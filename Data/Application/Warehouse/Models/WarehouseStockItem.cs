@@ -2,12 +2,12 @@ namespace Shop.Data.Application.Warehouse.Models;
 
 public sealed record WarehouseStockItem(
     long IdWarehouse,
-    long IdInventoryItem,
+    decimal IdInventoryItem,
     long IdSalesPlanReference,
     string WarehouseCode,
     string WarehouseName,
     string CompanyName,
-    long IdProduct,
+    decimal IdProduct,
     string StoreProductKey,
     string ProductName,
     long? IdProductVariant,

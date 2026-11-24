@@ -17,7 +17,8 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         CancellationToken cancellationToken)
     {
         string normalizedName = userName.Trim().ToUpperInvariant();
-        AdminSystemUser? user = await db.AdminSystemUsers.Include(x => x.WarehouseAccess).Include(x => x.Roles).ThenInclude(x => x.Role).ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
+        AdminSystemUser? user = await db.AdminSystemUsers.Include(x => x.WarehouseAccess).Include(x => x.Roles)
+            .ThenInclude(x => x.Role).ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
             .SingleOrDefaultAsync(x => x.NormalizedUserName == normalizedName && x.IsActive, cancellationToken);
 
         if (user is null || passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) ==
@@ -28,7 +29,8 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         user.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
-        AdminPermission[] allPermissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToArrayAsync(cancellationToken);
+        AdminPermission[] allPermissions =
+            await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToArrayAsync(cancellationToken);
 
         return CreatePrincipal(user, allPermissions);
     }
@@ -46,7 +48,8 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         foreach (long warehouseId in user.WarehouseAccess.Select(x => x.IdWarehouse))
             claims.Add(new Claim("admin_warehouse", warehouseId.ToString()));
 
-        var children = allPermissions.GroupBy(x => x.ParentKey ?? "").ToDictionary(x => x.Key, x => x.ToArray(), StringComparer.OrdinalIgnoreCase);
+        var children = allPermissions.GroupBy(x => x.ParentKey ?? "")
+            .ToDictionary(x => x.Key, x => x.ToArray(), StringComparer.OrdinalIgnoreCase);
         var granted = new Dictionary<string, AdminPermission>(StringComparer.OrdinalIgnoreCase);
 
         void Grant(AdminPermission permission)
@@ -67,6 +70,7 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
                     Grant(permission);
                 continue;
             }
+
             foreach (AdminPermission permission in role.Permissions.Select(x => x.Permission).Where(x => x.IsActive))
                 Grant(permission);
         }
@@ -74,7 +78,8 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         foreach (AdminPermission permission in granted.Values.Where(x => !string.IsNullOrWhiteSpace(x.Area)
                                                                          && !string.IsNullOrWhiteSpace(x.Controller) &&
                                                                          !string.IsNullOrWhiteSpace(x.Action)))
-            claims.Add(new Claim("admin_permission", RoutePermission(permission.Area, permission.Controller, permission.Action, permission.FeatureKey)));
+            claims.Add(new Claim("admin_permission",
+                RoutePermission(permission.Area, permission.Controller, permission.Action, permission.FeatureKey)));
 
         var identity = new ClaimsIdentity(claims, "AdminCookie");
 
@@ -87,7 +92,10 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
             : $"{area}:{controller}:{action}:{featureKey}";
 }
 
-public sealed class AdminBootstrapper(IServiceScopeFactory scopeFactory, IConfiguration configuration, ILogger<AdminBootstrapper> logger) : IHostedService
+public sealed class AdminBootstrapper(
+    IServiceScopeFactory scopeFactory,
+    IConfiguration configuration,
+    ILogger<AdminBootstrapper> logger) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -99,7 +107,8 @@ public sealed class AdminBootstrapper(IServiceScopeFactory scopeFactory, IConfig
 
         if (password.Length < 12 || password.Length > 200)
         {
-            logger.LogError( "AdminBootstrap password must be between 12 and 200 characters; no initial system user was created.");
+            logger.LogError(
+                "AdminBootstrap password must be between 12 and 200 characters; no initial system user was created.");
 
             return;
         }
@@ -109,7 +118,8 @@ public sealed class AdminBootstrapper(IServiceScopeFactory scopeFactory, IConfig
         if (await db.AdminSystemUsers.AnyAsync(cancellationToken))
             return;
 
-        AdminRole? fullAccess = await db.AdminRoles.SingleOrDefaultAsync(x => x.RoleKey == "system.full-access", cancellationToken);
+        AdminRole? fullAccess =
+            await db.AdminRoles.SingleOrDefaultAsync(x => x.RoleKey == "system.full-access", cancellationToken);
         if (fullAccess is null)
         {
             logger.LogError("Admin schema is not installed; the configured initial system user was not created.");
@@ -174,7 +184,9 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
             return;
         }
 
-        AdminSystemUser? user = await db.AdminSystemUsers.AsNoTracking().Include(x => x.WarehouseAccess).Include(x => x.Roles).ThenInclude(x => x.Role).ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
+        AdminSystemUser? user = await db.AdminSystemUsers.AsNoTracking().Include(x => x.WarehouseAccess)
+            .Include(x => x.Roles).ThenInclude(x => x.Role).ThenInclude(x => x.Permissions)
+            .ThenInclude(x => x.Permission)
             .SingleOrDefaultAsync(x => x.Id == userId && x.IsActive, context.HttpContext.RequestAborted);
         if (user is null || user.SecurityStamp != stamp)
         {
@@ -183,7 +195,8 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
             return;
         }
 
-        AdminPermission[] permissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToArrayAsync(context.HttpContext.RequestAborted);
+        AdminPermission[] permissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive)
+            .ToArrayAsync(context.HttpContext.RequestAborted);
         ClaimsPrincipal current = context.Principal!;
         ClaimsPrincipal refreshed = AdminAuthentication.CreatePrincipal(user, permissions);
         if (!ClaimsMatch(current, refreshed))
@@ -195,8 +208,10 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
 
     private static bool ClaimsMatch(ClaimsPrincipal current, ClaimsPrincipal refreshed)
     {
-        string[] currentClaims = current.Claims.Select(claim => claim.Type + "\0" + claim.Value).OrderBy(value => value, StringComparer.Ordinal).ToArray();
-        string[] refreshedClaims = refreshed.Claims.Select(claim => claim.Type + "\0" + claim.Value).OrderBy(value => value, StringComparer.Ordinal).ToArray();
+        string[] currentClaims = current.Claims.Select(claim => claim.Type + "\0" + claim.Value)
+            .OrderBy(value => value, StringComparer.Ordinal).ToArray();
+        string[] refreshedClaims = refreshed.Claims.Select(claim => claim.Type + "\0" + claim.Value)
+            .OrderBy(value => value, StringComparer.Ordinal).ToArray();
 
         return currentClaims.SequenceEqual(refreshedClaims, StringComparer.Ordinal);
     }
@@ -230,7 +245,9 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             string? section = context.HttpContext.Request.Query["section"].FirstOrDefault();
             feature = string.IsNullOrWhiteSpace(section) ? "users" : section;
         }
-        if (string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase) && string.Equals(controller, "UsersApi", StringComparison.OrdinalIgnoreCase))
+
+        if (string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(controller, "UsersApi", StringComparison.OrdinalIgnoreCase))
         {
             string? section = action switch
             {
@@ -250,6 +267,7 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
                 feature = section;
             }
         }
+
         if (string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase)
             && string.Equals(controller, "StorePaidOrdersDispatchApi", StringComparison.OrdinalIgnoreCase)
             && string.Equals(action, "List", StringComparison.OrdinalIgnoreCase)
@@ -260,6 +278,7 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             action = "Index";
             feature = "order-confirmation";
         }
+
         if (string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase) &&
             (string.Equals(controller, "Catalog", StringComparison.OrdinalIgnoreCase) ||
              string.Equals(controller, "StoreCatalogAdminApi", StringComparison.OrdinalIgnoreCase)) &&
@@ -269,6 +288,7 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             action = "Products";
             feature = null;
         }
+
         if (string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase) &&
             string.Equals(controller, "StoreProductBadgesApi", StringComparison.OrdinalIgnoreCase))
         {
@@ -276,6 +296,7 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             action = "Badges";
             feature = null;
         }
+
         if (string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase) &&
             string.Equals(controller, "StoreCatalogFeaturesApi", StringComparison.OrdinalIgnoreCase))
         {
@@ -283,29 +304,39 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             action = "Attributes";
             feature = null;
         }
+
         if (string.Equals(area, "Warehouse", StringComparison.OrdinalIgnoreCase) &&
             string.Equals(controller, "WarehouseDefinitionsApi", StringComparison.OrdinalIgnoreCase))
         {
-            action = action switch { "GetVariantNames" or "GetVariantOptions" => "Get", "CreateVariantName" => "Create", "UpdateVariantName" => "Save", _ => action };
+            action = action switch
+            {
+                "GetVariantNames" or "GetVariantOptions" => "Get", "CreateVariantName" => "Create",
+                "UpdateVariantName" => "Save", _ => action
+            };
             feature = null;
         }
+
         if (string.Equals(controller, "Auth", StringComparison.OrdinalIgnoreCase)
             || (string.IsNullOrEmpty(area)
-            && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)))
+                && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)))
             return Task.CompletedTask;
 
         string required = AdminAuthentication.RoutePermission(area, controller, action, feature);
         ClaimsPrincipal user = context.HttpContext.User;
         bool productListAccess = string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase)
-            && string.Equals(controller, "StoreCatalogAdminApi", StringComparison.OrdinalIgnoreCase)
-            && string.Equals(action, "GetSection", StringComparison.OrdinalIgnoreCase)
-            && string.Equals(Convert.ToString(route.GetValueOrDefault("section")), "products", StringComparison.OrdinalIgnoreCase)
-            && user.FindAll("admin_permission").Any(claim => string.Equals(claim.Value,
-                AdminAuthentication.RoutePermission("Store", "Catalog", "Products"), StringComparison.OrdinalIgnoreCase));
+                                 && string.Equals(controller, "StoreCatalogAdminApi",
+                                     StringComparison.OrdinalIgnoreCase)
+                                 && string.Equals(action, "GetSection", StringComparison.OrdinalIgnoreCase)
+                                 && string.Equals(Convert.ToString(route.GetValueOrDefault("section")), "products",
+                                     StringComparison.OrdinalIgnoreCase)
+                                 && user.FindAll("admin_permission").Any(claim => string.Equals(claim.Value,
+                                     AdminAuthentication.RoutePermission("Store", "Catalog", "Products"),
+                                     StringComparison.OrdinalIgnoreCase));
 
         if (user.Identity?.IsAuthenticated == true
-            && (productListAccess || user.IsInRole("system.full-access") || user.FindAll("admin_permission").Any(claim =>
-                string.Equals(claim.Value, required, StringComparison.OrdinalIgnoreCase))))
+            && (productListAccess || user.IsInRole("system.full-access") || user.FindAll("admin_permission")
+                .Any(claim =>
+                    string.Equals(claim.Value, required, StringComparison.OrdinalIgnoreCase))))
             return Task.CompletedTask;
 
         context.Result = new ForbidResult();

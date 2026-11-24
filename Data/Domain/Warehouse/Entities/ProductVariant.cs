@@ -3,7 +3,7 @@ namespace Shop.Data.Domain.Warehouse.Entities;
 public sealed class ProductVariant
 {
     public long Id { get; set; }
-    public long IdProduct { get; set; }
+    public decimal IdProduct { get; set; }
     public long IdVariantName { get; set; }
     public VariantName VariantName { get; set; } = null!;
     public bool IsDefault { get; set; }
@@ -11,5 +11,7 @@ public sealed class ProductVariant
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
     public WarehouseProduct Product { get; set; } = null!;
-    public ICollection<ProductVariantAttributeValue> AttributeValues { get; set; } = new List<ProductVariantAttributeValue>();
+
+    public ICollection<ProductVariantAttributeValue> AttributeValues { get; set; } =
+        new List<ProductVariantAttributeValue>();
 }

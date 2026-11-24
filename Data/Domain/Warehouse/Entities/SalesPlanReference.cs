@@ -14,6 +14,8 @@ public sealed class SalesPlanReference
     public DateTimeOffset? EndsAtUtc { get; set; }
     public string? Label { get; set; }
     public bool ShowCountdown { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
     public ICollection<StockBalance> StockBalances { get; set; } = new List<StockBalance>();
 }
 

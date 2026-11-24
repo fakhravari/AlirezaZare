@@ -17,9 +17,9 @@
                 @if (type == "reviews")
                 {
                     <label class="visually-hidden" for="feedback-date-from">از تاریخ</label>
-                    <input class="form-control" id="feedback-date-from" name="from" type="date" aria-label="از تاریخ" value="@DateTime.Today.AddDays(-15).ToString("yyyy-MM-dd")" />
+                    <input class="form-control" id="feedback-date-from" name="from" type="date" aria-label="از تاریخ" value="@DateTime.Today.AddDays(-15).ToString("yyyy-MM-dd")"/>
                     <label class="visually-hidden" for="feedback-date-to">تا تاریخ</label>
-                    <input class="form-control" id="feedback-date-to" name="to" type="date" aria-label="تا تاریخ" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <input class="form-control" id="feedback-date-to" name="to" type="date" aria-label="تا تاریخ" value="@DateTime.Today.ToString("yyyy-MM-dd")"/>
                 }
                 <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset" data-feedback-reset>پاک‌کردن</button>
             </form>
@@ -48,8 +48,11 @@
             </div>
             <div class="modal-body admin-feedback-modal-body">
                 <p data-feedback-text class="border rounded p-3 bg-light text-break" style="white-space:pre-wrap"></p>
-                <div class="admin-modal-field"><label class="form-label" for="feedback-review-status">وضعیت</label><select class="form-select" name="statusId" id="feedback-review-status">
-                </select></div>
+                <div class="admin-modal-field">
+                    <label class="form-label" for="feedback-review-status">وضعیت</label>
+                    <select class="form-select" name="statusId" id="feedback-review-status">
+                    </select>
+                </div>
                 <div class="admin-modal-field admin-feedback-reply-field">
                     <label class="form-label" for="feedback-reply">پاسخ مدیر</label>
                     <textarea class="form-control" data-rich-editor data-rich-editor-height="360" name="adminReply" id="feedback-reply" rows="12" maxlength="1000"></textarea>

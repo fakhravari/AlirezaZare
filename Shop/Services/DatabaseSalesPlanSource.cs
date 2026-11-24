@@ -16,7 +16,8 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
 
         return requestSnapshot = new SalesPlanCatalog(1, "IRT",
             snapshot.Plans.Select(plan => new SalesPlan(plan.Id, plan.Code, plan.Name, plan.Type,
-                    plan.IsDefault, plan.IsEnabled, plan.StartsAtUtc, plan.EndsAtUtc, plan.Label, plan.ShowCountdown)).ToArray(),
+                    plan.IsDefault, plan.IsEnabled, plan.StartsAtUtc, plan.EndsAtUtc, plan.Label, plan.ShowCountdown))
+                .ToArray(),
             snapshot.Offers.Select(offer => new ProductSalesOffer(offer.ProductId, offer.SalesPlanId,
                 offer.PriceAmount, offer.DiscountPercent, offer.StockQuantity, offer.MaxPurchaseQuantity,
                 offer.IsEnabled)
@@ -33,19 +34,25 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
                 variant.ProductId, variant.VariantId, variant.Name, variant.Code,
                 variant.Attributes, variant.IsDefault, variant.StockBySalesPlan,
                 variant.PriceBySalesPlan, variant.DiscountBySalesPlan)
-            { PriceVersionIdsBySalesPlan = variant.PriceVersionIdsBySalesPlan, FinalPriceBySalesPlan = variant.FinalPriceBySalesPlan, DisabledSalesPlanIds = variant.DisabledSalesPlanIds }).ToArray(),
+            {
+                PriceVersionIdsBySalesPlan = variant.PriceVersionIdsBySalesPlan,
+                FinalPriceBySalesPlan = variant.FinalPriceBySalesPlan,
+                DisabledSalesPlanIds = variant.DisabledSalesPlanIds
+            }).ToArray(),
         };
     }
 
     public async Task<ProductPurchaseConfiguration?> ReadAsync(int productId, string salesPlanId,
         CancellationToken cancellationToken = default)
     {
-        var configuration = await repository.ReadProductPurchaseConfigurationAsync(productId, salesPlanId, cancellationToken);
+        var configuration =
+            await repository.ReadProductPurchaseConfigurationAsync(productId, salesPlanId, cancellationToken);
 
         return configuration is null
             ? null
             : new ProductPurchaseConfiguration(
                 configuration.MaxPurchaseQuantity,
-                configuration.Accessories.Select(accessory => new ProductAccessory(accessory.Key, accessory.IsRequired)).ToArray());
+                configuration.Accessories.Select(accessory => new ProductAccessory(accessory.Key, accessory.IsRequired))
+                    .ToArray());
     }
 }

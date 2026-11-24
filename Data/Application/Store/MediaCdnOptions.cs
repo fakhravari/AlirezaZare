@@ -12,7 +12,8 @@ public sealed class MediaCdnOptions
         if (!Uri.TryCreate(candidate, UriKind.Absolute, out Uri? uri) ||
             uri.Scheme != Uri.UriSchemeHttps || !string.IsNullOrEmpty(uri.UserInfo) ||
             uri.AbsolutePath != "/" || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
-            throw new InvalidOperationException("MediaCdn:BaseUrl must be an HTTPS origin without credentials, path, query, or fragment.");
+            throw new InvalidOperationException(
+                "MediaCdn:BaseUrl must be an HTTPS origin without credentials, path, query, or fragment.");
 
         return uri.GetLeftPart(UriPartial.Authority) + "/";
     }

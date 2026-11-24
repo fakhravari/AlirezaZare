@@ -4,7 +4,7 @@ namespace Shop.Data.Domain.Warehouse.Entities;
 
 public sealed class Voucher
 {
-    public long Id { get; set; }
+    public decimal Id { get; set; }
     public long IdWarehouse { get; set; }
     public long IdVoucherType { get; set; }
     public long IdParty { get; set; }
@@ -26,8 +26,8 @@ public sealed class Voucher
 public sealed class VoucherLine
 {
     public long Id { get; set; }
-    public long IdVoucher { get; set; }
-    public long IdInventoryItem { get; set; }
+    public decimal IdVoucher { get; set; }
+    public decimal IdInventoryItem { get; set; }
     public long IdUnit { get; set; }
     public long? IdSalesPlanReference { get; set; }
     public decimal Quantity { get; set; }
@@ -40,11 +40,11 @@ public sealed class VoucherLine
 
 public sealed class WarehouseStockMovement
 {
-    public long Id { get; set; }
+    public decimal Id { get; set; }
     public long IdWarehouse { get; set; }
-    public long IdInventoryItem { get; set; }
+    public decimal IdInventoryItem { get; set; }
     public long IdSalesPlanReference { get; set; }
-    public long IdVoucher { get; set; }
+    public decimal IdVoucher { get; set; }
     public long IdVoucherLine { get; set; }
     public decimal QuantityDelta { get; set; }
     public DateTime OccurredAtUtc { get; set; }

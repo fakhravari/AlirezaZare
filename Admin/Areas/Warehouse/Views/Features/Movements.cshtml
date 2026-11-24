@@ -15,7 +15,10 @@
                 <p>مانده و خلاصهٔ گردش بر اساس سندهای قطعی مؤثر بر موجودی، برای هر کالا، تنوع، انبار و طرح محاسبه می‌شوند.</p>
             }
             <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-movement-filter>
-                <label class="visually-hidden" for="movement-product">کالا</label><select class="form-select" id="movement-product" name="productId" data-remote-product-url="@ViewData["ApiUrl"]/products"><option value="">همهٔ کالاها</option></select><label class="visually-hidden" for="movement-search">جست‌وجوی متنی</label><input class="form-control" id="movement-search" name="search" placeholder="جست‌وجوی متنی"/><label class="visually-hidden" for="movement-warehouse">انبار</label>
+                <label class="visually-hidden" for="movement-product">کالا</label>
+                <select class="form-select" id="movement-product" name="productId" data-remote-product-url="@ViewData["ApiUrl"]/products">
+                    <option value="">همهٔ کالاها</option>
+                </select><label class="visually-hidden" for="movement-search">جست‌وجوی متنی</label><input class="form-control" id="movement-search" name="search" placeholder="جست‌وجوی متنی"/><label class="visually-hidden" for="movement-warehouse">انبار</label>
                 <select class="form-select" name="warehouseId" id="movement-warehouse">
                     <option value="">همهٔ انبارهای مجاز</option>
                 </select><label class="visually-hidden" for="movement-plan">طرح یا مالک کالا</label><input class="form-control" id="movement-plan" name="salesPlan" maxlength="100" placeholder="نام یا کد طرح"/><label class="visually-hidden" for="movement-from">از تاریخ</label><input class="form-control" type="date" name="from" id="movement-from"/><label class="visually-hidden" for="movement-to">تا تاریخ</label><input class="form-control" type="date" name="to" id="movement-to"/><button class="btn btn-primary" type="submit">جست‌وجو</button><button class="btn btn-default" type="reset" data-movement-reset>پاک‌کردن</button>

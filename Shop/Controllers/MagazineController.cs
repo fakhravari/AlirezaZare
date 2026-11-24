@@ -36,7 +36,8 @@ public sealed class MagazineController : PageController
             string siteOrigin = SeoUrlBuilder.SiteOrigin(_seoOptions.SiteUrl, Request);
             string siteRoot = SeoUrlBuilder.SiteRoot(_seoOptions.SiteUrl, Request);
             string articleUrl = SeoUrlBuilder.AbsolutePageUrl(siteRoot, $"/magazine/{relatedArticle.Slug}");
-            string articleImage = SeoUrlBuilder.AbsoluteAssetUrl(siteOrigin, Url.Content($"~/{relatedArticle.ContentImage}"));
+            string articleImage =
+                SeoUrlBuilder.AbsoluteAssetUrl(siteOrigin, Url.Content($"~/{relatedArticle.ContentImage}"));
             var articleData = new Dictionary<string, object?>
             {
                 ["@type"] = "Article",
@@ -44,9 +45,9 @@ public sealed class MagazineController : PageController
                 ["description"] = relatedArticle.Summary,
                 ["image"] = new[] { articleImage },
                 ["author"] = new Dictionary<string, object?>
-                { ["@type"] = "Organization", ["name"] = relatedArticle.Author },
+                    { ["@type"] = "Organization", ["name"] = relatedArticle.Author },
                 ["publisher"] = new Dictionary<string, object?>
-                { ["@type"] = "Organization", ["name"] = "فروشگاه ندا اولیائی" },
+                    { ["@type"] = "Organization", ["name"] = "فروشگاه ندا اولیائی" },
                 ["mainEntityOfPage"] = articleUrl,
                 ["inLanguage"] = "fa-IR"
             };

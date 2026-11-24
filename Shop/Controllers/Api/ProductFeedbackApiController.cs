@@ -41,10 +41,11 @@ public sealed class ProductFeedbackApiController(IProductFeedbackRepository feed
             type == "questions" && request.Rating is not null)
             return BadRequest(new { code = "invalid-feedback" });
 
-        long? id = await feedback.AddAsync(productId, ProfileId, type, name, text, request.Rating, cancellationToken);
+        decimal? id = await feedback.AddAsync(productId, ProfileId, type, name, text, request.Rating, cancellationToken);
         if (!id.HasValue) return NotFound();
 
-        var item = new ProductFeedbackItem(id.Value, name, text, request.Rating, ProductFeedbackStatus.Pending, null, DateTimeOffset.UtcNow, null);
+        var item = new ProductFeedbackItem(id.Value, name, text, request.Rating, ProductFeedbackStatus.Pending, null,
+            DateTimeOffset.UtcNow, null);
 
         return Ok(new { saved = true, item });
     }

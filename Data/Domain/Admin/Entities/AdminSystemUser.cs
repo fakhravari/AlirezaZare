@@ -22,6 +22,7 @@ public sealed class AdminRole
     public string RoleKey { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public bool IsActive { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
     public ICollection<AdminUserRole> Users { get; set; } = [];
     public ICollection<AdminRolePermission> Permissions { get; set; } = [];
 }
@@ -61,4 +62,5 @@ public sealed class AdminUserWarehouseAccess
     public long IdUser { get; set; }
     public long IdWarehouse { get; set; }
     public AdminSystemUser User { get; set; } = null!;
+    public DateTime GrantedAtUtc { get; set; }
 }

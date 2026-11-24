@@ -20,6 +20,7 @@ public static class ContentCdn
 
             return value;
         }
+
         path = path.TrimStart('~', '/');
 
         return path.StartsWith("content/", StringComparison.OrdinalIgnoreCase) ? cdnBaseUrl + path : value;
@@ -43,6 +44,7 @@ public static class ContentCdn
 
             return result;
         }
+
         if (node is JsonArray sourceArray)
         {
             var result = new JsonArray();
@@ -50,6 +52,7 @@ public static class ContentCdn
 
             return result;
         }
+
         if (node is JsonValue valueNode && valueNode.TryGetValue<string>(out string? text))
             return JsonValue.Create(ToUrl(text, baseUrl));
 

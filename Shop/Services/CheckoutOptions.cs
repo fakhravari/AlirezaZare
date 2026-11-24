@@ -29,6 +29,7 @@ public sealed record CheckoutOptions(HashSet<string> AccessoryIds)
 
                     if (selected.ValueKind == JsonValueKind.False) continue;
                 }
+
                 if (!accessories.Add(id.GetString()!)) return false;
             }
         }

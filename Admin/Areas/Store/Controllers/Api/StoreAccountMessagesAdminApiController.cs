@@ -4,8 +4,8 @@ using Shop.Admin.Infrastructure;
 using Shop.Data.Application.Store;
 using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Infrastructure.Persistence;
-
 using Shop.Data.Helpers;
+
 namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
@@ -22,8 +22,10 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
 
         if (term.Length < 2) return Ok(Array.Empty<object>());
 
-        var rows = await db.AccountProfiles.AsNoTracking().Where(x => x.Email.Contains(term) || x.FirstName.Contains(term) || x.LastName.Contains(term))
-            .OrderBy(x => x.FirstName).ThenBy(x => x.LastName).Take(20).Select(x => new { x.Id, x.Email, x.FirstName, x.LastName }).ToListAsync(cancellationToken);
+        var rows = await db.AccountProfiles.AsNoTracking().Where(x =>
+                x.Email.Contains(term) || x.FirstName.Contains(term) || x.LastName.Contains(term))
+            .OrderBy(x => x.FirstName).ThenBy(x => x.LastName).Take(20)
+            .Select(x => new { x.Id, x.Email, x.FirstName, x.LastName }).ToListAsync(cancellationToken);
 
         return Ok(rows);
     }
@@ -46,23 +48,31 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
         if (from.HasValue && to.HasValue && to.Value.DayNumber - from.Value.DayNumber > 365)
             return ValidationProblem(detail: "بازهٔ تاریخ نمی‌تواند بیشتر از ۳۶۶ روز باشد.", statusCode: 400);
 
-        DateTime? fromUtc = from.HasValue ? DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc) : null;
-        DateTime? untilUtc = to.HasValue ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc) : null;
-        var query = from message in db.AccountMessages.AsNoTracking()
-                    join profile in db.AccountProfiles.AsNoTracking() on message.IdProfile equals profile.Id
-                    select new
-                    {
-                        message.Id,
-                        message.Title,
-                        message.Category,
-                        message.Body,
-                        message.IsRead,
-                        message.CreatedAtUtc,
-                        ProfileId = profile.Id,
-                        profile.Email,
-                        profile.FirstName,
-                        profile.LastName
-                    };
+        DateTime? fromUtc = from.HasValue
+            ? DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : null;
+        DateTime? untilUtc = to.HasValue
+            ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : null;
+        var query = db.AccountMessages
+            .AsNoTracking()
+            .Join(
+                db.AccountProfiles.AsNoTracking(),
+                message => message.IdProfile,
+                profile => profile.Id,
+                (message, profile) => new
+            {
+                message.Id,
+                message.Title,
+                message.Category,
+                message.Body,
+                message.IsRead,
+                message.CreatedAtUtc,
+                ProfileId = profile.Id,
+                profile.Email,
+                profile.FirstName,
+                profile.LastName
+            });
         if (fromUtc.HasValue) query = query.Where(x => x.CreatedAtUtc >= fromUtc.Value);
         if (untilUtc.HasValue) query = query.Where(x => x.CreatedAtUtc < untilUtc.Value);
         if (paging.Search.Length > 0)
@@ -70,8 +80,10 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
             string term = paging.Search;
             query = query.Where(x => x.Email.Contains(term) || x.FirstName.Contains(term) || x.LastName.Contains(term));
         }
+
         int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id) .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset)
+            .Take(paging.PageSize).ToListAsync(cancellationToken);
         var result = items.Select(item => new
         {
             item.Id,

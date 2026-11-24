@@ -6,22 +6,55 @@
         <button class="nav-link" id="badge-assignments-tab" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#badge-assignments" aria-controls="badge-assignments" aria-selected="false">تخصیص نشان به کالا</button>
     </div>
     <div class="tab-content">
-    <section class="tab-pane fade show active panel panel-inverse" id="badge-definitions" role="tabpanel" aria-labelledby="badge-definitions-tab"><div class="panel-heading"><h2 class="panel-title">تعریف نشان‌ها</h2></div><div class="panel-body">
-        <form class="d-flex flex-wrap gap-2 mb-3" data-badge-form>
-            <input type="hidden" name="id" /><label class="visually-hidden" for="badge-title">عنوان نشان</label>
-            <input id="badge-title" name="title" class="form-control w-auto" maxlength="100" required placeholder="عنوان نشان" />
-            <label class="form-label align-self-center mb-0" for="badge-color">رنگ زمینه</label><input id="badge-color" name="backgroundColor" class="form-control form-control-color" type="color" value="#102a43" title="انتخاب رنگ زمینه" />
-            <label class="form-label align-self-center mb-0" for="badge-text-color">رنگ متن</label><input id="badge-text-color" name="textColor" class="form-control form-control-color" type="color" value="#ffffff" title="انتخاب رنگ متن" />
-            <label class="form-label align-self-center mb-0" for="badge-border-color">رنگ حاشیه</label><input id="badge-border-color" name="borderColor" class="form-control form-control-color" type="color" value="#ffffff" title="انتخاب رنگ حاشیه" />
-            <button class="btn btn-primary" type="submit">ذخیره نشان</button><button class="btn btn-default" type="button" data-badge-reset>نشان جدید</button>
-        </form>
-        <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>عنوان</th><th>رنگ</th><th>تعداد کالا</th><th>عملیات</th></tr></thead><tbody data-badge-rows></tbody></table></div>
-    </div></section>
-    <section class="tab-pane fade panel panel-inverse" id="badge-assignments" role="tabpanel" aria-labelledby="badge-assignments-tab"><div class="panel-heading"><h2 class="panel-title">تخصیص نشان به کالا</h2></div><div class="panel-body">
-        <form class="admin-filter-bar d-flex flex-wrap gap-2 mb-3" data-badge-search><label class="visually-hidden" for="badge-product-query">نام یا کد کالا</label><input id="badge-product-query" name="q" class="form-control" type="search" maxlength="100" placeholder="نام یا کد کالا" /><label class="visually-hidden" for="badge-product-filter">فیلتر نشان کالا</label><select id="badge-product-filter" name="badgeFilter" class="form-select"><option value="">همهٔ نشان‌ها</option><option value="none">بدون نشان</option></select><button class="btn btn-primary">جست‌وجو</button></form>
-        <p class="small text-muted" role="status" data-badge-status></p>
-        <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>کد کالا</th><th>نام کالا</th><th>نشان فروش عادی</th><th>عملیات</th></tr></thead><tbody data-badge-products></tbody></table></div>
-        <div class="d-flex align-items-center gap-2 mt-3"><button type="button" class="btn btn-default" data-badge-prev>قبلی</button><span data-badge-page></span><button type="button" class="btn btn-default" data-badge-next>بعدی</button></div>
-    </div></section>
+        <section class="tab-pane fade show active panel panel-inverse" id="badge-definitions" role="tabpanel" aria-labelledby="badge-definitions-tab">
+            <div class="panel-heading">
+                <h2 class="panel-title">تعریف نشان‌ها</h2>
+            </div>
+            <div class="panel-body">
+                <form class="d-flex flex-wrap gap-2 mb-3" data-badge-form>
+                    <input type="hidden" name="id"/><label class="visually-hidden" for="badge-title">عنوان نشان</label>
+                    <input id="badge-title" name="title" class="form-control w-auto" maxlength="100" required placeholder="عنوان نشان"/>
+                    <label class="form-label align-self-center mb-0" for="badge-color">رنگ زمینه</label><input id="badge-color" name="backgroundColor" class="form-control form-control-color" type="color" value="#102a43" title="انتخاب رنگ زمینه"/>
+                    <label class="form-label align-self-center mb-0" for="badge-text-color">رنگ متن</label><input id="badge-text-color" name="textColor" class="form-control form-control-color" type="color" value="#ffffff" title="انتخاب رنگ متن"/>
+                    <label class="form-label align-self-center mb-0" for="badge-border-color">رنگ حاشیه</label><input id="badge-border-color" name="borderColor" class="form-control form-control-color" type="color" value="#ffffff" title="انتخاب رنگ حاشیه"/>
+                    <button class="btn btn-primary" type="submit">ذخیره نشان</button><button class="btn btn-default" type="button" data-badge-reset>نشان جدید</button>
+                </form>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                        <tr>
+                            <th>عنوان</th><th>رنگ</th><th>تعداد کالا</th><th>عملیات</th>
+                        </tr>
+                        </thead><tbody data-badge-rows></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <section class="tab-pane fade panel panel-inverse" id="badge-assignments" role="tabpanel" aria-labelledby="badge-assignments-tab">
+            <div class="panel-heading">
+                <h2 class="panel-title">تخصیص نشان به کالا</h2>
+            </div>
+            <div class="panel-body">
+                <form class="admin-filter-bar d-flex flex-wrap gap-2 mb-3" data-badge-search>
+                    <label class="visually-hidden" for="badge-product-query">نام یا کد کالا</label><input id="badge-product-query" name="q" class="form-control" type="search" maxlength="100" placeholder="نام یا کد کالا"/><label class="visually-hidden" for="badge-product-filter">فیلتر نشان کالا</label>
+                    <select id="badge-product-filter" name="badgeFilter" class="form-select">
+                        <option value="">همهٔ نشان‌ها</option><option value="none">بدون نشان</option>
+                    </select><button class="btn btn-primary">جست‌وجو</button>
+                </form>
+                <p class="small text-muted" role="status" data-badge-status></p>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                        <tr>
+                            <th>کد کالا</th><th>نام کالا</th><th>نشان فروش عادی</th><th>عملیات</th>
+                        </tr>
+                        </thead><tbody data-badge-products></tbody>
+                    </table>
+                </div>
+                <div class="d-flex align-items-center gap-2 mt-3">
+                    <button type="button" class="btn btn-default" data-badge-prev>قبلی</button><span data-badge-page></span><button type="button" class="btn btn-default" data-badge-next>بعدی</button>
+                </div>
+            </div>
+        </section>
     </div>
 </div>

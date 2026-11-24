@@ -3,7 +3,7 @@ namespace Shop.Data.Domain.Store.Entities;
 public sealed class StoreHomeTestimonial
 {
     public long Id { get; set; }
-    public long IdProduct { get; set; }
+    public decimal IdProduct { get; set; }
     public string DisplayName { get; set; } = "";
     public string FeedbackText { get; set; } = "";
     public byte Rating { get; set; }

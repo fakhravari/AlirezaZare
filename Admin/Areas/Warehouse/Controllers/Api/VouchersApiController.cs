@@ -6,8 +6,8 @@ using Shop.Admin.Infrastructure;
 using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Infrastructure.Persistence;
-
 using Shop.Data.Helpers;
+
 namespace Shop.Admin.Areas.Warehouse.Controllers.Api;
 
 [Area("Warehouse")]
@@ -18,7 +18,8 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] long? warehouseId, [FromQuery] string? status,
         [FromQuery] string? q,
-        [FromQuery] int page = 1, [FromQuery] int pageSize = AdminListQuery.DefaultPageSize, CancellationToken cancellationToken = default)
+        [FromQuery] int page = 1, [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
+        CancellationToken cancellationToken = default)
     {
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging)
             || status is not (null or "D" or "F"))
@@ -28,12 +29,41 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         if (!User.IsInRole("system.full-access") && warehouseId.HasValue && !allowed.Contains(warehouseId.Value))
             return Forbid();
 
-        var query = from document in db.Vouchers.AsNoTracking()
-                    join warehouse in db.Warehouses.AsNoTracking() on document.IdWarehouse equals warehouse.Id
-                    join type in db.VoucherTypes.AsNoTracking() on document.IdVoucherType equals type.Id
-                    join party in db.WarehouseParties.AsNoTracking() on document.IdParty equals party.Id
-                    join plan in db.SalesPlanReferences.AsNoTracking() on document.IdSalesPlanReference equals plan.Id
-                    select new { document, warehouse, type, party, plan };
+        var query = db.Vouchers
+            .AsNoTracking()
+            .Join(
+                db.Warehouses.AsNoTracking(),
+                document => document.IdWarehouse,
+                warehouse => warehouse.Id,
+                (document, warehouse) => new { document, warehouse })
+            .Join(
+                db.VoucherTypes.AsNoTracking(),
+                documentWarehouse => documentWarehouse.document.IdVoucherType,
+                type => type.Id,
+                (documentWarehouse, type) => new { documentWarehouse.document, documentWarehouse.warehouse, type })
+            .Join(
+                db.WarehouseParties.AsNoTracking(),
+                documentDetails => documentDetails.document.IdParty,
+                party => party.Id,
+                (documentDetails, party) => new
+                {
+                    documentDetails.document,
+                    documentDetails.warehouse,
+                    documentDetails.type,
+                    party
+                })
+            .Join(
+                db.SalesPlanReferences.AsNoTracking(),
+                documentDetails => documentDetails.document.IdSalesPlanReference,
+                plan => plan.Id,
+                (documentDetails, plan) => new
+                {
+                    documentDetails.document,
+                    documentDetails.warehouse,
+                    documentDetails.type,
+                    documentDetails.party,
+                    plan
+                });
 
         if (warehouseId.HasValue) query = query.Where(x => x.document.IdWarehouse == warehouseId.Value);
         else if (!User.IsInRole("system.full-access"))
@@ -41,17 +71,24 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         if (!string.IsNullOrWhiteSpace(status)) query = query.Where(x => x.document.StatusReference.Code == status);
         if (paging.Search.Length > 0)
             query = query.Where(x => (x.document.ExternalReference ?? "").Contains(paging.Search)
-                || (x.document.CustomerOrderKey ?? "").Contains(paging.Search)
-                || x.warehouse.Name.Contains(paging.Search) || x.warehouse.Code.Contains(paging.Search)
-                || x.warehouse.Company.Name.Contains(paging.Search) || x.type.Name.Contains(paging.Search)
-                || x.party.Name.Contains(paging.Search) || x.plan.DisplayName.Contains(paging.Search));
+                                     || (x.document.CustomerOrderKey ?? "").Contains(paging.Search)
+                                     || x.warehouse.Name.Contains(paging.Search) ||
+                                     x.warehouse.Code.Contains(paging.Search)
+                                     || x.warehouse.Company.Name.Contains(paging.Search) ||
+                                     x.type.Name.Contains(paging.Search)
+                                     || x.party.Name.Contains(paging.Search) ||
+                                     x.plan.DisplayName.Contains(paging.Search));
         int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.document.VoucherDate).ThenByDescending(x => x.document.VoucherNumber).Skip(paging.Offset).Take(paging.PageSize).Select(x => new VoucherListItem(x.document.Id, x.document.IdWarehouse, x.document.IdVoucherType,
-                x.document.IdParty, x.document.IdSalesPlanReference, x.document.VoucherNumber, x.document.VoucherDate,
-                x.document.StatusReference.Code, x.document.StatusReference.NameFa, x.warehouse.Company.Name + " / " + x.warehouse.Name + " (" + x.warehouse.Code + ")",
-                x.type.Name, x.type.Direction, x.type.AffectsStock,
-                x.party.Name, x.plan.DisplayName, x.document.Reason, x.document.ExternalReference,
-                x.document.CustomerOrderKey)).ToListAsync(cancellationToken);
+        var items = await query.OrderByDescending(x => x.document.VoucherDate)
+            .ThenByDescending(x => x.document.VoucherNumber).Skip(paging.Offset).Take(paging.PageSize).Select(x =>
+                new VoucherListItem(x.document.Id, x.document.IdWarehouse, x.document.IdVoucherType,
+                    x.document.IdParty, x.document.IdSalesPlanReference, x.document.VoucherNumber,
+                    x.document.VoucherDate,
+                    x.document.StatusReference.Code, x.document.StatusReference.NameFa,
+                    x.warehouse.Company.Name + " / " + x.warehouse.Name + " (" + x.warehouse.Code + ")",
+                    x.type.Name, x.type.Direction, x.type.AffectsStock,
+                    x.party.Name, x.plan.DisplayName, x.document.Reason, x.document.ExternalReference,
+                    x.document.CustomerOrderKey)).ToListAsync(cancellationToken);
 
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
@@ -63,50 +100,91 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         var warehouseQuery = db.Warehouses.AsNoTracking().Where(x => x.IsActive);
         if (!User.IsInRole("system.full-access")) warehouseQuery = warehouseQuery.Where(x => allowed.Contains(x.Id));
         var warehouses = await warehouseQuery.OrderBy(x => x.Company.Name).ThenBy(x => x.Name)
-            .Select(x => new { x.Id, x.Code, x.Name, x.IdCompany, CompanyName = x.Company.Name, x.IsSalesWarehouse, DefaultOwnerSalesPlanId = db.WarehouseStockOwners.Where(link => link.IdWarehouse == x.Id && link.IsDefault).Select(link => (long?)link.IdStockOwner).FirstOrDefault() }).ToListAsync(cancellationToken);
-        var types = await db.VoucherTypes.AsNoTracking().Where(x => x.IsActive && !x.IsSystemSalesDispatch).OrderBy(x => x.Name)
-            .Select(x => new { x.Id, x.Name, x.Direction, x.AffectsStock, x.IsReturn, x.IsSystemSalesDispatch }).ToListAsync(cancellationToken);
+            .Select(x => new
+            {
+                x.Id, x.Code, x.Name, x.IdCompany, CompanyName = x.Company.Name, x.IsSalesWarehouse,
+                DefaultOwnerSalesPlanId = db.WarehouseStockOwners
+                    .Where(link => link.IdWarehouse == x.Id && link.IsDefault).Select(link => (long?)link.IdStockOwner)
+                    .FirstOrDefault()
+            }).ToListAsync(cancellationToken);
+        var types = await db.VoucherTypes.AsNoTracking().Where(x => x.IsActive && !x.IsSystemSalesDispatch)
+            .OrderBy(x => x.Name)
+            .Select(x => new { x.Id, x.Name, x.Direction, x.AffectsStock, x.IsReturn, x.IsSystemSalesDispatch })
+            .ToListAsync(cancellationToken);
         var partyQuery = db.WarehouseParties.AsNoTracking().Where(x => x.IsActive);
         if (!User.IsInRole("system.full-access"))
             partyQuery = partyQuery.Where(x => x.IdWarehouse == null || allowed.Contains(x.IdWarehouse.Value));
-        var parties = await partyQuery.OrderBy(x => x.Name).Select(x => new { x.Id, x.Name, x.PartyType, x.IdWarehouse }).ToListAsync(cancellationToken);
+        var parties = await partyQuery.OrderBy(x => x.Name)
+            .Select(x => new { x.Id, x.Name, x.PartyType, x.IdWarehouse }).ToListAsync(cancellationToken);
         var plans = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DisplayName)
             .Select(x => new { x.Id, x.StoreSalesPlanKey, x.DisplayName, x.IsRegular }).ToListAsync(cancellationToken);
-        var units = await (from productUnit in db.WarehouseProductUnits.AsNoTracking()
-                           join unit in db.WarehouseUnits.AsNoTracking() on productUnit.IdUnit equals unit.Id
-                           where productUnit.IsActive && unit.IsActive
-                           select new
-                           {
-                               productUnit.IdProduct,
-                               unit.Id,
-                               unit.NameFa,
-                               productUnit.ConversionFactor,
-                               productUnit.IsBaseUnit
-                           }).ToListAsync(cancellationToken);
+        var units = await db.WarehouseProductUnits
+            .AsNoTracking()
+            .Join(
+                db.WarehouseUnits.AsNoTracking(),
+                productUnit => productUnit.IdUnit,
+                unit => unit.Id,
+                (productUnit, unit) => new { productUnit, unit })
+            .Where(productUnit => productUnit.productUnit.IsActive && productUnit.unit.IsActive)
+            .Select(productUnit => new
+            {
+                productUnit.productUnit.IdProduct,
+                productUnit.unit.Id,
+                productUnit.unit.NameFa,
+                productUnit.productUnit.ConversionFactor,
+                productUnit.productUnit.IsBaseUnit
+            })
+            .ToListAsync(cancellationToken);
         var unitGroups = units.GroupBy(x => x.IdProduct).ToDictionary(group => group.Key,
             group => group.Select(x => new { x.Id, Name = x.NameFa, x.ConversionFactor, x.IsBaseUnit }).ToArray());
-        var items = await (from x in db.InventoryItems.AsNoTracking()
-                           join baseUnit in db.WarehouseProductUnits.AsNoTracking().Where(link => link.IsActive && link.IsBaseUnit)
-                               on x.IdProduct equals baseUnit.IdProduct
-                           where x.IsActive && x.Product.IsWarehouseEnabled
-                               && (x.ProductVariant == null || x.ProductVariant.IsActive)
-                           select new
-                           {
-                               x.Id,
-                               x.IdProduct,
-                               x.IdProductVariant,
-                               ProductName = x.Product.Name,
-                               VariantName = x.ProductVariant == null ? null : x.ProductVariant.VariantName.Name,
-                               IdBaseUnit = baseUnit.IdUnit
-                           }).OrderBy(x => x.ProductName).ThenBy(x => x.VariantName).ToListAsync(cancellationToken);
+        var items = await db.InventoryItems
+            .AsNoTracking()
+            .Join(
+                db.WarehouseProductUnits.AsNoTracking().Where(link => link.IsActive && link.IsBaseUnit),
+                inventoryItem => inventoryItem.IdProduct,
+                baseUnit => baseUnit.IdProduct,
+                (inventoryItem, baseUnit) => new { inventoryItem, baseUnit })
+            .Where(inventoryItem => inventoryItem.inventoryItem.IsActive &&
+                                    inventoryItem.inventoryItem.Product.IsWarehouseEnabled &&
+                                    (inventoryItem.inventoryItem.ProductVariant == null ||
+                                     inventoryItem.inventoryItem.ProductVariant.IsActive))
+            .Select(inventoryItem => new
+            {
+                inventoryItem.inventoryItem.Id,
+                inventoryItem.inventoryItem.IdProduct,
+                inventoryItem.inventoryItem.IdProductVariant,
+                ProductName = inventoryItem.inventoryItem.Product.Name,
+                VariantName = inventoryItem.inventoryItem.ProductVariant == null
+                    ? null
+                    : inventoryItem.inventoryItem.ProductVariant.VariantName.Name,
+                IdBaseUnit = inventoryItem.baseUnit.IdUnit
+            })
+            .OrderBy(item => item.ProductName)
+            .ThenBy(item => item.VariantName)
+            .ToListAsync(cancellationToken);
         long[] variantIds = items.Where(item => item.IdProductVariant.HasValue)
             .Select(item => item.IdProductVariant!.Value).Distinct().ToArray();
-        var variantAttributes = await (from link in db.ProductVariantAttributeValues.AsNoTracking()
-                                       join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
-                                       join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
-                                       where variantIds.Contains(link.IdProductVariant)
-                                       orderby attribute.SortOrder, attribute.Id
-                                       select new { link.IdProductVariant, attribute.Label, value.DisplayValue })
+        var variantAttributes = await db.ProductVariantAttributeValues
+            .AsNoTracking()
+            .Join(
+                db.ProductAttributeValues.AsNoTracking(),
+                link => link.IdProductAttributeValue,
+                value => value.Id,
+                (link, value) => new { link, value })
+            .Join(
+                db.ProductAttributes.AsNoTracking(),
+                linkValue => linkValue.value.IdProductAttribute,
+                attribute => attribute.Id,
+                (linkValue, attribute) => new { linkValue.link, linkValue.value, attribute })
+            .Where(linkValueAttribute => variantIds.Contains(linkValueAttribute.link.IdProductVariant))
+            .OrderBy(linkValueAttribute => linkValueAttribute.attribute.SortOrder)
+            .ThenBy(linkValueAttribute => linkValueAttribute.attribute.Id)
+            .Select(linkValueAttribute => new
+            {
+                linkValueAttribute.link.IdProductVariant,
+                linkValueAttribute.attribute.Label,
+                linkValueAttribute.value.DisplayValue
+            })
             .ToListAsync(cancellationToken);
         var attributesByVariant = variantAttributes.GroupBy(item => item.IdProductVariant)
             .ToDictionary(group => group.Key,
@@ -125,16 +203,19 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             Units = unitGroups.GetValueOrDefault(item.IdProduct) ?? []
         });
         long[] warehouseIds = warehouses.Select(w => w.Id).ToArray();
-        var ownerLinks = await db.WarehouseStockOwners.AsNoTracking().Where(x => warehouseIds.Contains(x.IdWarehouse)).ToListAsync(cancellationToken);
+        var ownerLinks = await db.WarehouseStockOwners.AsNoTracking().Where(x => warehouseIds.Contains(x.IdWarehouse))
+            .ToListAsync(cancellationToken);
 
-        var statuses = await db.VoucherStatuses.AsNoTracking().OrderBy(x => x.Code).Select(x => new { x.Code, x.NameFa, x.NameEn }).ToListAsync(cancellationToken);
+        var statuses = await db.VoucherStatuses.AsNoTracking().OrderBy(x => x.Code)
+            .Select(x => new { x.Code, x.NameFa, x.NameEn }).ToListAsync(cancellationToken);
         return Ok(new { warehouses, types, parties, plans, inventoryItems, ownerLinks, statuses });
     }
 
     [HttpGet("{id:long}")]
-    public async Task<IActionResult> Detail(long id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Detail(decimal id, CancellationToken cancellationToken)
     {
-        Voucher? document = await db.Vouchers.AsNoTracking().Include(x => x.Lines).Include(x => x.StatusReference).SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        Voucher? document = await db.Vouchers.AsNoTracking().Include(x => x.Lines).Include(x => x.StatusReference)
+            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (document is null) return NotFound();
 
         if (!await CanAccessWarehouseAsync(document.IdWarehouse, cancellationToken)) return Forbid();
@@ -144,7 +225,8 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             document.Reason, document.ExternalReference, document.CustomerOrderKey, document.CreatedByUserKey,
             document.CreatedAtUtc,
             document.UpdatedByUserKey, document.UpdatedAtUtc,
-            document.Lines.OrderBy(x => x.Id).Select(x => new VoucherLineDetail(x.IdInventoryItem, x.IdUnit, x.IdSalesPlanReference ?? document.IdSalesPlanReference,
+            document.Lines.OrderBy(x => x.Id).Select(x => new VoucherLineDetail(x.IdInventoryItem, x.IdUnit,
+                x.IdSalesPlanReference ?? document.IdSalesPlanReference,
                 x.Quantity, x.ConversionFactor, x.BaseQuantity, x.ProductNameSnapshot, x.VariantNameSnapshot,
                 x.UnitNameSnapshot)).ToArray()));
     }
@@ -154,7 +236,8 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
     public async Task<IActionResult> Create([FromBody] SaveVoucherInput input,
         CancellationToken cancellationToken)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         if (!await CanAccessWarehouseAsync(input.WarehouseId, cancellationToken)) return Forbid();
 
         IActionResult? lineFailure = ValidateLines(input.Lines);
@@ -163,7 +246,8 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         IActionResult? failure = await ValidateHeaderAsync(input, cancellationToken);
         if (failure is not null) return failure;
 
-        if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem(detail: "طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.", statusCode: 400);
+        if (!await ValidLinePlansAsync(input, cancellationToken))
+            return ValidationProblem(detail: "طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.", statusCode: 400);
 
         PreparedLine[] lines = await PrepareLinesAsync(input.Lines!, cancellationToken);
         if (lines.Length != input.Lines!.Count)
@@ -177,7 +261,8 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             IdParty = input.PartyId,
             IdSalesPlanReference = input.SalesPlanId,
             VoucherDate = input.VoucherDate,
-            IdVoucherStatus = await db.VoucherStatuses.Where(x => x.Code == input.Status).Select(x => x.Id).SingleAsync(cancellationToken),
+            IdVoucherStatus = await db.VoucherStatuses.Where(x => x.Code == input.Status).Select(x => x.Id)
+                .SingleAsync(cancellationToken),
             ExternalReference = input.ExternalReference?.Trim(),
             Reason = input.Reason.Trim(),
             CreatedByUserKey = CurrentUserKey(),
@@ -194,7 +279,7 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             await RebuildStockAsync(document.Id, cancellationToken);
             db.VoucherAudits.Add(new VoucherAudit
             {
-                VoucherId = document.Id,
+                VoucherId = checked((long)document.Id),
                 VoucherNumber = document.VoucherNumber,
                 WarehouseId = document.IdWarehouse,
                 Action = "Created",
@@ -217,11 +302,13 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
 
     [HttpPut("{id:long}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update(long id, [FromBody] SaveVoucherInput input,
+    public async Task<IActionResult> Update(decimal id, [FromBody] SaveVoucherInput input,
         CancellationToken cancellationToken)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        int claimed = await db.Vouchers.Where(x => x.Id == id) .ExecuteUpdateAsync(update => update.SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        int claimed = await db.Vouchers.Where(x => x.Id == id)
+            .ExecuteUpdateAsync(update => update.SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
         if (claimed == 0) return NotFound();
 
         Voucher? document = await db.Vouchers.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -239,7 +326,8 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         IActionResult? failure = await ValidateHeaderAsync(input, cancellationToken);
         if (failure is not null) return failure;
 
-        if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem(detail: "طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.", statusCode: 400);
+        if (!await ValidLinePlansAsync(input, cancellationToken))
+            return ValidationProblem(detail: "طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.", statusCode: 400);
 
         PreparedLine[] lines = await PrepareLinesAsync(input.Lines!, cancellationToken);
         if (lines.Length != input.Lines!.Count)
@@ -254,7 +342,8 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             document.IdParty = input.PartyId;
             document.IdSalesPlanReference = input.SalesPlanId;
             document.VoucherDate = input.VoucherDate;
-            document.IdVoucherStatus = await db.VoucherStatuses.Where(x => x.Code == input.Status).Select(x => x.Id).SingleAsync(cancellationToken);
+            document.IdVoucherStatus = await db.VoucherStatuses.Where(x => x.Code == input.Status).Select(x => x.Id)
+                .SingleAsync(cancellationToken);
             document.ExternalReference = input.ExternalReference?.Trim();
             document.Reason = input.Reason.Trim();
             document.UpdatedByUserKey = CurrentUserKey();
@@ -265,7 +354,7 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             await RebuildStockAsync(id, cancellationToken);
             db.VoucherAudits.Add(new VoucherAudit
             {
-                VoucherId = document.Id,
+                VoucherId = checked((long)document.Id),
                 VoucherNumber = document.VoucherNumber,
                 WarehouseId = document.IdWarehouse,
                 Action = "Updated",
@@ -279,7 +368,8 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
 
             await transaction.CommitAsync(cancellationToken);
 
-            return Ok(new { document.Id, document.VoucherNumber, message = "سند و گردش موجودی باهم به‌روزرسانی شدند." });
+            return Ok(new
+                { document.Id, document.VoucherNumber, message = "سند و گردش موجودی باهم به‌روزرسانی شدند." });
         }
         catch (InsufficientWarehouseStockException)
         {
@@ -289,10 +379,12 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
 
     [HttpDelete("{id:long}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete(decimal id, CancellationToken cancellationToken)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        int claimed = await db.Vouchers.Where(x => x.Id == id) .ExecuteUpdateAsync(update => update.SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        int claimed = await db.Vouchers.Where(x => x.Id == id)
+            .ExecuteUpdateAsync(update => update.SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
         if (claimed == 0) return NotFound();
 
         Voucher? document = await db.Vouchers.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -300,7 +392,8 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
 
         if (!await CanAccessWarehouseAsync(document.IdWarehouse, cancellationToken)) return Forbid();
 
-        if (!await db.VoucherStatuses.AnyAsync(x => x.Id == document.IdVoucherStatus && x.Code == "D", cancellationToken))
+        if (!await db.VoucherStatuses.AnyAsync(x => x.Id == document.IdVoucherStatus && x.Code == "D",
+                cancellationToken))
             return Conflict(new { detail = "برای حذف سند، ابتدا وضعیت آن را به موقت تغییر دهید." });
 
         if (await IsPaidOrderLinkedAsync(id, cancellationToken))
@@ -312,7 +405,7 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             await ReverseMovementsAndClearLinesAsync(id, cancellationToken);
             db.VoucherAudits.Add(new VoucherAudit
             {
-                VoucherId = document.Id,
+                VoucherId = checked((long)document.Id),
                 VoucherNumber = document.VoucherNumber,
                 WarehouseId = document.IdWarehouse,
                 Action = "Deleted",
@@ -343,7 +436,8 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             input.Reason.Trim().Length > 1000
             || (input.ExternalReference?.Trim().Length ?? 0) > 128)
         {
-            return ValidationProblem(detail: "انبار، نوع سند، مرجع، طرح، تاریخ، وضعیت و دلیل را درست تکمیل کنید.", statusCode: 400);
+            return ValidationProblem(detail: "انبار، نوع سند، مرجع، طرح، تاریخ، وضعیت و دلیل را درست تکمیل کنید.",
+                statusCode: 400);
         }
 
         bool valid = await db.Warehouses.AnyAsync(x => x.Id == input.WarehouseId && x.IsActive, cancellationToken)
@@ -357,17 +451,20 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             return ValidationProblem(detail: "یکی از انبار، نوع سند، مرجع یا طرح فروش غیرفعال است.", statusCode: 400);
         }
 
-        if (!await db.WarehouseStockOwners.AnyAsync(x => x.IdWarehouse == input.WarehouseId && x.IdStockOwner == input.SalesPlanId, cancellationToken))
+        if (!await db.WarehouseStockOwners.AnyAsync(
+                x => x.IdWarehouse == input.WarehouseId && x.IdStockOwner == input.SalesPlanId, cancellationToken))
             return ValidationProblem(detail: "مالک انتخاب‌شده به این انبار اختصاص داده نشده است.", statusCode: 400);
 
-        long? linkedWarehouseId = await db.WarehouseParties.AsNoTracking().Where(x => x.Id == input.PartyId) .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
+        long? linkedWarehouseId = await db.WarehouseParties.AsNoTracking().Where(x => x.Id == input.PartyId)
+            .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
         if (linkedWarehouseId.HasValue && !await CanAccessWarehouseAsync(linkedWarehouseId.Value, cancellationToken))
             return Forbid();
 
         var selectedType = await db.VoucherTypes.AsNoTracking().Where(x => x.Id == input.VoucherTypeId)
             .Select(x => new { x.IsSystemSalesDispatch, x.IsReturn }).SingleAsync(cancellationToken);
         if (selectedType.IsSystemSalesDispatch)
-            return ValidationProblem(detail: "حوالهٔ فروش فقط از صفحهٔ صدور حوالهٔ سفارش‌های پرداخت‌شده صادر می‌شود.", statusCode: 400);
+            return ValidationProblem(detail: "حوالهٔ فروش فقط از صفحهٔ صدور حوالهٔ سفارش‌های پرداخت‌شده صادر می‌شود.",
+                statusCode: 400);
 
         if (selectedType.IsReturn
             && (string.IsNullOrWhiteSpace(input.ExternalReference)
@@ -390,10 +487,17 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
     private async Task<bool> ValidLinePlansAsync(SaveVoucherInput input, CancellationToken cancellationToken)
     {
         long[] plans = input.Lines!.Select(line => line.SalesPlanId ?? input.SalesPlanId).Distinct().ToArray();
-        int count = await (from owner in db.WarehouseStockOwners.AsNoTracking()
-                           join plan in db.SalesPlanReferences.AsNoTracking() on owner.IdStockOwner equals plan.Id
-                           where owner.IdWarehouse == input.WarehouseId && plan.IsActive && plans.Contains(plan.Id)
-                           select plan.Id).CountAsync(cancellationToken);
+        int count = await db.WarehouseStockOwners
+            .AsNoTracking()
+            .Join(
+                db.SalesPlanReferences.AsNoTracking(),
+                owner => owner.IdStockOwner,
+                plan => plan.Id,
+                (owner, plan) => new { owner, plan })
+            .Where(ownerPlan => ownerPlan.owner.IdWarehouse == input.WarehouseId && ownerPlan.plan.IsActive &&
+                                plans.Contains(ownerPlan.plan.Id))
+            .Select(ownerPlan => ownerPlan.plan.Id)
+            .CountAsync(cancellationToken);
 
         return count == plans.Length;
     }
@@ -402,13 +506,28 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         CancellationToken cancellationToken)
     {
         var itemIds = input.Select(x => x.InventoryItemId).ToArray();
-        var inventoryItems = await db.InventoryItems.AsNoTracking().Include(x => x.Product).Include(x => x.ProductVariant).ThenInclude(x => x!.VariantName).Where(x => itemIds.Contains(x.Id) && x.IsActive && x.Product.IsWarehouseEnabled &&
-                        (x.ProductVariant == null || x.ProductVariant.IsActive)).ToDictionaryAsync(x => x.Id, cancellationToken);
+        var inventoryItems = await db.InventoryItems.AsNoTracking().Include(x => x.Product)
+            .Include(x => x.ProductVariant).ThenInclude(x => x!.VariantName).Where(x => itemIds.Contains(x.Id) &&
+                x.IsActive && x.Product.IsWarehouseEnabled &&
+                (x.ProductVariant == null || x.ProductVariant.IsActive))
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
         var productIds = inventoryItems.Values.Select(x => x.IdProduct).Distinct().ToArray();
-        var selectedUnits = await (from productUnit in db.WarehouseProductUnits.AsNoTracking()
-                                   join unit in db.WarehouseUnits.AsNoTracking() on productUnit.IdUnit equals unit.Id
-                                   where productIds.Contains(productUnit.IdProduct) && productUnit.IsActive && unit.IsActive
-                                   select new { productUnit.IdProduct, productUnit.IdUnit, productUnit.ConversionFactor, unit.NameFa })
+        var selectedUnits = await db.WarehouseProductUnits
+            .AsNoTracking()
+            .Join(
+                db.WarehouseUnits.AsNoTracking(),
+                productUnit => productUnit.IdUnit,
+                unit => unit.Id,
+                (productUnit, unit) => new { productUnit, unit })
+            .Where(productUnit => productIds.Contains(productUnit.productUnit.IdProduct) &&
+                                  productUnit.productUnit.IsActive && productUnit.unit.IsActive)
+            .Select(productUnit => new
+            {
+                productUnit.productUnit.IdProduct,
+                productUnit.productUnit.IdUnit,
+                productUnit.productUnit.ConversionFactor,
+                productUnit.unit.NameFa
+            })
             .ToListAsync(cancellationToken);
 
         var result = new List<PreparedLine>();
@@ -423,14 +542,15 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             decimal baseQuantity = decimal.Truncate(quantity * unit.ConversionFactor * 1000m) / 1000m;
             if (quantity <= 0 || baseQuantity <= 0 || baseQuantity > 999999999999999.999m) return [];
 
-            result.Add(new PreparedLine(item.Id, unit.IdUnit, line.SalesPlanId, quantity, unit.ConversionFactor, baseQuantity,
+            result.Add(new PreparedLine(item.Id, unit.IdUnit, line.SalesPlanId, quantity, unit.ConversionFactor,
+                baseQuantity,
                 item.Product.Name, item.ProductVariant?.VariantName.Name, unit.NameFa));
         }
 
         return result.ToArray();
     }
 
-    private void AddLines(long voucherId, IEnumerable<PreparedLine> lines)
+    private void AddLines(decimal voucherId, IEnumerable<PreparedLine> lines)
     {
         foreach (PreparedLine line in lines)
             db.VoucherLines.Add(new VoucherLine
@@ -448,12 +568,13 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             });
     }
 
-    private Task RebuildStockAsync(long voucherId, CancellationToken cancellationToken) =>
+    private Task RebuildStockAsync(decimal voucherId, CancellationToken cancellationToken) =>
         stockLedger.RebuildVoucherAsync(voucherId, cancellationToken);
 
-    private async Task<string> CaptureSnapshotAsync(long voucherId, CancellationToken cancellationToken)
+    private async Task<string> CaptureSnapshotAsync(decimal voucherId, CancellationToken cancellationToken)
     {
-        Voucher document = await db.Vouchers.AsNoTracking().Include(x => x.Lines).Include(x => x.StatusReference).SingleAsync(x => x.Id == voucherId, cancellationToken);
+        Voucher document = await db.Vouchers.AsNoTracking().Include(x => x.Lines).Include(x => x.StatusReference)
+            .SingleAsync(x => x.Id == voucherId, cancellationToken);
 
         return JsonSerializer.Serialize(new
         {
@@ -487,7 +608,7 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         });
     }
 
-    private async Task ReverseMovementsAndClearLinesAsync(long voucherId, CancellationToken cancellationToken)
+    private async Task ReverseMovementsAndClearLinesAsync(decimal voucherId, CancellationToken cancellationToken)
     {
         await stockLedger.ReverseMovementsAsync(voucherId, cancellationToken);
         await db.VoucherLines.Where(x => x.IdVoucher == voucherId).ExecuteDeleteAsync(cancellationToken);
@@ -497,7 +618,7 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         User.IsInRole("system.full-access") || await db.AdminUserWarehouseAccesses.AsNoTracking()
             .AnyAsync(x => x.IdUser == CurrentUserId() && x.IdWarehouse == id, cancellationToken);
 
-    private Task<bool> IsPaidOrderLinkedAsync(long voucherId, CancellationToken cancellationToken) =>
+    private Task<bool> IsPaidOrderLinkedAsync(decimal voucherId, CancellationToken cancellationToken) =>
         db.StoreCustomerOrders.AnyAsync(x => x.IdVoucher == voucherId, cancellationToken);
 
     private async Task<long[]> AllowedWarehouseIdsAsync(CancellationToken cancellationToken) =>
@@ -514,7 +635,7 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
     private string CurrentActorKey() => $"{CurrentUserKey()}:{User.Identity?.Name ?? "system"}";
 
     private sealed record PreparedLine(
-        long InventoryItemId,
+        decimal InventoryItemId,
         long UnitId,
         long? SalesPlanId,
         decimal Quantity,
@@ -525,7 +646,7 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         string UnitName);
 
     private sealed record VoucherListItem(
-        long Id,
+        decimal Id,
         long WarehouseId,
         long VoucherTypeId,
         long PartyId,
@@ -545,7 +666,7 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         string? OrderKey);
 
     private sealed record VoucherDetail(
-        long Id,
+        decimal Id,
         long WarehouseId,
         long VoucherTypeId,
         long PartyId,
@@ -563,7 +684,7 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         IReadOnlyList<VoucherLineDetail> Lines);
 
     private sealed record VoucherLineDetail(
-        long InventoryItemId,
+        decimal InventoryItemId,
         long UnitId,
         long SalesPlanId,
         decimal Quantity,
@@ -585,4 +706,4 @@ public sealed record SaveVoucherInput(
     string? ExternalReference,
     IReadOnlyList<VoucherLineInput>? Lines);
 
-public sealed record VoucherLineInput(long InventoryItemId, long UnitId, decimal Quantity, long? SalesPlanId);
+public sealed record VoucherLineInput(decimal InventoryItemId, long UnitId, decimal Quantity, long? SalesPlanId);

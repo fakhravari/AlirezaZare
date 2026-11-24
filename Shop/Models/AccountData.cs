@@ -15,7 +15,8 @@ public sealed record AccountData(
 
     public static AccountData Parse(string json)
     {
-        var data = JsonSerializer.Deserialize<AccountData>(json, JsonOptions) ?? throw new InvalidDataException("Missing account data.");
+        var data = JsonSerializer.Deserialize<AccountData>(json, JsonOptions) ??
+                   throw new InvalidDataException("Missing account data.");
         if (data.SchemaVersion != 1 || data.Currency != "IRT" || data.Orders is null || data.Coupons is null)
             throw new InvalidDataException("Unsupported account schema or currency.");
         var orders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

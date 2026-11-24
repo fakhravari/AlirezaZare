@@ -11,7 +11,12 @@ public interface IPaymentGateway
 
 public sealed record PaymentGatewayRequestResult(bool Available, string? GatewayReference, Uri? RedirectUri);
 
-public sealed record PaymentGatewayVerification(bool Verified, decimal AmountToman, string? GatewayReference,
-    string? ReceiptReference, DateTimeOffset? PaidAtUtc, bool DefinitivelyFailed = false);
+public sealed record PaymentGatewayVerification(
+    bool Verified,
+    decimal AmountToman,
+    string? GatewayReference,
+    string? ReceiptReference,
+    DateTimeOffset? PaidAtUtc,
+    bool DefinitivelyFailed = false);
 
 public sealed record PaymentStartResult(string Status, Uri? RedirectUri = null);

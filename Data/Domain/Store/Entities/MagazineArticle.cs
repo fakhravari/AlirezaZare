@@ -2,7 +2,7 @@ namespace Shop.Data.Domain.Store.Entities;
 
 public sealed class MagazineArticle
 {
-    public long Id { get; set; }
+    public decimal Id { get; set; }
     public string ArticleKey { get; set; } = "";
     public long IdCategory { get; set; }
     public long IdBranch { get; set; }
@@ -29,22 +29,70 @@ public sealed class MagazineArticle
     public List<MagazineArticleSection> Sections { get; set; } = [];
 }
 
-public sealed class MagazineArticleCategory { public long Id { get; set; } public string CategoryKey { get; set; } = ""; }
-public sealed class MagazineArticleBranch { public long Id { get; set; } public string BranchKey { get; set; } = ""; }
-public sealed class MagazineArticleTopic { public long Id { get; set; } public string TopicKey { get; set; } = ""; }
-public sealed class MagazineArticleArea { public long Id { get; set; } public string AreaKey { get; set; } = ""; }
+public sealed class MagazineArticleCategory
+{
+    public long Id { get; set; }
+    public string CategoryKey { get; set; } = "";
+}
+
+public sealed class MagazineArticleBranch
+{
+    public long Id { get; set; }
+    public string BranchKey { get; set; } = "";
+}
+
+public sealed class MagazineArticleTopic
+{
+    public long Id { get; set; }
+    public string TopicKey { get; set; } = "";
+}
+
+public sealed class MagazineArticleArea
+{
+    public long Id { get; set; }
+    public string AreaKey { get; set; } = "";
+}
 
 public sealed class MagazineArticleSection
 {
-    public long Id { get; set; }
-    public long IdMagazineArticle { get; set; }
+    public decimal Id { get; set; }
+    public decimal IdMagazineArticle { get; set; }
     public string Heading { get; set; } = "";
     public string Body { get; set; } = "";
     public int SortOrder { get; set; }
 }
 
-public sealed class MagazineArticleSource { public long Id { get; set; } public long IdMagazineArticle { get; set; } public string Title { get; set; } = ""; public string Url { get; set; } = ""; public int SortOrder { get; set; } }
-public sealed class MagazineArticleTag { public long Id { get; set; } public long IdMagazineArticle { get; set; } public string Label { get; set; } = ""; public string Filter { get; set; } = ""; public int SortOrder { get; set; } }
-public sealed class MagazineArticleRelated { public long Id { get; set; } public long IdMagazineArticle { get; set; } public long IdRelatedArticle { get; set; } public int SortOrder { get; set; } }
-public sealed class MagazineArticleMetric { public long IdMagazineArticle { get; set; } public int Views { get; set; } public int Likes { get; set; } public decimal AverageRating { get; set; } public int Comments { get; set; } }
+public sealed class MagazineArticleSource
+{
+    public decimal Id { get; set; }
+    public decimal IdMagazineArticle { get; set; }
+    public string Title { get; set; } = "";
+    public string Url { get; set; } = "";
+    public int SortOrder { get; set; }
+}
 
+public sealed class MagazineArticleTag
+{
+    public decimal Id { get; set; }
+    public decimal IdMagazineArticle { get; set; }
+    public string Label { get; set; } = "";
+    public string Filter { get; set; } = "";
+    public int SortOrder { get; set; }
+}
+
+public sealed class MagazineArticleRelated
+{
+    public decimal Id { get; set; }
+    public decimal IdMagazineArticle { get; set; }
+    public decimal IdRelatedArticle { get; set; }
+    public int SortOrder { get; set; }
+}
+
+public sealed class MagazineArticleMetric
+{
+    public decimal IdMagazineArticle { get; set; }
+    public int Views { get; set; }
+    public int Likes { get; set; }
+    public decimal AverageRating { get; set; }
+    public int Comments { get; set; }
+}

@@ -22,26 +22,32 @@ public sealed class OrderTrackingApiController(ShopDbContext db) : ControllerBas
         if (orderNumber.Length is < 8 or > 32 ||
             orderNumber.Any(character => !char.IsAsciiLetterOrDigit(character) && character != '-') ||
             phone.Length != 11 || !phone.StartsWith("09", StringComparison.Ordinal))
-            return BadRequest(new { code = "invalid-tracking-request", message = "کد سفارش یا شمارهٔ همراه معتبر نیست." });
+            return BadRequest(new
+                { code = "invalid-tracking-request", message = "کد سفارش یا شمارهٔ همراه معتبر نیست." });
 
         var candidates = await db.StoreCustomerOrders.AsNoTracking().Where(x => x.OrderNumber == orderNumber ||
-            db.StoreOrderPreviousNumbers.Any(previous => previous.IdOrder == x.Id && previous.PreviousNumber == orderNumber)).Select(x => new
-            {
-                x.Id,
-                x.OrderNumber,
-                Status = x.StatusReference.Code,
-                StatusName = x.StatusReference.NameFa,
-                x.CreatedAtUtc,
-                x.ShippingCarrier,
-                x.ShippingTrackingCode,
-                x.AddressSnapshotJson
-            }).ToListAsync(ct);
+            db.StoreOrderPreviousNumbers.Any(previous =>
+                previous.IdOrder == x.Id && previous.PreviousNumber == orderNumber)).Select(x => new
+        {
+            x.Id,
+            x.OrderNumber,
+            Status = x.StatusReference.Code,
+            StatusName = x.StatusReference.NameFa,
+            x.CreatedAtUtc,
+            x.ShippingCarrier,
+            x.ShippingTrackingCode,
+            x.AddressSnapshotJson
+        }).ToListAsync(ct);
         var order = candidates.FirstOrDefault(x => SnapshotPhoneMatches(x.AddressSnapshotJson, phone));
         if (order is null)
             return NotFound(new { code = "order-not-found", message = "سفارشی با این کد و شمارهٔ همراه پیدا نشد." });
 
-        var trackingRows = await db.StoreOrderShipmentTrackingHistories.AsNoTracking().Where(x => x.IdOrder == order.Id).OrderBy(x => x.ChangedAtUtc).Select(x => new { x.Carrier, x.TrackingCode, x.ChangedAtUtc }).ToListAsync(ct);
-        var trackingHistory = trackingRows.Select(x => new { x.Carrier, x.TrackingCode, changedAtUtc = DateTime.SpecifyKind(x.ChangedAtUtc, DateTimeKind.Utc) }).ToArray();
+        var trackingRows = await db.StoreOrderShipmentTrackingHistories.AsNoTracking().Where(x => x.IdOrder == order.Id)
+            .OrderBy(x => x.ChangedAtUtc).Select(x => new { x.Carrier, x.TrackingCode, x.ChangedAtUtc })
+            .ToListAsync(ct);
+        var trackingHistory = trackingRows.Select(x => new
+                { x.Carrier, x.TrackingCode, changedAtUtc = DateTime.SpecifyKind(x.ChangedAtUtc, DateTimeKind.Utc) })
+            .ToArray();
 
         return Ok(new
         {

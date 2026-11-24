@@ -21,28 +21,38 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
 
         if (section == "roles")
         {
-            var roles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name).Select(x => new { x.Id, x.RoleKey, x.Name, x.IsActive }).ToListAsync(cancellationToken);
+            var roles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name)
+                .Select(x => new { x.Id, x.RoleKey, x.Name, x.IsActive }).ToListAsync(cancellationToken);
             var userCounts = await db.AdminUserRoles.AsNoTracking().GroupBy(userRole => userRole.IdRole)
                 .Select(group => new { RoleId = group.Key, Count = group.Count() })
                 .ToDictionaryAsync(item => item.RoleId, item => item.Count, cancellationToken);
-            var roleRows = roles.Select(role => new { role.Id, role.RoleKey, role.Name, role.IsActive, userCount = userCounts.GetValueOrDefault(role.Id) });
+            var roleRows = roles.Select(role => new
+                { role.Id, role.RoleKey, role.Name, role.IsActive, userCount = userCounts.GetValueOrDefault(role.Id) });
 
-            return Ok(new { users = Array.Empty<object>(), roles = roleRows, permissions = Array.Empty<object>(), warehouses = Array.Empty<object>() });
+            return Ok(new
+            {
+                users = Array.Empty<object>(), roles = roleRows, permissions = Array.Empty<object>(),
+                warehouses = Array.Empty<object>()
+            });
         }
 
         if (section == "permissions")
         {
-            var visible = GetVisiblePermissions(await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToListAsync(cancellationToken));
-            var canonicalKeys = visible.ToDictionary(x => x.PermissionKey, x => x.PermissionKey, StringComparer.OrdinalIgnoreCase);
+            var visible = GetVisiblePermissions(await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive)
+                .ToListAsync(cancellationToken));
+            var canonicalKeys = visible.ToDictionary(x => x.PermissionKey, x => x.PermissionKey,
+                StringComparer.OrdinalIgnoreCase);
             var permissions = visible.OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new
             {
                 x.Id, x.PermissionKey, x.Name,
-                ParentKey = string.IsNullOrWhiteSpace(x.ParentKey) ? null : canonicalKeys.GetValueOrDefault(x.ParentKey),
+                ParentKey =
+                    string.IsNullOrWhiteSpace(x.ParentKey) ? null : canonicalKeys.GetValueOrDefault(x.ParentKey),
                 x.Area, x.Controller, x.Action
             }).ToList();
             long[] allPermissionIds = permissions.Select(x => x.Id).ToArray();
             var storedRoles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name).Select(x => new
-                { x.Id, x.RoleKey, x.Name, x.IsActive, permissionIds = x.Permissions.Select(p => p.IdPermission) }).ToListAsync(cancellationToken);
+                    { x.Id, x.RoleKey, x.Name, x.IsActive, permissionIds = x.Permissions.Select(p => p.IdPermission) })
+                .ToListAsync(cancellationToken);
             var roles = storedRoles.Select(role => new
             {
                 role.Id,
@@ -55,21 +65,24 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
             return Ok(new { users = Array.Empty<object>(), roles, permissions, warehouses = Array.Empty<object>() });
         }
 
-        var userRoles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name).Select(x => new { x.Id, x.RoleKey, x.Name, x.IsActive }).ToListAsync(cancellationToken);
+        var userRoles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name)
+            .Select(x => new { x.Id, x.RoleKey, x.Name, x.IsActive }).ToListAsync(cancellationToken);
 
         var users = await db.AdminSystemUsers.AsNoTracking().OrderBy(x => x.UserName).Select(x => new
-            {
-                x.Id,
-                x.UserName,
-                x.DisplayName,
-                x.IsActive,
-                x.CreatedAtUtc,
-                x.LastLoginAtUtc,
-                roleIds = x.Roles.Select(r => r.IdRole),
-                warehouseIds = x.WarehouseAccess.Select(w => w.IdWarehouse)
-            }).ToListAsync(cancellationToken);
+        {
+            x.Id,
+            x.UserName,
+            x.DisplayName,
+            x.IsActive,
+            x.CreatedAtUtc,
+            x.LastLoginAtUtc,
+            roleIds = x.Roles.Select(r => r.IdRole),
+            warehouseIds = x.WarehouseAccess.Select(w => w.IdWarehouse)
+        }).ToListAsync(cancellationToken);
 
-        var warehouses = await db.Warehouses.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Company.Name).ThenBy(x => x.Name).Select(x => new { x.Id, x.Name, x.Code, x.IdCompany, CompanyName = x.Company.Name }).ToListAsync(cancellationToken);
+        var warehouses = await db.Warehouses.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Company.Name)
+            .ThenBy(x => x.Name).Select(x => new { x.Id, x.Name, x.Code, x.IdCompany, CompanyName = x.Company.Name })
+            .ToListAsync(cancellationToken);
 
         return Ok(new { users, roles = userRoles, permissions = Array.Empty<object>(), warehouses });
     }
@@ -108,20 +121,27 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
         long[] warehouseIds = input.WarehouseIds.Distinct().ToArray();
         long[] existingRoleIds = user?.Roles.Select(x => x.IdRole).ToArray() ?? [];
         long[] existingWarehouseIds = user?.WarehouseAccess.Select(x => x.IdWarehouse).ToArray() ?? [];
-        long[] inactiveRoleIds = await db.AdminRoles.Where(x => existingRoleIds.Contains(x.Id) && !x.IsActive).Select(x => x.Id).ToArrayAsync(cancellationToken);
-        long[] inactiveWarehouseIds = await db.Warehouses.Where(x => existingWarehouseIds.Contains(x.Id) && !x.IsActive).Select(x => x.Id).ToArrayAsync(cancellationToken);
+        long[] inactiveRoleIds = await db.AdminRoles.Where(x => existingRoleIds.Contains(x.Id) && !x.IsActive)
+            .Select(x => x.Id).ToArrayAsync(cancellationToken);
+        long[] inactiveWarehouseIds = await db.Warehouses.Where(x => existingWarehouseIds.Contains(x.Id) && !x.IsActive)
+            .Select(x => x.Id).ToArrayAsync(cancellationToken);
         roleIds = roleIds.Union(inactiveRoleIds).ToArray();
         warehouseIds = warehouseIds.Union(inactiveWarehouseIds).ToArray();
-        if (await db.AdminRoles.CountAsync(x => roleIds.Contains(x.Id) && (x.IsActive || existingRoleIds.Contains(x.Id)), cancellationToken) !=
+        if (await db.AdminRoles.CountAsync(
+                x => roleIds.Contains(x.Id) && (x.IsActive || existingRoleIds.Contains(x.Id)), cancellationToken) !=
             roleIds.Length)
             return ValidationProblem(detail: "یکی از نقش‌های انتخاب‌شده معتبر یا فعال نیست.", statusCode: 400);
 
-        if (await db.Warehouses.CountAsync(x => warehouseIds.Contains(x.Id) && (x.IsActive || existingWarehouseIds.Contains(x.Id)), cancellationToken) !=
+        if (await db.Warehouses.CountAsync(
+                x => warehouseIds.Contains(x.Id) && (x.IsActive || existingWarehouseIds.Contains(x.Id)),
+                cancellationToken) !=
             warehouseIds.Length)
             return ValidationProblem(detail: "یکی از انبارهای انتخاب‌شده معتبر یا فعال نیست.", statusCode: 400);
 
         bool targetHasFullAccess = user?.Roles.Any(x => x.Role.RoleKey == "system.full-access") == true;
-        bool willHaveFullAccess = await db.AdminRoles.AnyAsync(x => roleIds.Contains(x.Id) && x.RoleKey == "system.full-access", cancellationToken);
+        bool willHaveFullAccess =
+            await db.AdminRoles.AnyAsync(x => roleIds.Contains(x.Id) && x.RoleKey == "system.full-access",
+                cancellationToken);
         if (!User.IsInRole("system.full-access") && (targetHasFullAccess || willHaveFullAccess))
             return Forbid();
         bool remainsActive = input.IsActive;
@@ -129,7 +149,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
                                 && !await db.AdminSystemUsers.AnyAsync(x => x.IsActive && x.Id != user!.Id
                                         && x.Roles.Any(r => r.Role.RoleKey == "system.full-access" && r.Role.IsActive),
                                     cancellationToken))
-            return ValidationProblem(detail: "سامانه باید دست‌کم یک کاربر فعال با دسترسی کامل داشته باشد.", statusCode: 400);
+            return ValidationProblem(detail: "سامانه باید دست‌کم یک کاربر فعال با دسترسی کامل داشته باشد.",
+                statusCode: 400);
 
         user ??= new AdminSystemUser { CreatedAtUtc = DateTime.UtcNow };
         user.UserName = input.UserName.Trim();
@@ -148,7 +169,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
         else
         {
             db.AdminUserRoles.RemoveRange(user.Roles.Where(x => !roleIds.Contains(x.IdRole)));
-            db.AdminUserWarehouseAccesses.RemoveRange(user.WarehouseAccess.Where(x => !warehouseIds.Contains(x.IdWarehouse)));
+            db.AdminUserWarehouseAccesses.RemoveRange(user.WarehouseAccess.Where(x =>
+                !warehouseIds.Contains(x.IdWarehouse)));
         }
 
         foreach (long roleId in roleIds.Except(existingRoleIds))
@@ -166,7 +188,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
     public async Task<IActionResult> SaveRole(long id, [FromBody] SaveRoleInput input,
         CancellationToken cancellationToken)
     {
-        AdminRole? role = await db.AdminRoles.Include(x => x.Permissions).SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        AdminRole? role = await db.AdminRoles.Include(x => x.Permissions)
+            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (role is null)
             return NotFound();
 
@@ -186,12 +209,15 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
             if (input.PermissionIds is null)
                 return BadRequest(new { message = "فهرست مجوزها الزامی است." });
             permissionIds = input.PermissionIds.Distinct().ToArray();
-            visiblePermissionIds = GetVisiblePermissions(await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToListAsync(cancellationToken)).Select(x => x.Id).ToHashSet();
+            visiblePermissionIds =
+                GetVisiblePermissions(await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive)
+                    .ToListAsync(cancellationToken)).Select(x => x.Id).ToHashSet();
             if (permissionIds.Any(id => !visiblePermissionIds.Contains(id)))
                 return ValidationProblem(detail: "یکی از مجوزهای انتخاب‌شده معتبر یا فعال نیست.", statusCode: 400);
         }
 
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         if (editRoleDetails)
         {
             role.Name = input.Name!.Trim();
@@ -200,10 +226,12 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
 
         if (!editRoleDetails)
         {
-            db.AdminRolePermissions.RemoveRange(role.Permissions.Where(x => visiblePermissionIds.Contains(x.IdPermission) && !permissionIds.Contains(x.IdPermission)));
+            db.AdminRolePermissions.RemoveRange(role.Permissions.Where(x =>
+                visiblePermissionIds.Contains(x.IdPermission) && !permissionIds.Contains(x.IdPermission)));
             foreach (long permissionId in permissionIds.Except(role.Permissions.Select(x => x.IdPermission)))
                 db.AdminRolePermissions.Add(new AdminRolePermission { IdRole = role.Id, IdPermission = permissionId });
         }
+
         await db.SaveChangesAsync(cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
@@ -213,7 +241,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
 
     private static List<AdminPermission> GetVisiblePermissions(IReadOnlyCollection<AdminPermission> permissions)
     {
-        var children = permissions.GroupBy(x => string.IsNullOrWhiteSpace(x.ParentKey) ? "" : x.ParentKey, StringComparer.OrdinalIgnoreCase)
+        var children = permissions.GroupBy(x => string.IsNullOrWhiteSpace(x.ParentKey) ? "" : x.ParentKey,
+                StringComparer.OrdinalIgnoreCase)
             .ToDictionary(group => group.Key, group => group.ToArray(), StringComparer.OrdinalIgnoreCase);
         var visible = new List<AdminPermission>();
         var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -229,6 +258,7 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
                     pending.Enqueue(entry.PermissionKey);
                 }
         }
+
         return visible;
     }
 
@@ -239,7 +269,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
         string key = input.RoleKey.Trim().ToLowerInvariant();
         if (key.Length is < 2 or > 100 || key.Any(character =>
                 !(char.IsAsciiLetterOrDigit(character) || character is '.' or '-' or '_')))
-            return ValidationProblem(detail: "کلید نقش فقط می‌تواند شامل حروف انگلیسی، عدد، نقطه، خط تیره و زیرخط باشد.", statusCode: 400);
+            return ValidationProblem(
+                detail: "کلید نقش فقط می‌تواند شامل حروف انگلیسی، عدد، نقطه، خط تیره و زیرخط باشد.", statusCode: 400);
 
         if (string.IsNullOrWhiteSpace(input.Name) || input.Name.Trim().Length > 160)
             return ValidationProblem(detail: "نام نقش الزامی است و حداکثر ۱۶۰ نویسه دارد.", statusCode: 400);
@@ -259,7 +290,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(input.Password) || input.Password.Length > 200)
-            return ValidationProblem(detail: "گذرواژه الزامی است و حداکثر ۲۰۰ نویسه می‌تواند داشته باشد.", statusCode: 400);
+            return ValidationProblem(detail: "گذرواژه الزامی است و حداکثر ۲۰۰ نویسه می‌تواند داشته باشد.",
+                statusCode: 400);
 
         AdminSystemUser? user = await db.AdminSystemUsers.Include(x => x.Roles).ThenInclude(x => x.Role)
             .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);

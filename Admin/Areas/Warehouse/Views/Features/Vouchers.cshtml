@@ -61,7 +61,13 @@
                 <div class="row g-3">
                     <div class="col-md-6 col-xl-4">
                         <label class="form-label" for="voucher-type">نوع سند</label><select id="voucher-type" name="voucherTypeId" class="form-select" required data-voucher-types></select>
-                        <small class="form-text" data-voucher-types-help hidden>ابتدا نوع سند مناسب را در <a href="/Warehouse/Features?feature=voucher-types">تعریف انواع اسناد</a> اضافه یا فعال کنید.@if (Model.FeatureId == "returns") { <text> گزینهٔ «سند مرجوعی است» را برای آن فعال کنید.</text> }</small>
+                        <small class="form-text" data-voucher-types-help hidden>
+                            ابتدا نوع سند مناسب را در <a href="/Warehouse/Features?feature=voucher-types">تعریف انواع اسناد</a> اضافه یا فعال کنید.
+                            @if (Model.FeatureId == "returns")
+                            {
+                                <text> گزینهٔ «سند مرجوعی است» را برای آن فعال کنید.</text>
+                            }
+                        </small>
                     </div>
                     <div class="col-md-6 col-xl-4">
                         <label class="form-label" for="voucher-warehouse">انبار</label><select id="voucher-warehouse" name="warehouseId" class="form-select" required data-voucher-warehouse></select>

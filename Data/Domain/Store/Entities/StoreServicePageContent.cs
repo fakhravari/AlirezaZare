@@ -22,6 +22,7 @@ public sealed class StoreContentPageSection
     public string? Body { get; set; }
     public int SortOrder { get; set; }
     public bool IsPublished { get; set; }
+    public string? DataJson { get; set; }
 }
 
 public sealed class StoreFaqItem

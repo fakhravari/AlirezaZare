@@ -7,76 +7,164 @@
         <div class="alert alert-success" role="status">@message</div>
     }
     <section class="panel panel-inverse">
-        <div class="panel-heading"><h2 class="panel-title">دسته‌های فیلتر</h2></div>
+        <div class="panel-heading">
+            <h2 class="panel-title">دسته‌های فیلتر</h2>
+        </div>
         <div class="panel-body">
-            @if (!Model.TabsReady) { <div class="alert alert-warning">برای مدیریت دسته‌ها ابتدا migration شمارهٔ ۱۵۴ را روی پایگاه دادهٔ هدف اجرا کنید.</div> }
+            @if (!Model.TabsReady)
+            {
+                <div class="alert alert-warning">برای مدیریت دسته‌ها ابتدا migration شمارهٔ ۱۵۴ را روی پایگاه دادهٔ هدف اجرا کنید.</div>
+            }
             <p>دسته‌های فعال به ترتیب مشخص‌شده نمایش داده می‌شوند و شامل کالاهای زیردسته‌های خود نیز هستند.</p>
             @if (Model.TabsReady)
             {
-            <form asp-action="AddCategory" method="post" class="d-flex flex-wrap gap-2 align-items-end mb-3">
-                <div><label for="categoryId" class="form-label">دسته</label><select id="categoryId" name="categoryId" class="form-select" required>
-                    <option value="">انتخاب دسته</option>
-                    @foreach (var category in Model.Categories.Where(category => !Model.Tabs.Any(tab => tab.CategoryId == category.Id)))
-                    { <option value="@category.Id">@category.Name</option> }
-                </select></div>
-                <button type="submit" class="btn btn-primary">افزودن دسته</button>
-            </form>
-            <div class="table-responsive"><table class="table table-striped align-middle">
-                <thead><tr><th>دسته</th><th>تنظیمات</th></tr></thead><tbody>
-                @foreach (var tab in Model.Tabs)
-                {
-                    <tr><td>@tab.Name @if (!tab.CategoryActive) { <span class="text-danger">(دسته غیرفعال است)</span> }</td><td>
-                        <form asp-action="Category" method="post" class="d-flex flex-wrap gap-2 align-items-center">
-                            <input type="hidden" name="id" value="@tab.Id" />
-                            <label for="category-order-@tab.Id">ترتیب</label><input id="category-order-@tab.Id" type="number" name="sortOrder" min="0" value="@tab.SortOrder" class="form-control w-auto" required />
-                            <label><input type="checkbox" name="isActive" value="true" checked="@tab.IsActive" /> فعال</label>
-                            <button type="submit" name="operation" value="save" class="btn btn-primary btn-sm">ذخیره</button>
-                            <button type="submit" name="operation" value="remove" class="btn btn-danger btn-sm">حذف از فیلتر</button>
-                        </form>
-                    </td></tr>
-                }
-                @if (Model.Tabs.Count == 0) { <tr><td colspan="2">دسته‌ای انتخاب نشده است.</td></tr> }
-                </tbody></table></div>
+                <form asp-action="AddCategory" method="post" class="d-flex flex-wrap gap-2 align-items-end mb-3">
+                    <div>
+                        <label for="categoryId" class="form-label">دسته</label>
+                        <select id="categoryId" name="categoryId" class="form-select" required>
+                            <option value="">انتخاب دسته</option>
+                            @foreach (var category in Model.Categories.Where(category => !Model.Tabs.Any(tab => tab.CategoryId == category.Id)))
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">افزودن دسته</button>
+                </form>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                        <tr>
+                            <th>دسته</th><th>تنظیمات</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var tab in Model.Tabs)
+                        {
+                            <tr>
+                                <td>
+                                    @tab.Name
+                                    @if (!tab.CategoryActive)
+                                    {
+                                        <span class="text-danger">(دسته غیرفعال است)</span>
+                                    }
+                                </td>
+                                <td>
+                                    <form asp-action="Category" method="post" class="d-flex flex-wrap gap-2 align-items-center">
+                                        <input type="hidden" name="id" value="@tab.Id"/>
+                                        <label for="category-order-@tab.Id">ترتیب</label><input id="category-order-@tab.Id" type="number" name="sortOrder" min="0" value="@tab.SortOrder" class="form-control w-auto" required/>
+                                        <label><input type="checkbox" name="isActive" value="true" checked="@tab.IsActive"/> فعال</label>
+                                        <button type="submit" name="operation" value="save" class="btn btn-primary btn-sm">ذخیره</button>
+                                        <button type="submit" name="operation" value="remove" class="btn btn-danger btn-sm">حذف از فیلتر</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        @if (Model.Tabs.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="2">دسته‌ای انتخاب نشده است.</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
             }
         </div>
     </section>
     <section class="panel panel-inverse">
-        <div class="panel-heading"><h2 class="panel-title">کالاهای منتخب</h2></div>
+        <div class="panel-heading">
+            <h2 class="panel-title">کالاهای منتخب</h2>
+        </div>
         <div class="panel-body">
             <p>نمایش کالا در فروشگاه به وضعیت فعال کالا، دسته و برند و شرایط فروش آن بستگی دارد.</p>
-            <div class="table-responsive"><table class="table table-striped align-middle">
-                <thead><tr><th>کالا</th><th>کد</th><th>تنظیمات</th></tr></thead><tbody>
-                @foreach (var product in Model.Products)
-                {
-                    <tr><td>@product.Name @if (!product.IsStoreEnabled) { <span class="text-danger">(غیرفعال در فروشگاه)</span> }</td><td>@product.Code</td><td>
-                        <form asp-action="Product" method="post" class="d-flex flex-wrap gap-2 align-items-center">
-                            <input type="hidden" name="id" value="@product.Id" />
-                            <label for="product-order-@product.Id">ترتیب</label><input id="product-order-@product.Id" type="number" name="sortOrder" min="0" value="@product.SortOrder" class="form-control w-auto" required />
-                            <button type="submit" name="operation" value="save" class="btn btn-primary btn-sm">ذخیره</button>
-                            <button type="submit" name="operation" value="remove" class="btn btn-danger btn-sm">حذف از منتخب</button>
-                        </form>
-                    </td></tr>
-                }
-                @if (Model.Products.Count == 0) { <tr><td colspan="3">کالایی انتخاب نشده است.</td></tr> }
-                </tbody></table></div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                    <tr>
+                        <th>کالا</th><th>کد</th><th>تنظیمات</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var product in Model.Products)
+                    {
+                        <tr>
+                            <td>
+                                @product.Name
+                                @if (!product.IsStoreEnabled)
+                                {
+                                    <span class="text-danger">(غیرفعال در فروشگاه)</span>
+                                }
+                            </td><td>@product.Code</td>
+                            <td>
+                                <form asp-action="Product" method="post" class="d-flex flex-wrap gap-2 align-items-center">
+                                    <input type="hidden" name="id" value="@product.Id"/>
+                                    <label for="product-order-@product.Id">ترتیب</label><input id="product-order-@product.Id" type="number" name="sortOrder" min="0" value="@product.SortOrder" class="form-control w-auto" required/>
+                                    <button type="submit" name="operation" value="save" class="btn btn-primary btn-sm">ذخیره</button>
+                                    <button type="submit" name="operation" value="remove" class="btn btn-danger btn-sm">حذف از منتخب</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.Products.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="3">کالایی انتخاب نشده است.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
             <h3 class="h5">افزودن کالا</h3>
             <form asp-action="Index" method="get" class="d-flex flex-wrap gap-2 mb-3">
-                <label for="product-search" class="visually-hidden">جست‌وجوی نام یا کد کالا</label><input id="product-search" name="q" value="@Model.Query" class="form-control w-auto" placeholder="نام یا کد کالا" />
+                <label for="product-search" class="visually-hidden">جست‌وجوی نام یا کد کالا</label><input id="product-search" name="q" value="@Model.Query" class="form-control w-auto" placeholder="نام یا کد کالا"/>
                 <button type="submit" class="btn btn-secondary">جست‌وجو</button>
             </form>
-            <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>کالا</th><th>کد</th><th>عملیات</th></tr></thead><tbody>
-            @foreach (var product in Model.Candidates)
-            {
-                <tr><td>@product.Name</td><td>@product.Code</td><td>
-                    @if (Model.Products.Any(selected => selected.ProductId == product.Id)) { <span>انتخاب شده</span> }
-                    else { <form asp-action="AddProduct" method="post"><input type="hidden" name="productId" value="@product.Id" /><button type="submit" class="btn btn-primary btn-sm">افزودن</button></form> }
-                </td></tr>
-            }
-            @if (Model.Candidates.Count == 0) { <tr><td colspan="3">کالایی یافت نشد.</td></tr> }
-            </tbody></table></div>
-            <div class="d-flex gap-2 align-items-center"><span>صفحهٔ @Model.Page، تعداد کالاها: @Model.Total</span>
-                @if (Model.Page > 1) { <a asp-action="Index" asp-route-q="@Model.Query" asp-route-page="@(Model.Page - 1)" class="btn btn-secondary btn-sm">قبلی</a> }
-                @if ((long)Model.Page * 50 < Model.Total) { <a asp-action="Index" asp-route-q="@Model.Query" asp-route-page="@(Model.Page + 1)" class="btn btn-secondary btn-sm">بعدی</a> }
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                    <tr>
+                        <th>کالا</th><th>کد</th><th>عملیات</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var product in Model.Candidates)
+                    {
+                        <tr>
+                            <td>@product.Name</td><td>@product.Code</td>
+                            <td>
+                                @if (Model.Products.Any(selected => selected.ProductId == product.Id))
+                                {
+                                    <span>انتخاب شده</span>
+                                }
+                                else
+                                {
+                                    <form asp-action="AddProduct" method="post">
+                                        <input type="hidden" name="productId" value="@product.Id"/><button type="submit" class="btn btn-primary btn-sm">افزودن</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.Candidates.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="3">کالایی یافت نشد.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <span>صفحهٔ @Model.Page، تعداد کالاها: @Model.Total</span>
+                @if (Model.Page > 1)
+                {
+                    <a asp-action="Index" asp-route-q="@Model.Query" asp-route-page="@(Model.Page - 1)" class="btn btn-secondary btn-sm">قبلی</a>
+                }
+                @if ((long)Model.Page * 50 < Model.Total)
+                {
+                    <a asp-action="Index" asp-route-q="@Model.Query" asp-route-page="@(Model.Page + 1)" class="btn btn-secondary btn-sm">بعدی</a>
+                }
             </div>
         </div>
     </section>

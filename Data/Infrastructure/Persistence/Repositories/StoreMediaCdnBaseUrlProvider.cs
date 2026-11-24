@@ -6,7 +6,8 @@ using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Data.Infrastructure.Persistence.Repositories;
 
-public sealed class StoreMediaCdnBaseUrlProvider(ShopDbContext dbContext, IOptions<MediaCdnOptions> options) : IMediaCdnBaseUrlProvider
+public sealed class StoreMediaCdnBaseUrlProvider(ShopDbContext dbContext, IOptions<MediaCdnOptions> options)
+    : IMediaCdnBaseUrlProvider
 {
     private string? _requestBaseUrl;
 
@@ -18,15 +19,23 @@ public sealed class StoreMediaCdnBaseUrlProvider(ShopDbContext dbContext, IOptio
         string? databaseValue;
         try
         {
-            databaseValue = await dbContext.StoreSiteIdentities.AsNoTracking().Where(setting => setting.Id == 1).Select(setting => setting.MediaCdnBaseUrl).SingleOrDefaultAsync(cancellationToken);
+            databaseValue = await dbContext.StoreSiteIdentities.AsNoTracking().Where(setting => setting.Id == 1)
+                .Select(setting => setting.MediaCdnBaseUrl).SingleOrDefaultAsync(cancellationToken);
         }
         catch (DbException)
         {
             return configuredFallback;
         }
+
         if (string.IsNullOrWhiteSpace(databaseValue)) return _requestBaseUrl = configuredFallback;
 
-        try { return _requestBaseUrl = MediaCdnOptions.NormalizeBaseUrl(databaseValue); }
-        catch (InvalidOperationException) { return _requestBaseUrl = configuredFallback; }
+        try
+        {
+            return _requestBaseUrl = MediaCdnOptions.NormalizeBaseUrl(databaseValue);
+        }
+        catch (InvalidOperationException)
+        {
+            return _requestBaseUrl = configuredFallback;
+        }
     }
 }

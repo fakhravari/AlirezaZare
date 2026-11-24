@@ -1,4 +1,7 @@
-﻿@{ string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? ""; var slides = ViewData["HomeSliders"] as List<Shop.Data.Domain.Store.Entities.StoreSlider> ?? new(); }
+﻿@{
+    string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? "";
+    var slides = ViewData["HomeSliders"] as List<Shop.Data.Domain.Store.Entities.StoreSlider> ?? new();
+}
 <section class="electrical-showcase" aria-label="دسته‌بندی و پیشنهادهای فروشگاه">
     <div class="electrical-home-row">
         <aside class="electrical-category-menu" id="productCategories" aria-label="مگامنوی دسته‌بندی قطعات">
@@ -38,7 +41,9 @@
                 @foreach (var slide in slides)
                 {
                     <div class="swiper-slide electrical-slide" data-show-mobile="@slide.ShowOnMobile.ToString().ToLowerInvariant()" data-show-desktop="@slide.ShowOnDesktop.ToString().ToLowerInvariant()">
-                        <a href="@slide.Url"><img class="electrical-banner-image" src="@(cdnBaseUrl)@slide.ImagePath" alt="@slide.Title" loading="lazy" /></a>
+                        <a href="@slide.Url">
+                            <img class="electrical-banner-image" src="@(cdnBaseUrl)@slide.ImagePath" alt="@slide.Title" loading="lazy"/>
+                        </a>
                     </div>
                 }
             </div>

@@ -6,7 +6,8 @@ namespace Shop.Data.Infrastructure.Persistence.Repositories;
 
 public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVersionService
 {
-    public async Task<long> AppendAsync(long productId, long salesPlanId, long? productVariantId, long? accessoryId, decimal amount, decimal discountPercent, long idChangedBy, CancellationToken cancellationToken = default)
+    public async Task<decimal> AppendAsync(decimal productId, long salesPlanId, long? productVariantId, decimal? accessoryId,
+        decimal amount, decimal discountPercent, long idChangedBy, CancellationToken cancellationToken = default)
     {
         Validate(amount, discountPercent);
         var prior = await FindActiveAsync(productId, salesPlanId, productVariantId, accessoryId, cancellationToken);
@@ -19,7 +20,8 @@ public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVers
             IdAccessory = accessoryId,
             PriceBeforeDiscountAmount = amount,
             DiscountPercent = discountPercent,
-            FinalPriceAmount = decimal.Round(amount * (100m - discountPercent) / 100m, 0, MidpointRounding.AwayFromZero),
+            FinalPriceAmount =
+                decimal.Round(amount * (100m - discountPercent) / 100m, 0, MidpointRounding.AwayFromZero),
             IsActive = true,
             CreatedAtUtc = DateTime.UtcNow,
             IdChangedBy = idChangedBy,
@@ -31,7 +33,8 @@ public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVers
         return version.Id;
     }
 
-    public async Task<bool> DeactivateAsync(long productId, long salesPlanId, long? productVariantId, long? accessoryId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeactivateAsync(decimal productId, long salesPlanId, long? productVariantId, decimal? accessoryId,
+        CancellationToken cancellationToken = default)
     {
         var active = await FindActiveAsync(productId, salesPlanId, productVariantId, accessoryId, cancellationToken);
         if (active is null) return false;
@@ -42,12 +45,17 @@ public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVers
         return true;
     }
 
-    private Task<StorePriceVersion?> FindActiveAsync(long productId, long salesPlanId, long? productVariantId, long? accessoryId, CancellationToken cancellationToken) =>
-        db.StorePriceVersions.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdSalesPlan == salesPlanId && x.IdProductVariant == productVariantId && x.IdAccessory == accessoryId && x.IsActive, cancellationToken);
+    private Task<StorePriceVersion?> FindActiveAsync(decimal productId, long salesPlanId, long? productVariantId,
+        decimal? accessoryId, CancellationToken cancellationToken) =>
+        db.StorePriceVersions.SingleOrDefaultAsync(
+            x => x.IdProduct == productId && x.IdSalesPlan == salesPlanId && x.IdProductVariant == productVariantId &&
+                 x.IdAccessory == accessoryId && x.IsActive, cancellationToken);
 
     private static void Validate(decimal amount, decimal discountPercent)
     {
-        if (amount < 0 || amount > 9007199254740991m || amount != decimal.Truncate(amount)) throw new ArgumentOutOfRangeException(nameof(amount));
-        if (discountPercent < 0 || discountPercent >= 100 || decimal.Round(discountPercent, 2) != discountPercent) throw new ArgumentOutOfRangeException(nameof(discountPercent));
+        if (amount < 0 || amount > 9007199254740991m || amount != decimal.Truncate(amount))
+            throw new ArgumentOutOfRangeException(nameof(amount));
+        if (discountPercent < 0 || discountPercent >= 100 || decimal.Round(discountPercent, 2) != discountPercent)
+            throw new ArgumentOutOfRangeException(nameof(discountPercent));
     }
 }

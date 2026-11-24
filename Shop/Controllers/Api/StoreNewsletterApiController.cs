@@ -63,8 +63,14 @@ public sealed class StoreNewsletterApiController(ShopDbContext db) : ControllerB
     {
         if (email.Length is < 3 or > 254) return false;
 
-        try { return new MailAddress(email).Address.Equals(email, StringComparison.OrdinalIgnoreCase); }
-        catch (FormatException) { return false; }
+        try
+        {
+            return new MailAddress(email).Address.Equals(email, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
     }
 
     public sealed record NewsletterRequest(string? Email);

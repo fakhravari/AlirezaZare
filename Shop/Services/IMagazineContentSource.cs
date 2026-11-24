@@ -23,11 +23,13 @@ public sealed class DatabaseMagazineContentSource(
 
     public async Task<MagazineDetailsModel?> ReadArticleAsync(string slug,
         CancellationToken cancellationToken = default) =>
-        (await ReadDatasetAsync(cancellationToken)).Articles.Select(item => item.Article).FirstOrDefault(article => string.Equals(article.Slug, slug, StringComparison.OrdinalIgnoreCase));
+        (await ReadDatasetAsync(cancellationToken)).Articles.Select(item => item.Article).FirstOrDefault(article =>
+            string.Equals(article.Slug, slug, StringComparison.OrdinalIgnoreCase));
 
     private async Task<MagazineDataset> ReadDatasetAsync(CancellationToken cancellationToken)
     {
-        string json = await datasets.ReadMagazineJsonAsync(cancellationToken) ?? throw new InvalidDataException("The magazine dataset is missing from the database.");
+        string json = await datasets.ReadMagazineJsonAsync(cancellationToken) ??
+                      throw new InvalidDataException("The magazine dataset is missing from the database.");
 
         return System.Text.Json.JsonSerializer.Deserialize<MagazineDataset>(json,
                    new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web))

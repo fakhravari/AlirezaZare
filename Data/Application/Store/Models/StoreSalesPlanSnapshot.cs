@@ -18,8 +18,10 @@ public sealed record StoreInventoryVariantRow(
     IReadOnlyDictionary<string, decimal> PriceBySalesPlan,
     IReadOnlyDictionary<string, decimal> DiscountBySalesPlan)
 {
-    public IReadOnlyDictionary<string, decimal> FinalPriceBySalesPlan { get; init; } = new Dictionary<string, decimal>();
-    public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
+    public IReadOnlyDictionary<string, decimal> FinalPriceBySalesPlan { get; init; } =
+        new Dictionary<string, decimal>();
+
+    public IReadOnlyDictionary<string, decimal> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, decimal>();
     public IReadOnlyList<string> DisabledSalesPlanIds { get; init; } = [];
 }
 
@@ -48,6 +50,6 @@ public sealed record StoreSalesOfferRow(
     IReadOnlyDictionary<string, string> SpecificationOverrides)
 {
     public decimal FinalPriceAmount { get; init; }
-    public long PriceVersionId { get; init; }
-    public IReadOnlyDictionary<string, long> AccessoryPriceVersionIds { get; init; } = new Dictionary<string, long>();
+    public decimal PriceVersionId { get; init; }
+    public IReadOnlyDictionary<string, decimal> AccessoryPriceVersionIds { get; init; } = new Dictionary<string, decimal>();
 }

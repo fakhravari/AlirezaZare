@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Admin.Infrastructure;
 using Shop.Data.Infrastructure.Persistence;
-
 using Shop.Data.Helpers;
+
 namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
@@ -22,14 +22,17 @@ public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext d
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
 
-        IQueryable<Shop.Data.Domain.Store.Entities.StoreNewsletterSubscriber> query = db.StoreNewsletterSubscribers.AsNoTracking();
+        IQueryable<Shop.Data.Domain.Store.Entities.StoreNewsletterSubscriber> query =
+            db.StoreNewsletterSubscribers.AsNoTracking();
         if (!includeUnsubscribed)
             query = query.Where(x => x.UnsubscribedAtUtc == null);
         if (paging.Search.Length > 0)
             query = query.Where(x => x.Email.Contains(paging.Search));
 
         int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.SubscribedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new { x.Id, x.Email, x.SubscribedAtUtc, x.UnsubscribedAtUtc }).ToListAsync(cancellationToken);
+        var items = await query.OrderByDescending(x => x.SubscribedAtUtc).ThenByDescending(x => x.Id)
+            .Skip(paging.Offset).Take(paging.PageSize)
+            .Select(x => new { x.Id, x.Email, x.SubscribedAtUtc, x.UnsubscribedAtUtc }).ToListAsync(cancellationToken);
 
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
@@ -56,7 +59,8 @@ public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext d
         if (search.Length > AdminListQuery.MaximumSearchLength || search.Any(char.IsControl))
             return ValidationProblem(detail: "عبارت جست‌وجو معتبر نیست.", statusCode: 400);
 
-        IQueryable<Shop.Data.Domain.Store.Entities.StoreNewsletterSubscriber> query = db.StoreNewsletterSubscribers.AsNoTracking();
+        IQueryable<Shop.Data.Domain.Store.Entities.StoreNewsletterSubscriber> query =
+            db.StoreNewsletterSubscribers.AsNoTracking();
         if (!includeUnsubscribed)
             query = query.Where(x => x.UnsubscribedAtUtc == null);
         if (search.Length > 0)
@@ -65,21 +69,22 @@ public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext d
         return new AdminExcelFileResult("newsletter-subscribers.xlsx", "اعضا", async (worksheet, ct) =>
         {
             await worksheet.WriteRowAsync(ct, "ایمیل", "تاریخ عضویت", "تاریخ لغو");
-            long lastId = 0;
+            decimal lastId = 0;
             while (true)
             {
                 ct.ThrowIfCancellationRequested();
-                var rows = await query.Where(x => x.Id > lastId).OrderBy(x => x.Id).Take(AdminListQuery.ExportBatchSize).Select(x => new { x.Id, x.Email, x.SubscribedAtUtc, x.UnsubscribedAtUtc }).ToListAsync(ct);
+                var rows = await query.Where(x => x.Id > lastId).OrderBy(x => x.Id).Take(AdminListQuery.ExportBatchSize)
+                    .Select(x => new { x.Id, x.Email, x.SubscribedAtUtc, x.UnsubscribedAtUtc }).ToListAsync(ct);
                 if (rows.Count == 0) break;
 
                 foreach (var row in rows)
-                    await worksheet.WriteRowAsync(ct, row.Email, row.SubscribedAtUtc.ToString("O"), row.UnsubscribedAtUtc?.ToString("O"));
+                    await worksheet.WriteRowAsync(ct, row.Email, row.SubscribedAtUtc.ToString("O"),
+                        row.UnsubscribedAtUtc?.ToString("O"));
 
                 lastId = rows[^1].Id;
                 if (rows.Count < AdminListQuery.ExportBatchSize) break;
             }
         });
-
     }
 }
 

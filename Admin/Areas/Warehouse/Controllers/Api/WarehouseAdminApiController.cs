@@ -5,8 +5,8 @@ using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Application.Warehouse.Models;
 using Shop.Data.Infrastructure.Persistence;
-
 using Shop.Data.Helpers;
+
 namespace Shop.Admin.Areas.Warehouse.Controllers.Api;
 
 [Area("Warehouse")]
@@ -40,13 +40,17 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
             return Forbid();
 
         decimal minimum = decimal.Truncate(input.MinimumQuantity * 1000m) / 1000m;
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         bool valid = await db.Warehouses.AnyAsync(x => x.Id == input.WarehouseId && x.IsActive, cancellationToken)
                      && await db.InventoryItems.AnyAsync(
-                         x => x.Id == input.InventoryItemId && x.IsActive && x.Product.IsWarehouseEnabled, cancellationToken);
-        var regularPlan = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsRegular && x.IsActive) .Select(x => new { x.Id }).SingleOrDefaultAsync(cancellationToken);
+                         x => x.Id == input.InventoryItemId && x.IsActive && x.Product.IsWarehouseEnabled,
+                         cancellationToken);
+        var regularPlan = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsRegular && x.IsActive)
+            .Select(x => new { x.Id }).SingleOrDefaultAsync(cancellationToken);
         if (!valid || regularPlan is null)
-            return ValidationProblem(detail: "انبار یا قلم موجودی فعال نیست یا طرح عادی تعریف نشده است.", statusCode: 400);
+            return ValidationProblem(detail: "انبار یا قلم موجودی فعال نیست یا طرح عادی تعریف نشده است.",
+                statusCode: 400);
 
         var balance = await db.StockBalances.SingleOrDefaultAsync(x => x.IdWarehouse == input.WarehouseId
                                                                        && x.IdInventoryItem == input.InventoryItemId &&
@@ -85,7 +89,8 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
         CancellationToken cancellationToken = default)
     {
         if (Request.Path.Value?.EndsWith("/stock/plans", StringComparison.OrdinalIgnoreCase) == true)
-            return Ok(await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DisplayName).Select(x => new { id = x.StoreSalesPlanKey, name = x.DisplayName }).ToListAsync(cancellationToken));
+            return Ok(await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DisplayName)
+                .Select(x => new { id = x.StoreSalesPlanKey, name = x.DisplayName }).ToListAsync(cancellationToken));
 
         if (!AdminListQuery.TryCreate(page, pageSize, search, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
@@ -100,9 +105,11 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
         async Task<IReadOnlyList<WarehouseStockItem>> ReadPage(int requestedPage, int requestedSize)
         {
             if (fullAccess || warehouseId.HasValue)
-                return await warehouseReadService.GetStockAsync(warehouseId, salesPlanKey, search, lowStockOnly, requestedPage, requestedSize, cancellationToken);
+                return await warehouseReadService.GetStockAsync(warehouseId, salesPlanKey, search, lowStockOnly,
+                    requestedPage, requestedSize, cancellationToken);
 
-            return await warehouseReadService.GetStockForWarehousesAsync(allowed.ToArray(), salesPlanKey, search, lowStockOnly, requestedPage, requestedSize, cancellationToken);
+            return await warehouseReadService.GetStockForWarehousesAsync(allowed.ToArray(), salesPlanKey, search,
+                lowStockOnly, requestedPage, requestedSize, cancellationToken);
         }
 
         IReadOnlyList<WarehouseStockItem> items = await ReadPage(paging.Page, paging.PageSize);
@@ -111,7 +118,8 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
         return Ok(AdminListQuery.CreateLookaheadResult(items, hasNext, paging));
     }
 
-    private HashSet<long> GetAllowedWarehouseIds() => User.FindAll("admin_warehouse").Select(claim => long.TryParse(claim.Value, out long id) ? id : 0).Where(id => id > 0).ToHashSet();
+    private HashSet<long> GetAllowedWarehouseIds() => User.FindAll("admin_warehouse")
+        .Select(claim => long.TryParse(claim.Value, out long id) ? id : 0).Where(id => id > 0).ToHashSet();
 
     public sealed record MinimumStockInput(long WarehouseId, long InventoryItemId, decimal MinimumQuantity);
 }

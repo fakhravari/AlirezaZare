@@ -40,7 +40,7 @@ public sealed class WarehouseParty
 public sealed class WarehouseProductUnit
 {
     public long Id { get; set; }
-    public long IdProduct { get; set; }
+    public decimal IdProduct { get; set; }
     public long IdUnit { get; set; }
     public decimal ConversionFactor { get; set; }
     public bool IsBaseUnit { get; set; }

@@ -5,9 +5,9 @@ namespace Shop.Data.Domain.Store.Entities;
 
 public sealed class ProductFeedback
 {
-    public long Id { get; set; }
-    public long IdProduct { get; set; }
-    public long? IdProfile { get; set; }
+    public decimal Id { get; set; }
+    public decimal IdProduct { get; set; }
+    public decimal? IdProfile { get; set; }
     public string FeedbackType { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
     public string FeedbackText { get; set; } = string.Empty;

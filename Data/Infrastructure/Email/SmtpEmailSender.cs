@@ -20,20 +20,20 @@ public sealed class SmtpEmailSender(
         ArgumentNullException.ThrowIfNull(body);
 
         var settings = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1).Select(x => new
-            {
-                x.SmtpHost,
-                x.SmtpPort,
-                x.SmtpEnableSsl,
-                x.SmtpUsername,
-                x.SmtpFrom,
-                x.SmtpPassword
-            }).SingleOrDefaultAsync(cancellationToken);
+        {
+            x.SmtpHost,
+            x.SmtpPort,
+            x.SmtpEnableSsl,
+            x.SmtpUsername,
+            x.SmtpFrom,
+            x.SmtpPassword
+        }).SingleOrDefaultAsync(cancellationToken);
         string? password = settings?.SmtpPassword ?? configuration["Email:Smtp:Password"];
         if (settings is null || string.IsNullOrWhiteSpace(settings.SmtpHost)
-            || settings.SmtpPort is null or < 1 or > 65535 || settings.SmtpEnableSsl is null
-            || string.IsNullOrWhiteSpace(settings.SmtpUsername)
-            || string.IsNullOrWhiteSpace(settings.SmtpFrom)
-            || string.IsNullOrWhiteSpace(password))
+                             || settings.SmtpPort is null or < 1 or > 65535 || settings.SmtpEnableSsl is null
+                             || string.IsNullOrWhiteSpace(settings.SmtpUsername)
+                             || string.IsNullOrWhiteSpace(settings.SmtpFrom)
+                             || string.IsNullOrWhiteSpace(password))
         {
             throw new InvalidOperationException("SMTP settings are incomplete.");
         }

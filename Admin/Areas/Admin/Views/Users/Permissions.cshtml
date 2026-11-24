@@ -6,7 +6,9 @@
     @await Html.PartialAsync("_AdminPageIntro", ("مجوزهای نقش‌ها", "مجوزهای هر نقش را از ساختار درختی پنل انتخاب و ذخیره کنید."))
     @Html.AntiForgeryToken()
     <section class="panel panel-inverse">
-        <div class="panel-heading"><h2 class="panel-title">انتخاب نقش</h2></div>
+        <div class="panel-heading">
+            <h2 class="panel-title">انتخاب نقش</h2>
+        </div>
         <div class="panel-body">
             <div class="admin-data-status small text-muted" data-users-status role="status" aria-live="polite">در حال بارگذاری نقش‌ها…</div>
             <div class="row g-3 align-items-end">

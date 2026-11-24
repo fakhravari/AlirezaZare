@@ -24,7 +24,8 @@ public sealed class FeaturesController : Controller
 
         if (new[]
             {
-                "companies", "warehouses", "references", "units", "product-units", "variant-names", "variants", "voucher-types",
+                "companies", "warehouses", "references", "units", "product-units", "variant-names", "variants",
+                "voucher-types",
                 "sales-plan-mapping", "stock-owners"
             }.Contains(page.FeatureId, StringComparer.OrdinalIgnoreCase))
         {

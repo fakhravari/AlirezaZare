@@ -37,8 +37,10 @@ public sealed class StoreContactApiController(
         if (name.Length is < 3 or > 100 || name.Any(char.IsControl) ||
             !string.IsNullOrWhiteSpace(email) && (email.Length > 254 || !MailAddress.TryCreate(email, out _)) ||
             phone.Length != 11 || !phone.StartsWith("09", StringComparison.Ordinal) ||
-            !Subjects.Contains(subject) || message.Length is < 10 or > 3000 || message.Any(character => character == '\0'))
-            return BadRequest(new { code = "invalid-contact-request", message = "اطلاعات فرم تماس را بررسی و کامل کنید." });
+            !Subjects.Contains(subject) || message.Length is < 10 or > 3000 ||
+            message.Any(character => character == '\0'))
+            return BadRequest(new
+                { code = "invalid-contact-request", message = "اطلاعات فرم تماس را بررسی و کامل کنید." });
 
         var contactMessage = new StoreContactMessage
         {
@@ -61,7 +63,8 @@ public sealed class StoreContactApiController(
             "business" => "همکاری سازمانی",
             _ => "سایر درخواست‌ها"
         };
-        string body = $"درخواست جدید از فرم تماس سایت\n\nنام: {name}\nشماره همراه: {phone}\nموضوع: {subjectLabel}\n\nمتن پیام:\n{message}";
+        string body =
+            $"درخواست جدید از فرم تماس سایت\n\nنام: {name}\nشماره همراه: {phone}\nموضوع: {subjectLabel}\n\nمتن پیام:\n{message}";
         SiteIdentityOptions siteIdentity = await siteIdentitySource.ReadAsync(ct);
         string recipient = siteIdentity.PublicEmail?.Trim() ?? string.Empty;
         bool notificationSent = false;
@@ -73,7 +76,10 @@ public sealed class StoreContactApiController(
                 await emailSender.SendAsync(recipient, $"پیام سایت: {subjectLabel}", body, ct);
                 notificationSent = true;
             }
-            else logger.LogWarning("Contact message {ContactMessageId} was saved, but no public email recipient is configured.", contactMessage.Id);
+            else
+                logger.LogWarning(
+                    "Contact message {ContactMessageId} was saved, but no public email recipient is configured.",
+                    contactMessage.Id);
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
@@ -81,10 +87,12 @@ public sealed class StoreContactApiController(
         }
         catch (Exception exception)
         {
-            logger.LogWarning(exception, "Contact message {ContactMessageId} was saved, but email notification failed.", contactMessage.Id);
+            logger.LogWarning(exception, "Contact message {ContactMessageId} was saved, but email notification failed.",
+                contactMessage.Id);
         }
 
-        return Ok(new { saved = true, notificationSent, message = "پیام شما ثبت شد و برای پیگیری در پنل پشتیبانی قرار گرفت." });
+        return Ok(new
+            { saved = true, notificationSent, message = "پیام شما ثبت شد و برای پیگیری در پنل پشتیبانی قرار گرفت." });
     }
 
     private static string NormalizePhone(string? value)

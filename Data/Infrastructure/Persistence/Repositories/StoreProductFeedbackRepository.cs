@@ -15,14 +15,20 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
         long? idProduct = await ActiveProductIdAsync(productId, cancellationToken);
         if (idProduct is null) return null;
 
-        IQueryable<ProductFeedback> approved = dbContext.ProductFeedback.AsNoTracking() .Where(x => x.IdProduct == idProduct && x.FeedbackType == type && x.IdStatus == ProductFeedbackStatus.Approved);
+        IQueryable<ProductFeedback> approved = dbContext.ProductFeedback.AsNoTracking().Where(x =>
+            x.IdProduct == idProduct && x.FeedbackType == type && x.IdStatus == ProductFeedbackStatus.Approved);
         long totalCount = await approved.LongCountAsync(cancellationToken);
-        decimal? averageRating = type == "reviews" ? await approved.Where(x => x.Rating.HasValue).Select(x => (decimal?)x.Rating!.Value).AverageAsync(cancellationToken) : null;
+        decimal? averageRating = type == "reviews"
+            ? await approved.Where(x => x.Rating.HasValue).Select(x => (decimal?)x.Rating!.Value)
+                .AverageAsync(cancellationToken)
+            : null;
 
-        List<ProductFeedback> rows = await dbContext.ProductFeedback.AsNoTracking().Where(x => x.IdProduct == idProduct && x.FeedbackType == type &&
-                        (x.IdStatus == ProductFeedbackStatus.Approved ||
-                         (x.IdStatus == ProductFeedbackStatus.Pending && profileId.HasValue && x.IdProfile == profileId)))
-            .OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Take(500).ToListAsync(cancellationToken);
+        List<ProductFeedback> rows = await dbContext.ProductFeedback.AsNoTracking().Where(x =>
+                x.IdProduct == idProduct && x.FeedbackType == type &&
+                (x.IdStatus == ProductFeedbackStatus.Approved ||
+                 (x.IdStatus == ProductFeedbackStatus.Pending && profileId.HasValue && x.IdProfile == profileId)))
+            .OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Take(500)
+            .ToListAsync(cancellationToken);
 
         ProductFeedbackItem[] items = rows.Select(x => new ProductFeedbackItem(
             x.Id, x.DisplayName, x.FeedbackText, x.Rating, x.IdStatus, x.AdminReply,
@@ -34,7 +40,7 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
         return new ProductFeedbackSnapshot(items, totalCount, averageRating);
     }
 
-    public async Task<long?> AddAsync(int productId, long? profileId, string type, string name, string text,
+    public async Task<decimal?> AddAsync(int productId, long? profileId, string type, string name, string text,
         byte? rating, CancellationToken cancellationToken)
     {
         long? idProduct = await ActiveProductIdAsync(productId, cancellationToken);
@@ -60,7 +66,8 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
     public async Task<int?> ImportLegacyAsync(int productId, long? profileId, string type,
         IReadOnlyList<ProductFeedbackLegacyItem> items, CancellationToken cancellationToken)
     {
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+        await using var transaction =
+            await dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
         long? idProduct = await ActiveProductIdAsync(productId, cancellationToken);
         if (idProduct is null)
         {
@@ -69,7 +76,8 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
             return null;
         }
 
-        List<ProductFeedback> existing = await dbContext.ProductFeedback.Where(x => x.IdProduct == idProduct && x.FeedbackType == type).ToListAsync(cancellationToken);
+        List<ProductFeedback> existing = await dbContext.ProductFeedback
+            .Where(x => x.IdProduct == idProduct && x.FeedbackType == type).ToListAsync(cancellationToken);
         var known = existing.Select(x => (x.DisplayName, x.FeedbackText, x.CreatedAtUtc)).ToHashSet();
         var knownWithoutDate = existing.Select(x => (x.DisplayName, x.FeedbackText)).ToHashSet();
         var imported = new List<ProductFeedback>();
@@ -78,7 +86,9 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
         {
             DateTime? sourceDate = item.CreatedAt?.UtcDateTime;
             DateTime createdAt = sourceDate is null ? DateTime.UtcNow : TruncateToMilliseconds(sourceDate.Value);
-            bool duplicate = sourceDate is null ? knownWithoutDate.Contains((item.Name, item.Text)) : known.Contains((item.Name, item.Text, createdAt));
+            bool duplicate = sourceDate is null
+                ? knownWithoutDate.Contains((item.Name, item.Text))
+                : known.Contains((item.Name, item.Text, createdAt));
             if (duplicate) continue;
 
             var feedback = new ProductFeedback
@@ -109,7 +119,8 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
     }
 
     private Task<long?> ActiveProductIdAsync(int productId, CancellationToken cancellationToken) =>
-        dbContext.Products.AsNoTracking().Where(x => x.Id == productId && x.IsStoreEnabled).Select(x => (long?)x.Id).SingleOrDefaultAsync(cancellationToken);
+        dbContext.Products.AsNoTracking().Where(x => x.Id == productId && x.IsStoreEnabled).Select(x => (long?)x.Id)
+            .SingleOrDefaultAsync(cancellationToken);
 
     private static DateTime TruncateToMilliseconds(DateTime value) =>
         new(value.Ticks - value.Ticks % TimeSpan.TicksPerMillisecond, DateTimeKind.Utc);

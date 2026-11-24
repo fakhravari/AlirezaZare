@@ -3,39 +3,63 @@
     @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
     @Html.AntiForgeryToken()
     <section class="panel panel-inverse">
-        <div class="panel-heading"><h2 class="panel-title">سفارش‌ها</h2><div class="panel-heading-btn"><button class="btn btn-xs btn-icon btn-default" type="button" data-admin-refresh aria-label="بارگذاری دوباره"><i class="fa fa-rotate" aria-hidden="true"></i></button></div></div>
+        <div class="panel-heading">
+            <h2 class="panel-title">سفارش‌ها</h2>
+            <div class="panel-heading-btn">
+                <button class="btn btn-xs btn-icon btn-default" type="button" data-admin-refresh aria-label="بارگذاری دوباره">
+                    <i class="fa fa-rotate" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
         <div class="panel-body">
             <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-admin-filter>
                 <label class="visually-hidden" for="order-search">جست‌وجوی شماره سفارش یا مشتری</label>
-                <input id="order-search" class="form-control" type="search" name="q" maxlength="100" placeholder="شماره سفارش یا نام مشتری" />
+                <input id="order-search" class="form-control" type="search" name="q" maxlength="100" placeholder="شماره سفارش یا نام مشتری"/>
                 <label class="visually-hidden" for="order-status-filter">وضعیت سفارش</label>
                 <select id="order-status-filter" class="form-select" name="status" aria-label="وضعیت سفارش">
                     <option value="">همهٔ وضعیت‌ها</option>
                 </select>
                 <label class="visually-hidden" for="order-date-from">از تاریخ</label>
-                <input id="order-date-from" class="form-control" type="date" name="from" aria-label="از تاریخ" />
+                <input id="order-date-from" class="form-control" type="date" name="from" aria-label="از تاریخ"/>
                 <label class="visually-hidden" for="order-date-to">تا تاریخ</label>
-                <input id="order-date-to" class="form-control" type="date" name="to" aria-label="تا تاریخ" />
+                <input id="order-date-to" class="form-control" type="date" name="to" aria-label="تا تاریخ"/>
                 <button class="btn btn-primary" type="submit">اعمال فیلتر</button>
                 <button class="btn btn-default" type="button" data-admin-reset-filter>پاک‌کردن</button>
                 <span class="admin-record-count ms-auto small text-muted" data-admin-count aria-live="polite"></span>
             </form>
             <div class="admin-data-status small text-muted" data-admin-status role="status" aria-live="polite">در حال دریافت سفارش‌ها…</div>
-            <div class="table-responsive admin-table-wrap"><table class="table table-striped table-hover align-middle mb-0" data-admin-datatable data-admin-table-mode="server"><thead><tr><th>شماره</th><th>مشتری</th><th>وضعیت</th><th>پرداخت</th><th>تعداد</th><th>مبلغ تومان</th><th>تاریخ</th><th>جزئیات</th></tr></thead><tbody data-admin-results></tbody></table></div>
+            <div class="table-responsive admin-table-wrap">
+                <table class="table table-striped table-hover align-middle mb-0" data-admin-datatable data-admin-table-mode="server">
+                    <thead>
+                    <tr>
+                        <th>شماره</th><th>مشتری</th><th>وضعیت</th><th>پرداخت</th><th>تعداد</th><th>مبلغ تومان</th><th>تاریخ</th><th>جزئیات</th>
+                    </tr>
+                    </thead><tbody data-admin-results></tbody>
+                </table>
+            </div>
             <div class="admin-empty-state d-none p-4 text-center text-muted small" data-admin-empty>سفارشی پیدا نشد.</div>
-            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-admin-pagination hidden><button type="button" class="btn btn-default btn-sm" data-admin-page-step="-1">قبلی</button><span data-admin-page-label></span><button type="button" class="btn btn-default btn-sm" data-admin-page-step="1">بعدی</button></div>
+            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-admin-pagination hidden>
+                <button type="button" class="btn btn-default btn-sm" data-admin-page-step="-1">قبلی</button><span data-admin-page-label></span><button type="button" class="btn btn-default btn-sm" data-admin-page-step="1">بعدی</button>
+            </div>
             <p class="admin-readonly-note alert alert-info small d-flex align-items-start gap-2 mt-3">ثبت ارسال تنها پس از تأیید پرداخت و صدور حواله ممکن است.</p>
         </div>
     </section>
 </div>
 <div class="modal fade" id="order-tracking-modal" tabindex="-1" aria-labelledby="order-tracking-title" aria-hidden="true">
-    <div class="modal-dialog"><form class="modal-content" data-order-tracking-form data-admin-confirm="اطلاعات رهگیری سفارش ذخیره شود؟">
-        @Html.AntiForgeryToken()<input type="hidden" name="id" />
-        <div class="modal-header"><h2 class="modal-title fs-5" id="order-tracking-title">اطلاعات رهگیری سفارش</h2><button class="btn-close ms-0" type="button" data-bs-dismiss="modal" aria-label="بستن"></button></div>
-        <div class="modal-body">
-            <p data-order-tracking-number></p>
-            <label class="form-label" for="order-carrier">شرکت حمل</label><input id="order-carrier" name="carrier" class="form-control mb-3" maxlength="100" required />
-            <label class="form-label" for="order-tracking-code">کد رهگیری</label><input id="order-tracking-code" name="trackingCode" class="form-control" maxlength="100" required />
-        </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
-    </form></div>
+    <div class="modal-dialog">
+        <form class="modal-content" data-order-tracking-form data-admin-confirm="اطلاعات رهگیری سفارش ذخیره شود؟">
+            @Html.AntiForgeryToken()<input type="hidden" name="id"/>
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="order-tracking-title">اطلاعات رهگیری سفارش</h2><button class="btn-close ms-0" type="button" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body">
+                <p data-order-tracking-number></p>
+                <label class="form-label" for="order-carrier">شرکت حمل</label><input id="order-carrier" name="carrier" class="form-control mb-3" maxlength="100" required/>
+                <label class="form-label" for="order-tracking-code">کد رهگیری</label><input id="order-tracking-code" name="trackingCode" class="form-control" maxlength="100" required/>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button>
+            </div>
+        </form>
+    </div>
 </div>

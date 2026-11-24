@@ -45,7 +45,7 @@
 <div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
 <nav class="menu" aria-label="منوی مدیریت">
 <div class="menu-profile">
-        <div class="menu-profile-link">
+    <div class="menu-profile-link">
         <div class="menu-profile-cover with-shadow"></div>
         <div class="menu-profile-image">
             <span class="w-100 h-100 d-flex align-items-center justify-content-center rounded-circle bg-teal text-white fw-bold fs-5">ش</span>
@@ -59,7 +59,7 @@
 
 @if (canOverview)
 {
-<div class="menu-header">نمای کلی</div>
+    <div class="menu-header">نمای کلی</div>
 }
 <div class="menu-item @(isHome ? "active" : "")" hidden="@(!Can("Admin:Home:Index"))">
     <a class="menu-link" asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>
@@ -71,57 +71,145 @@
 </div>
 <details class="admin-sidebar-group" open="@systemMenuOpen" hidden="@(!canSystemAccess && !canWarehouseStructure && !canWarehouseSettings && !User.IsInRole("system.full-access"))">
     <summary class="menu-header">مدیریت سامانه</summary>
-@if (canSystemAccess)
-{
-    <div class="menu-item has-sub @(systemAccessOpen ? "active expand" : "")">
-        <a href="#system-access" class="menu-link" aria-expanded="@(systemAccessOpen ? "true" : "false")">
-            <span class="menu-icon"><i class="fa fa-users-gear" aria-hidden="true"></i></span>
-            <span class="menu-text">کاربران، نقش‌ها و مجوزها</span><span class="menu-caret"></span>
+    @if (canSystemAccess)
+    {
+        <div class="menu-item has-sub @(systemAccessOpen ? "active expand" : "")">
+            <a href="#system-access" class="menu-link" aria-expanded="@(systemAccessOpen ? "true" : "false")">
+                <span class="menu-icon">
+                    <i class="fa fa-users-gear" aria-hidden="true"></i>
+                </span>
+                <span class="menu-text">کاربران، نقش‌ها و مجوزها</span><span class="menu-caret"></span>
+            </a>
+            <div id="system-access" class="menu-submenu">
+                <div class="menu-item @(string.Equals(controller, "Users", StringComparison.OrdinalIgnoreCase) && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase) && !new[] { "roles", "permissions" }.Contains(userSection ?? "", StringComparer.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!canAdminUsers)">
+                    <a class="menu-link" asp-area="Admin" asp-controller="Users" asp-action="Index" asp-route-section="users" data-admin-nav>
+                        <span class="menu-icon">
+                            <i class="fa fa-user" aria-hidden="true"></i>
+                        </span><span class="menu-text">کاربران پنل</span>
+                    </a>
+                </div>
+                <div class="menu-item @(string.Equals(controller, "Users", StringComparison.OrdinalIgnoreCase) && string.Equals(userSection, "permissions", StringComparison.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!canAdminPermissions)">
+                    <a class="menu-link" asp-area="Admin" asp-controller="Users" asp-action="Index" asp-route-section="permissions" data-admin-nav>
+                        <span class="menu-icon">
+                            <i class="fa fa-list-check" aria-hidden="true"></i>
+                        </span><span class="menu-text">مجوزهای نقش‌ها</span>
+                    </a>
+                </div>
+                <div class="menu-item @(string.Equals(controller, "Users", StringComparison.OrdinalIgnoreCase) && string.Equals(userSection, "roles", StringComparison.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!canAdminRoles)">
+                    <a class="menu-link" asp-area="Admin" asp-controller="Users" asp-action="Index" asp-route-section="roles" data-admin-nav>
+                        <span class="menu-icon">
+                            <i class="fa fa-user-tag" aria-hidden="true"></i>
+                        </span><span class="menu-text">نقش‌ها</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (User.IsInRole("system.full-access"))
+    {
+        <div class="menu-item @(systemProblemsOpen ? "active" : "")">
+            <a class="menu-link" asp-area="Admin" asp-controller="SystemProblems" asp-action="Index" data-admin-nav>
+                <span class="menu-icon">
+                    <i class="fa fa-triangle-exclamation" aria-hidden="true"></i>
+                </span><span class="menu-text">مشکلات سیستمی</span>
+            </a>
+        </div>
+        <div class="menu-item @(siteSettingsOpen && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+            <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Index" data-admin-nav>
+                <span class="menu-icon">
+                    <i class="fa fa-sliders" aria-hidden="true"></i>
+                </span><span class="menu-text">تنظیمات عمومی</span>
+            </a>
+        </div>
+        <div class="menu-item @(IsFeature("geography") ? "active" : "")">
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="geography" data-admin-nav>
+                <span class="menu-icon">
+                    <i class="fa fa-earth-asia" aria-hidden="true"></i>
+                </span><span class="menu-text">کشورها، استان‌ها و شهرها</span>
+            </a>
+        </div>
+    }
+
+    <div class="menu-item has-sub @(systemDefinitionsOpen ? "active expand" : "")" hidden="@(!canWarehouseStructure && !canWarehouseSettings)">
+        <a href="#system-definitions" class="menu-link" aria-expanded="@(systemDefinitionsOpen ? "true" : "false")">
+            <span class="menu-icon">
+                <i class="fa fa-sitemap" aria-hidden="true"></i>
+            </span><span class="menu-text">تعاریف پایهٔ انبار</span><span class="menu-caret"></span>
         </a>
-        <div id="system-access" class="menu-submenu">
-            <div class="menu-item @(string.Equals(controller, "Users", StringComparison.OrdinalIgnoreCase) && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase) && !new[] { "roles", "permissions" }.Contains(userSection ?? "", StringComparer.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!canAdminUsers)">
-                <a class="menu-link" asp-area="Admin" asp-controller="Users" asp-action="Index" asp-route-section="users" data-admin-nav><span class="menu-icon"><i class="fa fa-user" aria-hidden="true"></i></span><span class="menu-text">کاربران پنل</span></a>
+        <div id="system-definitions" class="menu-submenu">
+            <div class="menu-item @(IsFeature("companies") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:companies"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="companies" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-building" aria-hidden="true"></i>
+                    </span><span class="menu-text">شرکت‌ها</span>
+                </a>
             </div>
-            <div class="menu-item @(string.Equals(controller, "Users", StringComparison.OrdinalIgnoreCase) && string.Equals(userSection, "permissions", StringComparison.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!canAdminPermissions)">
-                <a class="menu-link" asp-area="Admin" asp-controller="Users" asp-action="Index" asp-route-section="permissions" data-admin-nav><span class="menu-icon"><i class="fa fa-list-check" aria-hidden="true"></i></span><span class="menu-text">مجوزهای نقش‌ها</span></a>
+            <div class="menu-item @(controller == "Warehouses" ? "active" : "")" hidden="@(!Can("Warehouse:Warehouses:Index"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-warehouse" aria-hidden="true"></i>
+                    </span><span class="menu-text">انبارها</span>
+                </a>
             </div>
-            <div class="menu-item @(string.Equals(controller, "Users", StringComparison.OrdinalIgnoreCase) && string.Equals(userSection, "roles", StringComparison.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!canAdminRoles)">
-                <a class="menu-link" asp-area="Admin" asp-controller="Users" asp-action="Index" asp-route-section="roles" data-admin-nav><span class="menu-icon"><i class="fa fa-user-tag" aria-hidden="true"></i></span><span class="menu-text">نقش‌ها</span></a>
+            <div class="menu-item @(IsFeature("units") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:units"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="units" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-ruler-combined" aria-hidden="true"></i>
+                    </span><span class="menu-text">واحدهای اندازه‌گیری</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("references") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:references"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="references" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-address-book" aria-hidden="true"></i>
+                    </span><span class="menu-text">مراجع گردش انبار</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("voucher-types") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:voucher-types"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="voucher-types" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-file-lines" aria-hidden="true"></i>
+                    </span><span class="menu-text">انواع سند انبار</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("stock-owners") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:stock-owners"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="stock-owners" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-people-carry-box" aria-hidden="true"></i>
+                    </span><span class="menu-text">مالکان و طرح‌های فروش</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("sales-plan-mapping") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:sales-plan-mapping"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="sales-plan-mapping" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-link" aria-hidden="true"></i>
+                    </span><span class="menu-text">تخصیص مالکان به انبارها</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("variant-names") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:variant-names"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="variant-names" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-sitemap" aria-hidden="true"></i>
+                    </span><span class="menu-text">تنوع محصول</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("variants") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:variants"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="variants" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-layer-group" aria-hidden="true"></i>
+                    </span><span class="menu-text">اتصال تنوع به محصول</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("product-units") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:product-units"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="product-units" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-scale-balanced" aria-hidden="true"></i>
+                    </span><span class="menu-text">تاریخچهٔ واحد و ضریب کالا</span>
+                </a>
             </div>
         </div>
     </div>
-}
-
-@if (User.IsInRole("system.full-access"))
-{
-    <div class="menu-item @(systemProblemsOpen ? "active" : "")"><a class="menu-link" asp-area="Admin" asp-controller="SystemProblems" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-triangle-exclamation" aria-hidden="true"></i></span><span class="menu-text">مشکلات سیستمی</span></a></div>
-    <div class="menu-item @(siteSettingsOpen && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
-        <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Index" data-admin-nav>
-            <span class="menu-icon"><i class="fa fa-sliders" aria-hidden="true"></i></span><span class="menu-text">تنظیمات عمومی</span>
-        </a>
-    </div>
-    <div class="menu-item @(IsFeature("geography") ? "active" : "")">
-        <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="geography" data-admin-nav>
-            <span class="menu-icon"><i class="fa fa-earth-asia" aria-hidden="true"></i></span><span class="menu-text">کشورها، استان‌ها و شهرها</span>
-        </a>
-    </div>
-}
-
-<div class="menu-item has-sub @(systemDefinitionsOpen ? "active expand" : "")" hidden="@(!canWarehouseStructure && !canWarehouseSettings)">
-    <a href="#system-definitions" class="menu-link" aria-expanded="@(systemDefinitionsOpen ? "true" : "false")"><span class="menu-icon"><i class="fa fa-sitemap" aria-hidden="true"></i></span><span class="menu-text">تعاریف پایهٔ انبار</span><span class="menu-caret"></span></a>
-    <div id="system-definitions" class="menu-submenu">
-        <div class="menu-item @(IsFeature("companies") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:companies"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="companies" data-admin-nav><span class="menu-icon"><i class="fa fa-building" aria-hidden="true"></i></span><span class="menu-text">شرکت‌ها</span></a></div>
-        <div class="menu-item @(controller == "Warehouses" ? "active" : "")" hidden="@(!Can("Warehouse:Warehouses:Index"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-warehouse" aria-hidden="true"></i></span><span class="menu-text">انبارها</span></a></div>
-        <div class="menu-item @(IsFeature("units") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:units"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="units" data-admin-nav><span class="menu-icon"><i class="fa fa-ruler-combined" aria-hidden="true"></i></span><span class="menu-text">واحدهای اندازه‌گیری</span></a></div>
-        <div class="menu-item @(IsFeature("references") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:references"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="references" data-admin-nav><span class="menu-icon"><i class="fa fa-address-book" aria-hidden="true"></i></span><span class="menu-text">مراجع گردش انبار</span></a></div>
-        <div class="menu-item @(IsFeature("voucher-types") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:voucher-types"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="voucher-types" data-admin-nav><span class="menu-icon"><i class="fa fa-file-lines" aria-hidden="true"></i></span><span class="menu-text">انواع سند انبار</span></a></div>
-        <div class="menu-item @(IsFeature("stock-owners") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:stock-owners"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="stock-owners" data-admin-nav><span class="menu-icon"><i class="fa fa-people-carry-box" aria-hidden="true"></i></span><span class="menu-text">مالکان و طرح‌های فروش</span></a></div>
-        <div class="menu-item @(IsFeature("sales-plan-mapping") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:sales-plan-mapping"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="sales-plan-mapping" data-admin-nav><span class="menu-icon"><i class="fa fa-link" aria-hidden="true"></i></span><span class="menu-text">تخصیص مالکان به انبارها</span></a></div>
-        <div class="menu-item @(IsFeature("variant-names") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:variant-names"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="variant-names" data-admin-nav><span class="menu-icon"><i class="fa fa-sitemap" aria-hidden="true"></i></span><span class="menu-text">تنوع محصول</span></a></div>
-        <div class="menu-item @(IsFeature("variants") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:variants"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="variants" data-admin-nav><span class="menu-icon"><i class="fa fa-layer-group" aria-hidden="true"></i></span><span class="menu-text">اتصال تنوع به محصول</span></a></div>
-        <div class="menu-item @(IsFeature("product-units") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:product-units"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="product-units" data-admin-nav><span class="menu-icon"><i class="fa fa-scale-balanced" aria-hidden="true"></i></span><span class="menu-text">تاریخچهٔ واحد و ضریب کالا</span></a></div>
-    </div>
-</div>
 
 </details>
 <details class="admin-sidebar-group" hidden="@(!canStore)">
@@ -144,35 +232,51 @@
     <div id="store-catalog" class="menu-submenu">
         <div class="menu-item @(IsFeature("home-collection") ? "active" : "")" hidden="@(!User.IsInRole("system.full-access"))">
             <a class="menu-link" asp-area="Store" asp-controller="HomeCollection" asp-action="Index" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-star" aria-hidden="true"></i></span><span class="menu-text">محصولات منتخب صفحهٔ اصلی</span>
+                <span class="menu-icon">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </span><span class="menu-text">محصولات منتخب صفحهٔ اصلی</span>
             </a>
         </div>
         <div class="menu-item @(IsFeature("categories") ? "active" : "")" hidden="@(!Can("Store:Catalog:Categories"))">
             <a class="menu-link" asp-area="Store" asp-controller="Catalog" asp-action="Categories" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-sitemap" aria-hidden="true"></i></span><span class="menu-text">دسته‌بندی‌ها</span>
+                <span class="menu-icon">
+                    <i class="fa fa-sitemap" aria-hidden="true"></i>
+                </span><span class="menu-text">دسته‌بندی‌ها</span>
             </a>
         </div>
         <div class="menu-item @(IsFeature("brands") ? "active" : "")" hidden="@(!Can("Store:Catalog:Brands"))">
             <a class="menu-link" asp-area="Store" asp-controller="Catalog" asp-action="Brands" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-tags" aria-hidden="true"></i></span><span class="menu-text">برندها</span>
+                <span class="menu-icon">
+                    <i class="fa fa-tags" aria-hidden="true"></i>
+                </span><span class="menu-text">برندها</span>
             </a>
         </div>
         <div class="menu-item @(IsFeature("attributes") ? "active" : "")" hidden="@(!Can("Store:Catalog:Attributes"))">
             <a class="menu-link" asp-area="Store" asp-controller="Catalog" asp-action="Attributes" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-list-check" aria-hidden="true"></i></span><span class="menu-text">ویژگی‌های کالا</span>
+                <span class="menu-icon">
+                    <i class="fa fa-list-check" aria-hidden="true"></i>
+                </span><span class="menu-text">ویژگی‌های کالا</span>
             </a>
         </div>
         <div class="menu-item @(IsFeature("badges") ? "active" : "")" hidden="@(!Can("Store:Catalog:Badges"))">
-            <a class="menu-link" asp-area="Store" asp-controller="Catalog" asp-action="Badges" data-admin-nav><span class="menu-icon"><i class="fa fa-tag" aria-hidden="true"></i></span><span class="menu-text">نشان‌های کالا</span></a>
+            <a class="menu-link" asp-area="Store" asp-controller="Catalog" asp-action="Badges" data-admin-nav>
+                <span class="menu-icon">
+                    <i class="fa fa-tag" aria-hidden="true"></i>
+                </span><span class="menu-text">نشان‌های کالا</span>
+            </a>
         </div>
         <div class="menu-item @(IsFeature("products") ? "active" : "")" hidden="@(!Can("Store:Catalog:Products"))">
             <a class="menu-link" asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-box-open" aria-hidden="true"></i></span><span class="menu-text">کالاها و پیش‌نویس‌ها</span>
+                <span class="menu-icon">
+                    <i class="fa fa-box-open" aria-hidden="true"></i>
+                </span><span class="menu-text">کالاها و پیش‌نویس‌ها</span>
             </a>
         </div>
         <div class="menu-item @(IsFeature("payment-institutions") ? "active" : "")" hidden="@(!User.IsInRole("system.full-access"))">
             <a class="menu-link" asp-area="Store" asp-controller="Catalog" asp-action="PaymentInstitutions" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-credit-card" aria-hidden="true"></i></span><span class="menu-text">مؤسسه‌های پرداخت</span>
+                <span class="menu-icon">
+                    <i class="fa fa-credit-card" aria-hidden="true"></i>
+                </span><span class="menu-text">مؤسسه‌های پرداخت</span>
             </a>
         </div>
     </div>
@@ -189,41 +293,71 @@
         @if (User.IsInRole("system.full-access"))
         {
             <div class="menu-item @(IsFeature("paid-orders-dispatch") ? "active" : "")">
-                <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="paid-orders-dispatch" data-admin-nav><span class="menu-icon"><i class="fa fa-truck-fast" aria-hidden="true"></i></span><span class="menu-text">صدور حوالهٔ سفارش‌های پرداخت‌شده</span></a>
+                <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="paid-orders-dispatch" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-truck-fast" aria-hidden="true"></i>
+                    </span><span class="menu-text">صدور حوالهٔ سفارش‌های پرداخت‌شده</span>
+                </a>
             </div>
         }
         <div class="menu-item @(IsFeature("orders") ? "active" : "")" hidden="@(!User.IsInRole("system.full-access"))">
             <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="orders" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-receipt" aria-hidden="true"></i></span><span class="menu-text">سفارش‌ها</span>
+                <span class="menu-icon">
+                    <i class="fa fa-receipt" aria-hidden="true"></i>
+                </span><span class="menu-text">سفارش‌ها</span>
             </a>
         </div>
     </div>
 </div>
 <div class="menu-item has-sub @(promotionsOpen ? "active expand" : "")" hidden="@(!Can("Store:Features:Index:promotions"))">
     <a href="#store-promotions" class="menu-link" aria-expanded="@(promotionsOpen ? "true" : "false")">
-        <span class="menu-icon"><i class="fa fa-percent" aria-hidden="true"></i></span>
+        <span class="menu-icon">
+            <i class="fa fa-percent" aria-hidden="true"></i>
+        </span>
         <span class="menu-text">طرح‌های فروش و تخفیف</span><span class="menu-caret"></span>
     </a>
     <div id="store-promotions" class="menu-submenu">
         @if (User.IsInRole("system.full-access"))
         {
-            <div class="menu-item @(IsFeature("coupons") ? "active" : "")"><a class="menu-link" asp-area="Store" asp-controller="Coupons" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-ticket" aria-hidden="true"></i></span><span class="menu-text">کدهای تخفیف</span></a></div>
+            <div class="menu-item @(IsFeature("coupons") ? "active" : "")">
+                <a class="menu-link" asp-area="Store" asp-controller="Coupons" asp-action="Index" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-ticket" aria-hidden="true"></i>
+                    </span><span class="menu-text">کدهای تخفیف</span>
+                </a>
+            </div>
         }
         <div class="menu-item @(promotionsOpen && Context.Request.Query["section"] == "plans" ? "active" : "")" hidden="@(!User.IsInRole("system.full-access"))">
-            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="plans" data-admin-nav><span class="menu-icon"><i class="fa fa-calendar-days" aria-hidden="true"></i></span><span class="menu-text">مدیریت طرح‌ها</span></a>
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="plans" data-admin-nav>
+                <span class="menu-icon">
+                    <i class="fa fa-calendar-days" aria-hidden="true"></i>
+                </span><span class="menu-text">مدیریت طرح‌ها</span>
+            </a>
         </div>
         <div class="menu-item @(promotionsOpen && Context.Request.Query["section"] == "offers" ? "active" : "")">
-            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="offers" data-admin-nav><span class="menu-icon"><i class="fa fa-tags" aria-hidden="true"></i></span><span class="menu-text">پیشنهادهای کالا</span></a>
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="offers" data-admin-nav>
+                <span class="menu-icon">
+                    <i class="fa fa-tags" aria-hidden="true"></i>
+                </span><span class="menu-text">پیشنهادهای کالا</span>
+            </a>
         </div>
         <div class="menu-item @(promotionsOpen && Context.Request.Query["section"] == "variant-prices" ? "active" : "")">
-            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="variant-prices" data-admin-nav><span class="menu-icon"><i class="fa fa-money-bill-wave" aria-hidden="true"></i></span><span class="menu-text">قیمت تنوع‌ها</span></a>
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="variant-prices" data-admin-nav>
+                <span class="menu-icon">
+                    <i class="fa fa-money-bill-wave" aria-hidden="true"></i>
+                </span><span class="menu-text">قیمت تنوع‌ها</span>
+            </a>
         </div>
         <div class="menu-item @(promotionsOpen && Context.Request.Query["section"] == "history" ? "active" : "")">
-            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="history" data-admin-nav><span class="menu-icon"><i class="fa fa-clock-rotate-left" aria-hidden="true"></i></span><span class="menu-text">تاریخچهٔ قیمت</span></a>
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="history" data-admin-nav>
+                <span class="menu-icon">
+                    <i class="fa fa-clock-rotate-left" aria-hidden="true"></i>
+                </span><span class="menu-text">تاریخچهٔ قیمت</span>
+            </a>
         </div>
     </div>
 </div>
-    <div class="menu-item has-sub @(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "testimonials", "questions", "contact-messages", "account-messages", "newsletter-subscribers" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "active expand" : "")" hidden="@(!canStorePeople)">
+<div class="menu-item has-sub @(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "testimonials", "questions", "contact-messages", "account-messages", "newsletter-subscribers" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "active expand" : "")" hidden="@(!canStorePeople)">
     <a href="#store-customers" class="menu-link" aria-expanded="@(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "testimonials", "questions", "contact-messages", "account-messages", "newsletter-subscribers" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "true" : "false")">
         <span class="menu-icon">
             <i class="fa fa-users" aria-hidden="true"></i>
@@ -234,124 +368,214 @@
     <div id="store-customers" class="menu-submenu">
         <div class="menu-item @(IsFeature("customers") ? "active" : "")" hidden="@(!User.IsInRole("system.full-access"))">
             <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="customers" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-users" aria-hidden="true"></i></span><span class="menu-text">مشتریان</span>
+                <span class="menu-icon">
+                    <i class="fa fa-users" aria-hidden="true"></i>
+                </span><span class="menu-text">مشتریان</span>
             </a>
         </div>
         <div class="menu-item @(IsFeature("reviews") ? "active" : "")" hidden="@(!Can("Store:Features:Index:reviews"))">
             <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="reviews" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-comments" aria-hidden="true"></i></span><span class="menu-text">دیدگاه‌های محصول</span>
+                <span class="menu-icon">
+                    <i class="fa fa-comments" aria-hidden="true"></i>
+                </span><span class="menu-text">دیدگاه‌های محصول</span>
             </a>
         </div>
         <div class="menu-item @(IsFeature("testimonials") ? "active" : "")" hidden="@(!Can("Store:Features:Index:testimonials"))">
             <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="testimonials" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-image" aria-hidden="true"></i></span><span class="menu-text">دیدگاه‌های صفحهٔ نخست</span>
+                <span class="menu-icon">
+                    <i class="fa fa-image" aria-hidden="true"></i>
+                </span><span class="menu-text">دیدگاه‌های صفحهٔ نخست</span>
             </a>
         </div>
         <div class="menu-item @(IsFeature("questions") ? "active" : "")" hidden="@(!Can("Store:Features:Index:questions"))">
             <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="questions" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-circle-question" aria-hidden="true"></i></span><span class="menu-text">پرسش‌های محصول</span>
+                <span class="menu-icon">
+                    <i class="fa fa-circle-question" aria-hidden="true"></i>
+                </span><span class="menu-text">پرسش‌های محصول</span>
             </a>
         </div>
         <div class="menu-item @(IsFeature("contact-messages") ? "active" : "")" hidden="@(!Can("Store:Features:Index:contact-messages"))">
-            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="contact-messages" data-admin-nav><span class="menu-icon"><i class="fa fa-envelope" aria-hidden="true"></i></span><span class="menu-text">پیام‌های فرم تماس</span></a>
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="contact-messages" data-admin-nav>
+                <span class="menu-icon">
+                    <i class="fa fa-envelope" aria-hidden="true"></i>
+                </span><span class="menu-text">پیام‌های فرم تماس</span>
+            </a>
         </div>
-        <div class="menu-item @(IsFeature("newsletter-subscribers") ? "active" : "")" hidden="@(!Can("Store:Features:Index:newsletter-subscribers"))"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="newsletter-subscribers" data-admin-nav><span class="menu-icon"><i class="fa fa-newspaper" aria-hidden="true"></i></span><span class="menu-text">اعضای خبرنامه</span></a></div>
+        <div class="menu-item @(IsFeature("newsletter-subscribers") ? "active" : "")" hidden="@(!Can("Store:Features:Index:newsletter-subscribers"))">
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="newsletter-subscribers" data-admin-nav>
+                <span class="menu-icon">
+                    <i class="fa fa-newspaper" aria-hidden="true"></i>
+                </span><span class="menu-text">اعضای خبرنامه</span>
+            </a>
+        </div>
         <div class="menu-item @(IsFeature("account-messages") ? "active" : "")" hidden="@(!Can("Store:Features:Index:account-messages"))">
-            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="account-messages" data-admin-nav><span class="menu-icon"><i class="fa fa-envelope-open-text" aria-hidden="true"></i></span><span class="menu-text">پیام‌های حساب مشتریان</span></a>
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="account-messages" data-admin-nav>
+                <span class="menu-icon">
+                    <i class="fa fa-envelope-open-text" aria-hidden="true"></i>
+                </span><span class="menu-text">پیام‌های حساب مشتریان</span>
+            </a>
         </div>
     </div>
 </div>
 <div class="menu-item @(IsFeature("reports") ? "active" : "")" hidden="@(!canStoreReports)">
     <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="reports" data-admin-nav>
-        <span class="menu-icon"><i class="fa fa-chart-column" aria-hidden="true"></i></span><span class="menu-text">گزارش‌های فروشگاه</span>
+        <span class="menu-icon">
+            <i class="fa fa-chart-column" aria-hidden="true"></i>
+        </span><span class="menu-text">گزارش‌های فروشگاه</span>
     </a>
 </div>
 </details>
 <details class="admin-sidebar-group" hidden="@(!User.IsInRole("system.full-access"))">
     <summary class="menu-header">محتوا</summary>
-@if (User.IsInRole("system.full-access"))
-{
-    <div class="menu-item has-sub @(contentMenuOpen ? "active expand" : "")">
-        <a href="#content-menu" class="menu-link" aria-expanded="@(contentMenuOpen ? "true" : "false")">
-            <span class="menu-icon"><i class="fa fa-file-lines" aria-hidden="true"></i></span><span class="menu-text">مدیریت محتوا</span><span class="menu-caret"></span>
-        </a>
-        <div id="content-menu" class="menu-submenu">
-            <div class="menu-item @(sliderOpen ? "active" : "")">
-                <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Slider" data-admin-nav>
-                    <span class="menu-icon"><i class="fa fa-images" aria-hidden="true"></i></span><span class="menu-text">اسلایدر</span>
-                </a>
+    @if (User.IsInRole("system.full-access"))
+    {
+        <div class="menu-item has-sub @(contentMenuOpen ? "active expand" : "")">
+            <a href="#content-menu" class="menu-link" aria-expanded="@(contentMenuOpen ? "true" : "false")">
+                <span class="menu-icon">
+                    <i class="fa fa-file-lines" aria-hidden="true"></i>
+                </span><span class="menu-text">مدیریت محتوا</span><span class="menu-caret"></span>
+            </a>
+            <div id="content-menu" class="menu-submenu">
+                <div class="menu-item @(sliderOpen ? "active" : "")">
+                    <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Slider" data-admin-nav>
+                        <span class="menu-icon">
+                            <i class="fa fa-images" aria-hidden="true"></i>
+                        </span><span class="menu-text">اسلایدر</span>
+                    </a>
+                </div>
+                <div class="menu-item @(IsFeature("content") && contentSection == "faq" ? "active" : "")">
+                    <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="faq" data-admin-nav>
+                        <span class="menu-icon">
+                            <i class="fa fa-circle-question" aria-hidden="true"></i>
+                        </span><span class="menu-text">پرسش‌های متداول</span>
+                    </a>
+                </div>
+                <div class="menu-item @(IsFeature("content") && contentSection == "magazine" ? "active" : "")">
+                    <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="magazine" data-admin-nav>
+                        <span class="menu-icon">
+                            <i class="fa fa-newspaper" aria-hidden="true"></i>
+                        </span><span class="menu-text">مقاله‌های مجله</span>
+                    </a>
+                </div>
+                <div class="menu-item @(IsFeature("content") && contentSection == "pages" ? "active" : "")">
+                    <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="pages" data-admin-nav>
+                        <span class="menu-icon">
+                            <i class="fa fa-file-lines" aria-hidden="true"></i>
+                        </span><span class="menu-text">صفحه‌های خدماتی</span>
+                    </a>
+                </div>
             </div>
-            <div class="menu-item @(IsFeature("content") && contentSection == "faq" ? "active" : "")"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="faq" data-admin-nav><span class="menu-icon"><i class="fa fa-circle-question" aria-hidden="true"></i></span><span class="menu-text">پرسش‌های متداول</span></a></div>
-            <div class="menu-item @(IsFeature("content") && contentSection == "magazine" ? "active" : "")"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="magazine" data-admin-nav><span class="menu-icon"><i class="fa fa-newspaper" aria-hidden="true"></i></span><span class="menu-text">مقاله‌های مجله</span></a></div>
-            <div class="menu-item @(IsFeature("content") && contentSection == "pages" ? "active" : "")"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="pages" data-admin-nav><span class="menu-icon"><i class="fa fa-file-lines" aria-hidden="true"></i></span><span class="menu-text">صفحه‌های خدماتی</span></a></div>
         </div>
-    </div>
-}
+    }
 
 </details>
 <details class="admin-sidebar-group" hidden="@(!canWarehouse)">
-<summary class="menu-header">مدیریت انبار</summary>
-<div class="menu-item @(inWarehouse && controller == "Dashboard" ? "active" : "")" hidden="@(!Can("Warehouse:Dashboard:Index"))">
-    <a class="menu-link" asp-area="Warehouse" asp-controller="Dashboard" asp-action="Index" data-admin-nav>
-        <span class="menu-icon">
-            <i class="fa fa-chart-pie" aria-hidden="true"></i>
-        </span><span class="menu-text">نمای کلی انبار</span>
-    </a>
-</div>
-<div class="menu-item has-sub @(operationsOpen ? "active expand" : "")" hidden="@(!canWarehouseOperations)">
-    <a href="#warehouse-operations" class="menu-link" aria-expanded="@(operationsOpen ? "true" : "false")">
-        <span class="menu-icon">
-            <i class="fa fa-arrows-rotate" aria-hidden="true"></i>
-        </span>
-        <span class="menu-text">عملیات انبار</span>
-        <span class="menu-caret"></span>
-    </a>
-    <div id="warehouse-operations" class="menu-submenu">
-        <div class="menu-item @(IsFeature("order-confirmation") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:order-confirmation"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="order-confirmation" data-admin-nav><span class="menu-icon"><i class="fa fa-clipboard-check" aria-hidden="true"></i></span><span class="menu-text">صدور حوالهٔ سفارش‌های پرداخت‌شده</span></a></div>
-        <div class="menu-item @(IsFeature("receipts") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:receipts"))">
-            <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="receipts" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-file-import" aria-hidden="true"></i></span><span class="menu-text">رسید ورود کالا</span>
-            </a>
-        </div>
-        <div class="menu-item @(IsFeature("dispatches") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:dispatches"))">
-            <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="dispatches" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-file-export" aria-hidden="true"></i></span><span class="menu-text">حوالهٔ خروج کالا</span>
-            </a>
-        </div>
-        <div class="menu-item @(IsFeature("transfers") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:transfers"))">
-            <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="transfers" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-right-left" aria-hidden="true"></i></span><span class="menu-text">انتقال بین انبارها</span>
-            </a>
-        </div>
-        <div class="menu-item @(IsFeature("returns") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:returns"))">
-            <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="returns" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-rotate-left" aria-hidden="true"></i></span><span class="menu-text">مرجوعی کالا</span>
-            </a>
-        </div>
-        <div class="menu-item @(IsFeature("stocktake") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:stocktake"))">
-            <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="stocktake" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-clipboard-check" aria-hidden="true"></i></span><span class="menu-text">انبارگردانی دستی</span>
-            </a>
-        </div>
-        <div class="menu-item @(IsFeature("adjustments") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:adjustments"))">
-            <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="adjustments" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-sliders" aria-hidden="true"></i></span><span class="menu-text">اصلاح موجودی</span>
-            </a>
-        </div>
+    <summary class="menu-header">مدیریت انبار</summary>
+    <div class="menu-item @(inWarehouse && controller == "Dashboard" ? "active" : "")" hidden="@(!Can("Warehouse:Dashboard:Index"))">
+        <a class="menu-link" asp-area="Warehouse" asp-controller="Dashboard" asp-action="Index" data-admin-nav>
+            <span class="menu-icon">
+                <i class="fa fa-chart-pie" aria-hidden="true"></i>
+            </span><span class="menu-text">نمای کلی انبار</span>
+        </a>
+    </div>
+    <div class="menu-item has-sub @(operationsOpen ? "active expand" : "")" hidden="@(!canWarehouseOperations)">
+        <a href="#warehouse-operations" class="menu-link" aria-expanded="@(operationsOpen ? "true" : "false")">
+            <span class="menu-icon">
+                <i class="fa fa-arrows-rotate" aria-hidden="true"></i>
+            </span>
+            <span class="menu-text">عملیات انبار</span>
+            <span class="menu-caret"></span>
+        </a>
+        <div id="warehouse-operations" class="menu-submenu">
+            <div class="menu-item @(IsFeature("order-confirmation") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:order-confirmation"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="order-confirmation" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-clipboard-check" aria-hidden="true"></i>
+                    </span><span class="menu-text">صدور حوالهٔ سفارش‌های پرداخت‌شده</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("receipts") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:receipts"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="receipts" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-file-import" aria-hidden="true"></i>
+                    </span><span class="menu-text">رسید ورود کالا</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("dispatches") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:dispatches"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="dispatches" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-file-export" aria-hidden="true"></i>
+                    </span><span class="menu-text">حوالهٔ خروج کالا</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("transfers") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:transfers"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="transfers" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-right-left" aria-hidden="true"></i>
+                    </span><span class="menu-text">انتقال بین انبارها</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("returns") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:returns"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="returns" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-rotate-left" aria-hidden="true"></i>
+                    </span><span class="menu-text">مرجوعی کالا</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("stocktake") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:stocktake"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="stocktake" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-clipboard-check" aria-hidden="true"></i>
+                    </span><span class="menu-text">انبارگردانی دستی</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("adjustments") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:adjustments"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="adjustments" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-sliders" aria-hidden="true"></i>
+                    </span><span class="menu-text">اصلاح موجودی</span>
+                </a>
+            </div>
 
+        </div>
     </div>
-</div>
-<div class="menu-item has-sub @(reportsOpen ? "active expand" : "")" hidden="@(!canWarehouseReports)">
-    <a href="#warehouse-reports" class="menu-link" aria-expanded="@(reportsOpen ? "true" : "false")">
-        <span class="menu-icon"><i class="fa fa-chart-bar" aria-hidden="true"></i></span><span class="menu-text">گزارش‌های انبار</span><span class="menu-caret"></span>
-    </a>
-    <div id="warehouse-reports" class="menu-submenu">
-        <div class="menu-item @(inWarehouse && string.Equals(controller, "Stock", StringComparison.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!Can("Warehouse:Stock:Index"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-boxes-stacked" aria-hidden="true"></i></span><span class="menu-text">موجودی انبار</span></a></div>
-        <div class="menu-item @(IsFeature("movements") && movementSection == "stock" ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav><span class="menu-icon"><i class="fa fa-arrows-rotate" aria-hidden="true"></i></span><span class="menu-text">گردش موجودی</span></a></div>
-        <div class="menu-item @(IsFeature("movements") && movementSection == "summary" ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" asp-route-section="summary" data-admin-nav><span class="menu-icon"><i class="fa fa-chart-column" aria-hidden="true"></i></span><span class="menu-text">خلاصهٔ گردش کالا</span></a></div>
-        <div class="menu-item @(IsFeature("movements") && movementSection == "audit" ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" asp-route-section="audit" data-admin-nav><span class="menu-icon"><i class="fa fa-clock-rotate-left" aria-hidden="true"></i></span><span class="menu-text">تاریخچهٔ تغییر سند</span></a></div>
+    <div class="menu-item has-sub @(reportsOpen ? "active expand" : "")" hidden="@(!canWarehouseReports)">
+        <a href="#warehouse-reports" class="menu-link" aria-expanded="@(reportsOpen ? "true" : "false")">
+            <span class="menu-icon">
+                <i class="fa fa-chart-bar" aria-hidden="true"></i>
+            </span><span class="menu-text">گزارش‌های انبار</span><span class="menu-caret"></span>
+        </a>
+        <div id="warehouse-reports" class="menu-submenu">
+            <div class="menu-item @(inWarehouse && string.Equals(controller, "Stock", StringComparison.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!Can("Warehouse:Stock:Index"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-boxes-stacked" aria-hidden="true"></i>
+                    </span><span class="menu-text">موجودی انبار</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("movements") && movementSection == "stock" ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-arrows-rotate" aria-hidden="true"></i>
+                    </span><span class="menu-text">گردش موجودی</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("movements") && movementSection == "summary" ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" asp-route-section="summary" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-chart-column" aria-hidden="true"></i>
+                    </span><span class="menu-text">خلاصهٔ گردش کالا</span>
+                </a>
+            </div>
+            <div class="menu-item @(IsFeature("movements") && movementSection == "audit" ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" asp-route-section="audit" data-admin-nav>
+                    <span class="menu-icon">
+                        <i class="fa fa-clock-rotate-left" aria-hidden="true"></i>
+                    </span><span class="menu-text">تاریخچهٔ تغییر سند</span>
+                </a>
+            </div>
+        </div>
     </div>
-</div>
 </details>
 <div class="menu-divider"></div>
 <div class="menu-item">

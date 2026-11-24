@@ -26,6 +26,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<WarehouseEntity> Warehouses => Set<WarehouseEntity>();
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<SalesPlanReference> SalesPlanReferences => Set<SalesPlanReference>();
+    public DbSet<WarehouseStockOwnerType> WarehouseStockOwnerTypes => Set<WarehouseStockOwnerType>();
+    public DbSet<WarehouseSchemaMigration> WarehouseSchemaMigrations => Set<WarehouseSchemaMigration>();
     public DbSet<WarehouseStockOwner> WarehouseStockOwners => Set<WarehouseStockOwner>();
     public DbSet<StockBalance> StockBalances => Set<StockBalance>();
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
@@ -69,20 +71,36 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreCatalogFeature> StoreCatalogFeatures => Set<StoreCatalogFeature>();
     public DbSet<StoreCatalogFeatureValue> StoreCatalogFeatureValues => Set<StoreCatalogFeatureValue>();
     public DbSet<StoreCategoryCatalogFeature> StoreCategoryCatalogFeatures => Set<StoreCategoryCatalogFeature>();
-    public DbSet<StoreProductCatalogFeatureValue> StoreProductCatalogFeatureValues => Set<StoreProductCatalogFeatureValue>();
-    public DbSet<StoreVariantCatalogFeatureValue> StoreVariantCatalogFeatureValues => Set<StoreVariantCatalogFeatureValue>();
+
+    public DbSet<StoreProductCatalogFeatureValue> StoreProductCatalogFeatureValues =>
+        Set<StoreProductCatalogFeatureValue>();
+
+    public DbSet<StoreVariantCatalogFeatureValue> StoreVariantCatalogFeatureValues =>
+        Set<StoreVariantCatalogFeatureValue>();
+
     public DbSet<StoreProductColor> StoreProductColors => Set<StoreProductColor>();
-    public DbSet<StoreProductSpecificationValue> StoreProductSpecificationValues => Set<StoreProductSpecificationValue>();
+
+    public DbSet<StoreProductSpecificationValue> StoreProductSpecificationValues =>
+        Set<StoreProductSpecificationValue>();
+
     public DbSet<StoreProductCollection> StoreProductCollections => Set<StoreProductCollection>();
     public DbSet<StoreProductCollectionItem> StoreProductCollectionItems => Set<StoreProductCollectionItem>();
     public DbSet<StoreHomeCategoryTab> StoreHomeCategoryTabs => Set<StoreHomeCategoryTab>();
     public DbSet<StoreCategory> StoreCategories => Set<StoreCategory>();
     public DbSet<StoreProductSalesPlanOffer> StoreProductSalesPlanOffers => Set<StoreProductSalesPlanOffer>();
-    public DbSet<StoreProductVariantSalesPlanOffer> StoreProductVariantSalesPlanOffers => Set<StoreProductVariantSalesPlanOffer>();
+
+    public DbSet<StoreProductVariantSalesPlanOffer> StoreProductVariantSalesPlanOffers =>
+        Set<StoreProductVariantSalesPlanOffer>();
+
     public DbSet<StoreAccessory> StoreAccessories => Set<StoreAccessory>();
     public DbSet<StoreProductAccessory> StoreProductAccessories => Set<StoreProductAccessory>();
-    public DbSet<StoreProductSalesPlanOfferAccessory> StoreProductSalesPlanOfferAccessories => Set<StoreProductSalesPlanOfferAccessory>();
-    public DbSet<StoreProductSalesPlanOfferSpecificationOverride> StoreProductSalesPlanOfferSpecificationOverrides => Set<StoreProductSalesPlanOfferSpecificationOverride>();
+
+    public DbSet<StoreProductSalesPlanOfferAccessory> StoreProductSalesPlanOfferAccessories =>
+        Set<StoreProductSalesPlanOfferAccessory>();
+
+    public DbSet<StoreProductSalesPlanOfferSpecificationOverride> StoreProductSalesPlanOfferSpecificationOverrides =>
+        Set<StoreProductSalesPlanOfferSpecificationOverride>();
+
     public DbSet<StorePriceVersion> StorePriceVersions => Set<StorePriceVersion>();
     public DbSet<StoreOrderAccessory> StoreOrderAccessories => Set<StoreOrderAccessory>();
     public DbSet<StoreOrderItemAmount> StoreOrderItemAmounts => Set<StoreOrderItemAmount>();
@@ -115,95 +133,107 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreOrderPreviousNumber> StoreOrderPreviousNumbers => Set<StoreOrderPreviousNumber>();
     public DbSet<StoreNewsletterSubscriber> StoreNewsletterSubscribers => Set<StoreNewsletterSubscriber>();
     public DbSet<StoreContactMessage> StoreContactMessages => Set<StoreContactMessage>();
-    public DbSet<StoreOrderShipmentTrackingHistory> StoreOrderShipmentTrackingHistories => Set<StoreOrderShipmentTrackingHistory>();
+
+    public DbSet<StoreOrderShipmentTrackingHistory> StoreOrderShipmentTrackingHistories =>
+        Set<StoreOrderShipmentTrackingHistory>();
+
+    public DbSet<StoreSchemaMigration> StoreSchemaMigrations => Set<StoreSchemaMigration>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Keep CLR/API names stable while using concise foreign-key names in SQL.
-        modelBuilder.Entity<AccountCartItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
-        modelBuilder.Entity<StoreCustomerOrderReference>().Property(x => x.IdVoucher).HasColumnName("IdVoucher");
-        modelBuilder.Entity<StoreCustomerOrderItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
-        modelBuilder.Entity<StorePriceVersion>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
-        modelBuilder.Entity<InventoryItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
-        modelBuilder.Entity<StoreProductVariantSalesPlanOffer>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
-        modelBuilder.Entity<StoreProductCollectionItem>().Property(x => x.IdProductCollection).HasColumnName("IdCollection");
-        modelBuilder.Entity<StoreProductSalesPlanOfferAccessory>().Property(x => x.IdProductSalesPlanOffer).HasColumnName("IdOffer");
-        modelBuilder.Entity<StoreProductSalesPlanOfferSpecificationOverride>().Property(x => x.IdProductSalesPlanOffer).HasColumnName("IdOffer");
         modelBuilder.Entity<StoreSlider>(entity =>
         {
             entity.ToTable("Slider", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Title).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.Url).HasMaxLength(1000).IsRequired();
-            entity.Property(x => x.ImagePath).HasMaxLength(1000).IsRequired();
         });
         modelBuilder.Entity<MagazineArticle>(entity =>
         {
             entity.ToTable("MagazineArticle", "Mag");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.ArticleKey).HasMaxLength(150).IsRequired();
-            entity.Property(x => x.IdCategory).HasColumnName("IdCategory");
-            entity.Property(x => x.Title).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.Summary).HasMaxLength(1500).IsRequired();
-            entity.Property(x => x.Author).HasMaxLength(200);
-            entity.Property(x => x.HeroImagePath).HasMaxLength(1000);
-            entity.Property(x => x.ContentImagePath).HasMaxLength(1000);
-            entity.Property(x => x.Kicker).HasMaxLength(300);
-            entity.Property(x => x.ReadTimeText).HasMaxLength(80);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasIndex(x => x.ArticleKey).IsUnique();
             entity.HasOne(x => x.Category).WithMany().HasForeignKey(x => x.IdCategory);
             entity.HasOne(x => x.Branch).WithMany().HasForeignKey(x => x.IdBranch);
             entity.HasOne(x => x.Topic).WithMany().HasForeignKey(x => x.IdTopic);
             entity.HasOne(x => x.Area).WithMany().HasForeignKey(x => x.IdArea);
-            entity.HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.IdMagazineArticle).OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.IdMagazineArticle)
+                .OnDelete(DeleteBehavior.Cascade);
         });
-        modelBuilder.Entity<MagazineArticleSource>(entity => { entity.ToTable("MagazineArticleSource", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.Title).HasMaxLength(300).IsRequired(); entity.Property(x => x.Url).HasMaxLength(2000).IsRequired(); });
-        modelBuilder.Entity<MagazineArticleTag>(entity => { entity.ToTable("MagazineArticleTag", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.Label).HasMaxLength(300).IsRequired(); entity.Property(x => x.Filter).HasMaxLength(160).IsRequired(); });
-        modelBuilder.Entity<MagazineArticleRelated>(entity => { entity.ToTable("MagazineArticleRelated", "Mag"); entity.HasKey(x => x.Id); entity.HasOne<MagazineArticle>().WithMany().HasForeignKey(x => x.IdRelatedArticle); });
-        modelBuilder.Entity<MagazineArticleMetric>(entity => { entity.ToTable("MagazineArticleMetric", "Mag"); entity.HasKey(x => x.IdMagazineArticle); entity.Property(x => x.AverageRating).HasPrecision(5, 2); });
-        modelBuilder.Entity<MagazineArticleCategory>(entity => { entity.ToTable("ArticleCategory", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.CategoryKey).HasMaxLength(300).IsRequired(); entity.HasIndex(x => x.CategoryKey).IsUnique(); });
-        modelBuilder.Entity<MagazineArticleBranch>(entity => { entity.ToTable("ArticleBranch", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.BranchKey).HasMaxLength(160).IsRequired(); entity.HasIndex(x => x.BranchKey).IsUnique(); });
-        modelBuilder.Entity<MagazineArticleTopic>(entity => { entity.ToTable("ArticleTopic", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.TopicKey).HasMaxLength(240).IsRequired(); entity.HasIndex(x => x.TopicKey).IsUnique(); });
-        modelBuilder.Entity<MagazineArticleArea>(entity => { entity.ToTable("ArticleArea", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.AreaKey).HasMaxLength(240).IsRequired(); entity.HasIndex(x => x.AreaKey).IsUnique(); });
+        modelBuilder.Entity<MagazineArticleSource>(entity =>
+        {
+            entity.ToTable("MagazineArticleSource", "Mag");
+            entity.HasKey(x => x.Id);
+        });
+        modelBuilder.Entity<MagazineArticleTag>(entity =>
+        {
+            entity.ToTable("MagazineArticleTag", "Mag");
+            entity.HasKey(x => x.Id);
+        });
+        modelBuilder.Entity<MagazineArticleRelated>(entity =>
+        {
+            entity.ToTable("MagazineArticleRelated", "Mag");
+            entity.HasKey(x => x.Id);
+            entity.HasOne<MagazineArticle>().WithMany().HasForeignKey(x => x.IdRelatedArticle);
+        });
+        modelBuilder.Entity<MagazineArticleMetric>(entity =>
+        {
+            entity.ToTable("MagazineArticleMetric", "Mag");
+            entity.HasKey(x => x.IdMagazineArticle);
+        });
+        modelBuilder.Entity<MagazineArticleCategory>(entity =>
+        {
+            entity.ToTable("ArticleCategory", "Mag");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.CategoryKey).IsUnique();
+        });
+        modelBuilder.Entity<MagazineArticleBranch>(entity =>
+        {
+            entity.ToTable("ArticleBranch", "Mag");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.BranchKey).IsUnique();
+        });
+        modelBuilder.Entity<MagazineArticleTopic>(entity =>
+        {
+            entity.ToTable("ArticleTopic", "Mag");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.TopicKey).IsUnique();
+        });
+        modelBuilder.Entity<MagazineArticleArea>(entity =>
+        {
+            entity.ToTable("ArticleArea", "Mag");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.AreaKey).IsUnique();
+        });
         modelBuilder.Entity<MagazineArticleSection>(entity =>
         {
             entity.ToTable("MagazineArticleSection", "Mag");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Heading).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.Body).IsRequired();
         });
         modelBuilder.Entity<AccountArticleInteraction>(entity =>
         {
             entity.ToTable("ArticleInteraction", "Account");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.InteractionType).HasMaxLength(20).IsRequired();
             entity.HasIndex(x => new { x.IdProfile, x.IdMagazineArticle, x.InteractionType }).IsUnique();
         });
         modelBuilder.Entity<AccountArticleFeedback>(entity =>
         {
             entity.ToTable("ArticleFeedback", "Account");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.DisplayName).HasMaxLength(80).IsRequired();
-            entity.Property(x => x.FeedbackText).HasMaxLength(1000).IsRequired();
-            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus)
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<AccountCart>(entity =>
         {
             entity.ToTable("Cart", "Account");
             entity.HasKey(x => x.Id);
             entity.HasIndex(x => x.IdProfile).IsUnique();
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.IdCart).OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<AccountCartItem>(entity =>
         {
             entity.ToTable("CartItem", "Account");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasMany(x => x.Accessories).WithOne().HasForeignKey(x => x.IdCartItem).OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(x => x.Accessories).WithOne().HasForeignKey(x => x.IdCartItem)
+                .OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<AccountCartItemAccessory>(entity =>
         {
@@ -216,78 +246,53 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("Address", "Account");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Title).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.Recipient).HasMaxLength(150).IsRequired();
-            entity.Property(x => x.Phone).HasMaxLength(30).IsRequired();
-            entity.Property(x => x.Street).HasMaxLength(500).IsRequired();
-            entity.Property(x => x.PostalCode).HasMaxLength(20).IsRequired();
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
         });
-        modelBuilder.Entity<AccountFavorite>(entity => { entity.ToTable("Favorite", "Account"); entity.HasKey(x => x.Id); entity.Property(x => x.CreatedAtUtc).HasPrecision(3); });
+        modelBuilder.Entity<AccountFavorite>(entity =>
+        {
+            entity.ToTable("Favorite", "Account");
+            entity.HasKey(x => x.Id);
+        });
         modelBuilder.Entity<AccountCompareItem>(entity =>
         {
             entity.ToTable("CompareItem", "Account");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
         });
         modelBuilder.Entity<AccountPriceAlert>(entity =>
         {
             entity.ToTable("PriceAlert", "Account");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Scope).HasMaxLength(20).IsRequired();
-            entity.Property(x => x.VariantSignature).HasMaxLength(500).IsRequired();
-            entity.Property(x => x.VariantsJson).HasColumnType("nvarchar(max)");
-            entity.Property(x => x.PriceAtRegistration).HasPrecision(19, 0);
-            entity.Property(x => x.StockAtRegistration).HasMaxLength(100);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
         });
         modelBuilder.Entity<EmailVerificationCode>(entity =>
         {
             entity.ToTable("EmailVerificationCode", "Account");
             entity.HasKey(x => x.Email);
-            entity.Property(x => x.Email).HasMaxLength(254).IsRequired();
-            entity.Property(x => x.CodeHash).HasMaxLength(32).IsRequired();
-            entity.Property(x => x.SentAtUtc).HasPrecision(3).IsRequired();
-            entity.Property(x => x.ExpiresAtUtc).HasPrecision(3).IsRequired();
-            entity.Property(x => x.LifetimeMinutes).IsRequired();
-            entity.Property(x => x.Attempts).IsRequired();
-            entity.HasIndex(x => x.ExpiresAtUtc);
         });
         modelBuilder.Entity<StoreContentPage>(entity =>
         {
-            entity.ToTable("ContentPage", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.PageKey).HasMaxLength(150).IsRequired(); entity.Property(x => x.RoutePath).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.Title).HasMaxLength(300).IsRequired(); entity.Property(x => x.Description).HasMaxLength(1000);
-            entity.Property(x => x.ContentSource).HasMaxLength(30).IsRequired(); entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasIndex(x => x.PageKey).IsUnique(); entity.HasIndex(x => x.RoutePath).IsUnique();
-            entity.HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.IdContentPage).OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable("ContentPage", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.PageKey).IsUnique();
+            entity.HasIndex(x => x.RoutePath).IsUnique();
+            entity.HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.IdContentPage)
+                .OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<StoreContentPageSection>(entity =>
         {
-            entity.ToTable("ContentPageSection", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.SectionKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Heading).HasMaxLength(300);
+            entity.ToTable("ContentPageSection", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasIndex(x => new { x.IdContentPage, x.SectionKey }).IsUnique();
         });
         modelBuilder.Entity<StoreFaqItem>(entity =>
         {
-            entity.ToTable("FaqItem", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.Question).HasMaxLength(1000).IsRequired(); entity.Property(x => x.Answer).IsRequired();
-            entity.Property(x => x.LinkText).HasMaxLength(300); entity.Property(x => x.LinkUrl).HasMaxLength(1000);
+            entity.ToTable("FaqItem", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasOne<StoreContentPage>().WithMany().HasForeignKey(x => x.IdContentPage);
         });
         modelBuilder.Entity<AdminSystemUser>(entity =>
         {
             entity.ToTable("SystemUser", "Admin");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.UserName).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.DisplayName).HasMaxLength(160).IsRequired();
-            entity.Property(x => x.PasswordHash).HasMaxLength(500).IsRequired();
-            entity.Property(x => x.SecurityStamp).IsRequired();
-            entity.Property(x => x.NormalizedUserName).HasMaxLength(100).IsRequired();
             entity.HasIndex(x => x.NormalizedUserName).IsUnique();
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.LastLoginAtUtc).HasPrecision(3);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasMany(x => x.Roles).WithOne(x => x.User).HasForeignKey(x => x.IdUser);
             entity.HasMany(x => x.WarehouseAccess).WithOne(x => x.User).HasForeignKey(x => x.IdUser);
         });
@@ -295,8 +300,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("Role", "Admin");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.RoleKey).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.Name).HasMaxLength(160).IsRequired();
             entity.HasIndex(x => x.RoleKey).IsUnique();
             entity.HasMany(x => x.Users).WithOne(x => x.Role).HasForeignKey(x => x.IdRole);
             entity.HasMany(x => x.Permissions).WithOne(x => x.Role).HasForeignKey(x => x.IdRole);
@@ -305,82 +308,58 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("Permission", "Admin");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.PermissionKey).HasMaxLength(160).IsRequired();
-            entity.Property(x => x.Name).HasMaxLength(160).IsRequired();
-            entity.Property(x => x.ParentKey).HasColumnName("ParentPermissionKey").HasMaxLength(160);
-            entity.Property(x => x.Area).HasMaxLength(80).IsRequired();
-            entity.Property(x => x.Controller).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.Action).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.FeatureKey).HasMaxLength(100);
             entity.HasIndex(x => x.PermissionKey).IsUnique();
         });
-        modelBuilder.Entity<AdminUserRole>(entity => { entity.ToTable("SystemUserRole", "Admin"); entity.HasKey(x => new { x.IdUser, x.IdRole }); });
+        modelBuilder.Entity<AdminUserRole>(entity =>
+        {
+            entity.ToTable("SystemUserRole", "Admin");
+            entity.HasKey(x => new { x.IdUser, x.IdRole });
+        });
         modelBuilder.Entity<AdminRolePermission>(entity =>
         {
             entity.ToTable("RolePermission", "Admin");
             entity.HasKey(x => new { x.IdRole, x.IdPermission });
-            entity.Property(x => x.IdPermission).HasColumnName("IdPermission");
             entity.HasOne(x => x.Role).WithMany(x => x.Permissions).HasForeignKey(x => x.IdRole);
             entity.HasOne(x => x.Permission).WithMany().HasForeignKey(x => x.IdPermission);
         });
-        modelBuilder.Entity<AdminUserWarehouseAccess>(entity => { entity.ToTable("SystemUserWarehouseAccess", "Admin"); entity.HasKey(x => new { x.IdUser, x.IdWarehouse }); });
-
+        modelBuilder.Entity<AdminUserWarehouseAccess>(entity =>
+        {
+            entity.ToTable("SystemUserWarehouseAccess", "Admin");
+            entity.HasKey(x => new { x.IdUser, x.IdWarehouse });
+        });
         modelBuilder.Entity<WarehouseEntity>(entity =>
         {
             entity.ToTable("Warehouse", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasOne(x => x.Company).WithMany(x => x.Warehouses).HasForeignKey(x => x.IdCompany);
-            entity.Property(x => x.Code).HasMaxLength(50).IsRequired();
-            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
             entity.HasIndex(x => new { x.IdCompany, x.Name }).IsUnique().HasDatabaseName("UX_Warehouse_Company_Name");
         });
         modelBuilder.Entity<Company>(entity =>
         {
             entity.ToTable("Company", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Code).HasMaxLength(50).IsRequired();
-            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.Phone).HasMaxLength(50);
-            entity.Property(x => x.Address).HasMaxLength(500);
-            entity.Property(x => x.Description).HasMaxLength(2000);
         });
         modelBuilder.Entity<VoucherType>(entity =>
         {
             entity.ToTable("VoucherType", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Name).HasMaxLength(150).IsRequired();
-            entity.Property(x => x.Direction).HasColumnType("char(1)").IsRequired();
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
         });
         modelBuilder.Entity<WarehouseUnit>(entity =>
         {
             entity.ToTable("Unit", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.NameFa).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.NameEn).HasMaxLength(100);
-            entity.Property(x => x.TreePathIds).HasMaxLength(4000).IsUnicode().IsRequired();
-            entity.Property(x => x.TreePathNames).HasMaxLength(4000).IsUnicode().IsRequired();
-            entity.HasIndex(x => x.IdParent);
             entity.HasOne<WarehouseUnit>().WithMany().HasForeignKey(x => x.IdParent).OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.SortOrder).IsRequired();
         });
         modelBuilder.Entity<WarehouseParty>(entity =>
         {
             entity.ToTable("Party", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.PartyType).HasMaxLength(30).IsRequired();
-            entity.Property(x => x.ExternalPartyKey).HasMaxLength(128);
-            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasOne<WarehouseEntity>().WithMany().HasForeignKey(x => x.IdWarehouse);
         });
         modelBuilder.Entity<WarehouseProductUnit>(entity =>
         {
             entity.ToTable("ProductUnit", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.ConversionFactor).HasPrecision(18, 9);
             entity.HasIndex(x => new { x.IdProduct, x.IdUnit }).IsUnique();
             entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct);
             entity.HasOne<WarehouseUnit>().WithMany().HasForeignKey(x => x.IdUnit);
@@ -389,103 +368,94 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("Voucher", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.VoucherNumber).HasDefaultValueSql("NEXT VALUE FOR [Warehouse].[VoucherNumberSequence]");
-            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdVoucherStatus).OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.CustomerOrderKey).HasMaxLength(128);
-            entity.Property(x => x.ExternalReference).HasMaxLength(128);
-            entity.Property(x => x.Reason).HasMaxLength(1000);
-            entity.Property(x => x.CreatedByUserKey).HasMaxLength(128).IsRequired();
-            entity.Property(x => x.UpdatedByUserKey).HasMaxLength(128);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasIndex(x => new { x.CustomerOrderKey, x.IdSalesPlanReference }).IsUnique().HasFilter("[CustomerOrderKey] IS NOT NULL");
+            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdVoucherStatus)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(x => new { x.CustomerOrderKey, x.IdSalesPlanReference }).IsUnique()
+                .HasFilter("[CustomerOrderKey] IS NOT NULL");
             entity.HasMany(x => x.Lines).WithOne().HasForeignKey(x => x.IdVoucher);
         });
         modelBuilder.Entity<VoucherLine>(entity =>
         {
             entity.ToTable("VoucherLine", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Quantity).HasPrecision(18, 3);
-            entity.Property(x => x.ConversionFactor).HasPrecision(18, 9);
-            entity.Property(x => x.BaseQuantity).HasPrecision(18, 3);
-            entity.Property(x => x.ProductNameSnapshot).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.VariantNameSnapshot).HasMaxLength(300);
-            entity.Property(x => x.UnitNameSnapshot).HasMaxLength(100).IsRequired();
         });
         modelBuilder.Entity<WarehouseStockMovement>(entity =>
         {
             entity.ToTable("StockMovement", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.QuantityDelta).HasPrecision(18, 3);
-            entity.Property(x => x.OccurredAtUtc).HasPrecision(3);
         });
         modelBuilder.Entity<VoucherAudit>(entity =>
         {
             entity.ToTable("VoucherAudit", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Action).HasMaxLength(20).IsRequired();
-            entity.Property(x => x.ActorUserKey).HasMaxLength(128).IsRequired();
-            entity.Property(x => x.OccurredAtUtc).HasPrecision(3);
-            entity.Property(x => x.Reason).HasMaxLength(1000);
-            entity.Property(x => x.BeforeJson).HasColumnType("nvarchar(max)");
-            entity.Property(x => x.AfterJson).HasColumnType("nvarchar(max)");
-            entity.HasIndex(x => new { x.VoucherId, x.OccurredAtUtc, x.Id });
-            entity.HasIndex(x => new { x.WarehouseId, x.OccurredAtUtc, x.Id });
         });
-        modelBuilder.Entity<SalesPlanReference>(entity => { entity.ToTable("SalesPlanReference", "Warehouse"); entity.HasKey(x => x.Id); entity.Property(x => x.StoreSalesPlanKey).HasMaxLength(128).IsRequired(); entity.Property(x => x.DisplayName).HasMaxLength(200).IsRequired(); entity.Property(x => x.Code).HasMaxLength(64).IsRequired(); entity.Property(x => x.PlanType).HasMaxLength(30).IsRequired(); entity.Property(x => x.Label).HasMaxLength(100); });
-        modelBuilder.Entity<WarehouseStockOwner>(entity => { entity.ToTable("WarehouseStockOwner", "Warehouse"); entity.HasKey(x => x.Id); entity.Property(x => x.Id).HasColumnType("numeric(30,0)").UseIdentityColumn(); entity.Property(x => x.IsDefault).HasDefaultValue(false); entity.HasAlternateKey(x => new { x.IdWarehouse, x.IdStockOwner }).HasName("UQ_WarehouseStockOwner_Warehouse_StockOwner"); entity.HasIndex(x => x.IdWarehouse).IsUnique().HasFilter("[IsDefault] = 1").HasDatabaseName("UX_WarehouseStockOwner_OneDefaultPerWarehouse"); });
+        modelBuilder.Entity<SalesPlanReference>(entity =>
+        {
+            entity.ToTable("SalesPlanReference", "Warehouse");
+            entity.HasKey(x => x.Id);
+        });
+        modelBuilder.Entity<WarehouseStockOwnerType>(entity =>
+        {
+            entity.ToTable("StockOwnerType", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.TypeKey).IsUnique();
+        });
+        modelBuilder.Entity<WarehouseSchemaMigration>(entity =>
+        {
+            entity.ToTable("SchemaMigration", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.MigrationKey).IsUnique();
+        });
+        modelBuilder.Entity<StoreSchemaMigration>(entity =>
+        {
+            entity.ToTable("SchemaMigration", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.MigrationKey).IsUnique();
+        });
+        modelBuilder.Entity<WarehouseStockOwner>(entity =>
+        {
+            entity.ToTable("WarehouseStockOwner", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.HasAlternateKey(x => new { x.IdWarehouse, x.IdStockOwner })
+                .HasName("UQ_WarehouseStockOwner_Warehouse_StockOwner");
+            entity.HasIndex(x => x.IdWarehouse).IsUnique().HasFilter("[IsDefault] = 1")
+                .HasDatabaseName("UX_WarehouseStockOwner_OneDefaultPerWarehouse");
+        });
         modelBuilder.Entity<StockBalance>(entity =>
         {
-            entity.ToTable("StockBalance", "Warehouse", table => table.UseSqlOutputClause(false));
+            entity.ToTable("StockBalance", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasIndex(x => new { x.IdWarehouse, x.IdInventoryItem, x.IdSalesPlanReference }).IsUnique();
             entity.HasOne(x => x.Warehouse).WithMany(x => x.StockBalances).HasForeignKey(x => x.IdWarehouse);
             entity.HasOne(x => x.InventoryItem).WithMany().HasForeignKey(x => x.IdInventoryItem);
-            entity.HasOne(x => x.SalesPlanReference).WithMany(x => x.StockBalances).HasForeignKey(x => x.IdSalesPlanReference);
-            entity.Property(x => x.Quantity).HasPrecision(18, 3);
-            entity.Property(x => x.MinimumQuantity).HasPrecision(18, 3);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.Version).IsRowVersion();
+            entity.HasOne(x => x.SalesPlanReference).WithMany(x => x.StockBalances)
+                .HasForeignKey(x => x.IdSalesPlanReference);
         });
         modelBuilder.Entity<InventoryItem>(entity =>
         {
             entity.ToTable("InventoryItem", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasOne(x => x.Product).WithMany(x => x.InventoryItems).HasForeignKey(x => x.IdProduct);
-            entity.HasOne(x => x.ProductVariant).WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct }) .HasPrincipalKey(x => new { x.Id, x.IdProduct });
+            entity.HasOne(x => x.ProductVariant).WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct })
+                .HasPrincipalKey(x => new { x.Id, x.IdProduct });
         });
         modelBuilder.Entity<WarehouseProduct>(entity =>
         {
             entity.ToTable("Product", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Id).ValueGeneratedNever();
-            entity.Property(x => x.ProductKey).HasMaxLength(128).IsRequired();
-            entity.Property(x => x.Name).HasColumnName("NameFa").HasMaxLength(300).IsRequired();
-            entity.Property(x => x.EnglishName).HasColumnName("NameEn").HasMaxLength(300).IsRequired();
-            entity.Property(x => x.Slug).HasMaxLength(200);
-            entity.HasOne(x => x.ProductBadge).WithMany().HasForeignKey(x => x.IdBadge).OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.MaxPurchaseQuantity).IsRequired();
-            entity.Property(x => x.IsStoreEnabled).HasDefaultValue(false).IsRequired();
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasOne(x => x.ProductBadge).WithMany().HasForeignKey(x => x.IdBadge)
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreProductBadge>(entity =>
         {
             entity.ToTable("ProductBadge", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Title).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.BackgroundColor).HasMaxLength(7).IsUnicode(false).IsRequired();
-            entity.Property(x => x.TextColor).HasMaxLength(7).IsUnicode(false).IsRequired();
-            entity.Property(x => x.BorderColor).HasMaxLength(7).IsUnicode(false).IsRequired();
             entity.HasIndex(x => x.Title).IsUnique();
         });
         modelBuilder.Entity<VariantName>(entity =>
         {
             entity.ToTable("VariantName", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.TreePathIds).HasMaxLength(4000).IsUnicode().IsRequired();
-            entity.Property(x => x.TreePathNames).HasMaxLength(4000).IsUnicode().IsRequired();
             entity.HasOne(x => x.Parent).WithMany().HasForeignKey(x => x.IdParent).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<ProductVariant>(entity =>
@@ -494,20 +464,15 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.HasAlternateKey(x => new { x.Id, x.IdProduct });
             entity.HasAlternateKey(x => new { x.IdProduct, x.Id });
-            entity.Property(x => x.IsDefault).HasDefaultValue(false).IsRequired();
             entity.HasIndex(x => x.IdProduct).IsUnique().HasFilter("[IsDefault] = 1");
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct);
-            entity.HasOne(x => x.VariantName).WithMany().HasForeignKey(x => x.IdVariantName).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.VariantName).WithMany().HasForeignKey(x => x.IdVariantName)
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<ProductAttribute>(entity =>
         {
             entity.ToTable("ProductAttribute", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Key).HasMaxLength(64).IsUnicode(false).IsRequired();
-            entity.Property(x => x.Label).HasMaxLength(80).IsRequired();
-            entity.Property(x => x.IsActive).HasDefaultValue(true).IsRequired();
             entity.HasIndex(x => new { x.IdProduct, x.Key }).IsUnique();
             entity.HasAlternateKey(x => new { x.Id, x.IdProduct });
             entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Cascade);
@@ -516,481 +481,411 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("ProductAttributeValue", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.ValueKey).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.Label).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.DisplayValue).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.Swatch).HasMaxLength(7).IsUnicode(false);
-            entity.Property(x => x.IsActive).HasDefaultValue(true).IsRequired();
             entity.HasIndex(x => new { x.IdProductAttribute, x.ValueKey }).IsUnique();
             entity.HasAlternateKey(x => new { x.Id, x.IdProduct, x.IdProductAttribute });
-            entity.HasOne(x => x.Attribute).WithMany(x => x.Values).HasForeignKey(x => new { x.IdProductAttribute, x.IdProduct }).HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(x => x.Attribute).WithMany(x => x.Values)
+                .HasForeignKey(x => new { x.IdProductAttribute, x.IdProduct })
+                .HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<ProductVariantAttributeValue>(entity =>
         {
             entity.ToTable("ProductVariantAttributeValue", "Warehouse");
             entity.HasKey(x => new { x.IdProductVariant, x.IdProductAttribute });
-            entity.HasOne(x => x.ProductVariant).WithMany(x => x.AttributeValues).HasForeignKey(x => new { x.IdProductVariant, x.IdProduct }).HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(x => x.AttributeValue).WithMany(x => x.Variants).HasForeignKey(x => new { x.IdProductAttributeValue, x.IdProduct, x.IdProductAttribute }).HasPrincipalKey(x => new { x.Id, x.IdProduct, x.IdProductAttribute }).OnDelete(DeleteBehavior.Restrict);
-            entity.HasIndex(x => x.IdProductAttributeValue);
+            entity.HasOne(x => x.ProductVariant).WithMany(x => x.AttributeValues)
+                .HasForeignKey(x => new { x.IdProductVariant, x.IdProduct })
+                .HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(x => x.AttributeValue).WithMany(x => x.Variants)
+                .HasForeignKey(x => new { x.IdProductAttributeValue, x.IdProduct, x.IdProductAttribute })
+                .HasPrincipalKey(x => new { x.Id, x.IdProduct, x.IdProductAttribute })
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreSiteIdentity>(entity =>
         {
             entity.ToTable("SiteSetting", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.DisplayName).HasMaxLength(160).IsRequired();
-            entity.Property(x => x.StoreName).HasMaxLength(240).IsRequired();
-            entity.Property(x => x.VisualBrandName).HasMaxLength(160).IsRequired();
-            entity.Property(x => x.SupportPhoneDisplay).HasMaxLength(32).IsRequired();
-            entity.Property(x => x.SupportPhoneUri).HasMaxLength(40).IsRequired();
-            entity.Property(x => x.WhatsAppNumber).HasMaxLength(32).IsRequired();
-            entity.Property(x => x.PublicEmail).HasMaxLength(254).IsRequired();
-            entity.Property(x => x.FooterDescription).HasMaxLength(1000).HasDefaultValue("").IsRequired();
-            entity.Property(x => x.InstagramUrl).HasMaxLength(500);
-            entity.Property(x => x.TelegramUrl).HasMaxLength(500);
-            entity.Property(x => x.LinkedInUrl).HasMaxLength(500);
-            entity.Property(x => x.MediaCdnBaseUrl).HasMaxLength(500).HasDefaultValue("https://cdn.bs-shop.ir/").IsRequired();
-            entity.Property(x => x.SmtpHost).HasMaxLength(255);
-            entity.Property(x => x.SmtpUsername).HasMaxLength(320);
-            entity.Property(x => x.SmtpFrom).HasMaxLength(320);
-            entity.Property(x => x.SmtpPassword).HasMaxLength(1024);
-            entity.Property(x => x.EmailVerificationCodeLifetimeMinutes).HasDefaultValue(15).IsRequired();
-            entity.Property(x => x.FtpHost).HasMaxLength(255);
-            entity.Property(x => x.FtpUsername).HasMaxLength(320);
-            entity.Property(x => x.FtpPassword).HasMaxLength(1024);
-            entity.Property(x => x.FtpPasswordProtected).HasColumnType("nvarchar(max)");
-            entity.Property(x => x.UpdatedByUserKey).HasMaxLength(128);
-            entity.Property(x => x.UpdatedAtUtc).HasColumnName("IdentityUpdatedAtUtc").HasPrecision(3);
-            entity.Property(x => x.SettingsUpdatedAtUtc).HasColumnName("UpdatedAtUtc").HasPrecision(3);
         });
         modelBuilder.Entity<AccountCoupon>(entity =>
         {
-            entity.ToTable("Coupon", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.CouponKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Code).HasMaxLength(32).IsRequired();
-            entity.HasIndex(x => x.CouponKey).IsUnique(); entity.HasIndex(x => x.Code).IsUnique();
-            entity.HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable("Coupon", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.CouponKey).IsUnique();
+            entity.HasIndex(x => x.Code).IsUnique();
+            entity.HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile)
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreCouponUsage>(entity =>
         {
             entity.ToTable("CouponUsage", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Id).HasColumnType("numeric(30,0)").UseIdentityColumn();
             entity.HasAlternateKey(x => new { x.IdCoupon, x.IdCustomerOrder }).HasName("UQ_CouponUsage_Coupon_Order");
             entity.HasOne<AccountCoupon>().WithMany().HasForeignKey(x => x.IdCoupon).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdCustomerOrder).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdCustomerOrder)
+                .OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<AccountProfile>(entity =>
         {
             entity.ToTable("Profile", "Account");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Email).HasMaxLength(254).IsRequired();
-            entity.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.LastName).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.Phone).HasMaxLength(30);
-            entity.Property(x => x.Password).HasMaxLength(500);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasOne(x => x.Gender).WithMany().HasForeignKey(x => x.IdGender).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<AccountMessage>(entity =>
         {
             entity.ToTable("Message", "Account");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Title).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.Category).HasMaxLength(40).IsRequired();
-            entity.Property(x => x.Body).HasMaxLength(4000).IsRequired();
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.ReadAtUtc).HasPrecision(3);
             entity.HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile).OnDelete(DeleteBehavior.Cascade);
-            entity.HasIndex(x => new { x.IdProfile, x.CreatedAtUtc });
         });
         modelBuilder.Entity<AccountGender>(entity =>
         {
             entity.ToTable("Gender", "Account");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Code).HasMaxLength(20).IsRequired();
-            entity.Property(x => x.NameFa).HasMaxLength(40).IsRequired();
             entity.HasIndex(x => x.Code).IsUnique();
         });
         modelBuilder.Entity<StoreOrderPreviousNumber>(entity =>
         {
             entity.ToTable("OrderPreviousNumber", "Store");
             entity.HasKey(x => x.IdOrder);
-            entity.Property(x => x.PreviousNumber).HasMaxLength(32).IsRequired();
-            entity.HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdOrder).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdOrder)
+                .OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<StoreCustomerOrderReference>(entity =>
         {
             entity.ToTable("Order", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.OrderNumber).HasMaxLength(32).IsRequired();
-            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.TotalAmount).HasPrecision(19, 0);
-            entity.Property(x => x.SubtotalAmount).HasPrecision(19, 0);
-            entity.Property(x => x.CouponDiscountAmount).HasPrecision(19, 0);
+            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus)
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<AccountCoupon>().WithMany().HasForeignKey(x => x.IdCoupon).OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.PaymentMethod).HasMaxLength(40).IsRequired();
-            entity.HasOne(x => x.Bank).WithMany().HasForeignKey(x => x.IdBank).IsRequired().OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.ShippingCarrier).HasMaxLength(100);
-            entity.Property(x => x.ShippingTrackingCode).HasMaxLength(100);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.AddressSnapshotJson).HasColumnType("nvarchar(max)").IsRequired();
+            entity.HasOne(x => x.Bank).WithMany().HasForeignKey(x => x.IdBank).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.IdOrder).OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<StoreNewsletterSubscriber>(entity =>
         {
             entity.ToTable("NewsletterSubscriber", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Email).HasMaxLength(254).IsRequired();
-            entity.Property(x => x.SubscribedAtUtc).HasPrecision(3);
-            entity.Property(x => x.UnsubscribedAtUtc).HasPrecision(3);
             entity.HasIndex(x => x.Email).IsUnique();
         });
         modelBuilder.Entity<StoreContactMessage>(entity =>
         {
             entity.ToTable("ContactFormMessage", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Name).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.Phone).HasMaxLength(30).IsRequired();
-            entity.Property(x => x.Email).HasMaxLength(254);
-            entity.Property(x => x.SubjectKey).HasMaxLength(30).IsRequired();
-            entity.Property(x => x.Message).HasMaxLength(3000).IsRequired();
-            entity.Property(x => x.AdminReply).HasMaxLength(4000);
-            entity.Property(x => x.RepliedAtUtc).HasPrecision(3);
-            entity.Property(x => x.ReplyEmailSentAtUtc).HasPrecision(3);
-            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasIndex(x => new { x.IdStatus, x.CreatedAtUtc });
+            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus)
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreCustomerOrderItem>(entity =>
         {
-            entity.ToTable("OrderItem", "Store", table => table.UseSqlOutputClause(false));
+            entity.ToTable("OrderItem", "Store");
             entity.HasKey(x => x.Id);
-            entity.HasOne(x => x.PriceVersion).WithMany().HasForeignKey(x => x.IdPriceVersion).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.PriceVersion).WithMany().HasForeignKey(x => x.IdPriceVersion)
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StorePriceVersion>(entity =>
         {
             entity.ToTable("PriceVersion", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.PriceBeforeDiscountAmount).HasPrecision(19, 0);
-            entity.Property(x => x.DiscountPercent).HasPrecision(5, 2);
-            entity.Property(x => x.FinalPriceAmount).HasPrecision(19, 0);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.HasOne<AdminSystemUser>().WithMany().HasForeignKey(x => x.IdChangedBy).OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.ChangeReason).HasMaxLength(300);
-            entity.HasIndex(x => new { x.IdProduct, x.IdSalesPlan, x.IdProductVariant, x.IdAccessory, x.Id });
-            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<SalesPlanReference>().WithMany().HasForeignKey(x => x.IdSalesPlan).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(x => x.PreviousVersion).WithMany().HasForeignKey(x => x.IdPreviousVersion).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct }).HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<StoreAccessory>().WithMany().HasForeignKey(x => x.IdAccessory).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<AdminSystemUser>().WithMany().HasForeignKey(x => x.IdChangedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<SalesPlanReference>().WithMany().HasForeignKey(x => x.IdSalesPlan)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.PreviousVersion).WithMany().HasForeignKey(x => x.IdPreviousVersion)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct })
+                .HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreAccessory>().WithMany().HasForeignKey(x => x.IdAccessory)
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreOrderItemAmount>(entity =>
         {
             entity.HasNoKey();
             entity.ToView("OrderItemAmount", "Store");
-            entity.Property(x => x.UnitAmount).HasPrecision(19, 0);
         });
         modelBuilder.Entity<StoreOrderAccessory>(entity =>
         {
-            entity.ToTable("OrderAccessory", "Store", table => table.UseSqlOutputClause(false));
+            entity.ToTable("OrderAccessory", "Store");
             entity.HasKey(x => new { x.IdOrder, x.IdProduct, x.IdSalesPlan, x.IdAccessory });
-            entity.HasOne(x => x.PriceVersion).WithMany().HasForeignKey(x => x.IdPriceVersion).OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.AccessoryNameSnapshot).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.UnitAmountSnapshot).HasPrecision(19, 0);
-            entity.HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdOrder).OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<SalesPlanReference>().WithMany().HasForeignKey(x => x.IdSalesPlan).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<StoreAccessory>().WithMany().HasForeignKey(x => x.IdAccessory).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.PriceVersion).WithMany().HasForeignKey(x => x.IdPriceVersion)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdOrder)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<SalesPlanReference>().WithMany().HasForeignKey(x => x.IdSalesPlan)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreAccessory>().WithMany().HasForeignKey(x => x.IdAccessory)
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreOrderShipmentTrackingHistory>(entity =>
         {
-            entity.ToTable("OrderShipmentTrackingHistory", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.PreviousCarrier).HasMaxLength(100);
-            entity.Property(x => x.PreviousTrackingCode).HasMaxLength(100);
-            entity.Property(x => x.Carrier).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.TrackingCode).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.ActorUserKey).HasMaxLength(256).IsRequired();
-            entity.Property(x => x.ChangedAtUtc).HasPrecision(3);
+            entity.ToTable("OrderShipmentTrackingHistory", "Store");
+            entity.HasKey(x => x.Id);
         });
         modelBuilder.Entity<StorePaymentAttempt>(entity =>
         {
             entity.ToTable("PaymentAttempt", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Id).HasColumnType("numeric(30,0)").UseIdentityColumn();
-            entity.Property(x => x.Amount).HasPrecision(19, 0);
-            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.GatewayReference).HasMaxLength(200);
-            entity.Property(x => x.ReceiptReference).HasMaxLength(200);
-            entity.Property(x => x.PaidAtUtc).HasPrecision(3);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus)
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<AccountRecentSearch>(entity =>
         {
             entity.ToTable("RecentSearch", "Account");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.SearchKey).HasMaxLength(80).IsRequired();
-            entity.Property(x => x.SearchText).HasMaxLength(80).IsRequired();
-            entity.Property(x => x.SearchedAtUtc).HasPrecision(3);
             entity.HasIndex(x => new { x.IdProfile, x.SearchKey }).IsUnique();
-            entity.HasIndex(x => new { x.IdProfile, x.SearchedAtUtc });
             entity.HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile).OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<ProductFeedback>(entity =>
         {
             entity.ToTable("ProductFeedback", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.FeedbackType).HasMaxLength(20).IsRequired();
-            entity.Property(x => x.DisplayName).HasMaxLength(80).IsRequired();
-            entity.Property(x => x.FeedbackText).HasMaxLength(800).IsRequired();
-            entity.Property(x => x.AdminReply).HasMaxLength(1000);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.RepliedAtUtc).HasPrecision(3);
-            entity.HasIndex(x => new { x.IdProduct, x.FeedbackType, x.IdStatus, x.CreatedAtUtc });
-            entity.HasIndex(x => new { x.IdProfile, x.IdProduct, x.FeedbackType });
             entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.Status).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(x => x.Profile).WithMany(x => x.ProductFeedback).HasForeignKey(x => x.IdProfile).OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(x => x.Profile).WithMany(x => x.ProductFeedback).HasForeignKey(x => x.IdProfile)
+                .OnDelete(DeleteBehavior.SetNull);
         });
         modelBuilder.Entity<ProductFeedbackStatus>(entity =>
         {
             entity.ToTable("ProductFeedbackStatus", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Id).ValueGeneratedNever();
-            entity.Property(x => x.Name).HasMaxLength(80).IsRequired();
-            entity.Property(x => x.NameEn).HasMaxLength(80).IsRequired();
         });
         modelBuilder.Entity<OrderStatusReference>(entity =>
         {
-            entity.ToTable("OrderStatus", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.Id).UseIdentityColumn();
-            entity.Property(x => x.Code).HasMaxLength(30).IsRequired(); entity.HasIndex(x => x.Code).IsUnique();
-            entity.Property(x => x.NameFa).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(80).IsRequired();
+            entity.ToTable("OrderStatus", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.Code).IsUnique();
         });
         modelBuilder.Entity<PaymentAttemptStatusReference>(entity =>
         {
-            entity.ToTable("PaymentAttemptStatus", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => x.Code).IsUnique();
-            entity.Property(x => x.Code).HasMaxLength(20); entity.Property(x => x.NameFa).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(80).IsRequired();
+            entity.ToTable("PaymentAttemptStatus", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.Code).IsUnique();
         });
         modelBuilder.Entity<ContactMessageStatusReference>(entity =>
         {
-            entity.ToTable("ContactMessageStatus", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => x.Code).IsUnique();
-            entity.Property(x => x.Code).HasMaxLength(20); entity.Property(x => x.NameFa).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(80).IsRequired();
+            entity.ToTable("ContactMessageStatus", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.Code).IsUnique();
         });
         modelBuilder.Entity<ArticleFeedbackStatusReference>(entity =>
         {
-            entity.ToTable("ArticleFeedbackStatus", "Account"); entity.HasKey(x => x.Id); entity.HasIndex(x => x.Code).IsUnique();
-            entity.Property(x => x.Code).HasMaxLength(20); entity.Property(x => x.NameFa).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(80).IsRequired();
+            entity.ToTable("ArticleFeedbackStatus", "Account");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.Code).IsUnique();
         });
         modelBuilder.Entity<VoucherStatus>(entity =>
         {
-            entity.ToTable("VoucherStatus", "Warehouse"); entity.HasKey(x => x.Id); entity.HasIndex(x => x.Code).IsUnique();
-            entity.Property(x => x.Code).HasColumnType("char(1)"); entity.Property(x => x.NameFa).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(80).IsRequired();
+            entity.ToTable("VoucherStatus", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.Code).IsUnique();
         });
         modelBuilder.Entity<StoreHomeTestimonial>(entity =>
         {
             entity.ToTable("HomeTestimonial", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.DisplayName).HasMaxLength(80).IsRequired();
-            entity.Property(x => x.FeedbackText).HasMaxLength(800).IsRequired();
-            entity.Property(x => x.ImagePath).HasMaxLength(500);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreAttributeDefinition>(entity =>
         {
             entity.ToTable("AttributeDefinition", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.AttributeKey).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.Label).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.Icon).HasMaxLength(100);
-            entity.Property(x => x.SourceKey).HasMaxLength(100);
-            entity.Property(x => x.FilterKey).HasMaxLength(100);
             entity.HasIndex(x => x.AttributeKey).IsUnique();
         });
         modelBuilder.Entity<StoreProductSalesPlanOffer>(entity =>
         {
-            entity.ToTable("ProductSalesPlanOffer", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3); entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.ToTable("ProductSalesPlanOffer", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasIndex(x => new { x.IdProduct, x.IdSalesPlan }).IsUnique();
         });
         modelBuilder.Entity<StoreProductVariantSalesPlanOffer>(entity =>
         {
-            entity.ToTable("ProductVariantSalesPlanOffer", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3); entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.ToTable("ProductVariantSalesPlanOffer", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasIndex(x => new { x.IdProductVariant, x.IdSalesPlan }).IsUnique();
         });
         modelBuilder.Entity<StoreAccessory>(entity =>
         {
-            entity.ToTable("Accessory", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.Description).HasMaxLength(1000);
+            entity.ToTable("Accessory", "Store");
+            entity.HasKey(x => x.Id);
         });
         modelBuilder.Entity<StoreProductAccessory>(entity =>
         {
-            entity.ToTable("ProductAccessory", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.DisplayDiscountPercent).HasPrecision(5, 2);
+            entity.ToTable("ProductAccessory", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasIndex(x => new { x.IdProduct, x.IdAccessory }).IsUnique();
         });
         modelBuilder.Entity<StoreProductSalesPlanOfferAccessory>(entity =>
         {
-            entity.ToTable("ProductSalesPlanOfferAccessory", "Store"); entity.HasKey(x => x.Id);
+            entity.ToTable("ProductSalesPlanOfferAccessory", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasIndex(x => new { x.IdProductSalesPlanOffer, x.IdAccessory }).IsUnique();
         });
         modelBuilder.Entity<StoreProductSalesPlanOfferSpecificationOverride>(entity =>
         {
-            entity.ToTable("ProductSalesPlanOfferSpecificationOverride", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.SpecificationKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Value).HasMaxLength(1000).IsRequired();
+            entity.ToTable("ProductSalesPlanOfferSpecificationOverride", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasIndex(x => new { x.IdProductSalesPlanOffer, x.SpecificationKey }).IsUnique();
         });
         modelBuilder.Entity<StoreProductMediaType>(entity =>
         {
-            entity.ToTable("ProductMediaType", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.Title).HasMaxLength(50).IsRequired();
+            entity.ToTable("ProductMediaType", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasIndex(x => x.Title).IsUnique();
         });
         modelBuilder.Entity<StoreProductAsset>(entity =>
         {
-            entity.ToTable("ProductAsset", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.Path).HasMaxLength(1000).IsRequired();
-            entity.Property(x => x.ThumbnailPath).HasMaxLength(1000).IsRequired();
-            entity.Property(x => x.CardPath).HasMaxLength(1000).IsRequired();
-            entity.Property(x => x.Title).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3).HasDefaultValueSql("SYSUTCDATETIME()").IsRequired();
+            entity.ToTable("ProductAsset", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasOne<StoreProductMediaType>().WithMany().HasForeignKey(x => x.IdMediaType);
-            entity.HasIndex(x => new { x.IdProduct, x.IdMediaType, x.SortOrder, x.Id });
         });
         modelBuilder.Entity<StoreProductBenefit>(entity =>
         {
             entity.ToTable("ProductBenefit", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Title).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.Detail).HasMaxLength(1000);
-            entity.Property(x => x.Icon).HasMaxLength(100);
-            entity.Property(x => x.IsActive).HasDefaultValue(true).IsRequired();
-            entity.HasIndex(x => new { x.IdProduct, x.SortOrder, x.Id });
         });
-        modelBuilder.Entity<StoreColor>(entity => { entity.ToTable("Color", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.ColorKey).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(100).IsRequired(); entity.Property(x => x.NameFa).HasMaxLength(100).IsRequired(); entity.Property(x => x.HexCode).HasColumnType("char(7)"); entity.HasIndex(x => x.ColorKey).IsUnique(); });
-        modelBuilder.Entity<StoreSpecificationGroup>(entity => { entity.ToTable("SpecificationGroup", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.GroupKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Name).HasMaxLength(200).IsRequired(); entity.HasIndex(x => x.GroupKey).IsUnique(); });
-        modelBuilder.Entity<StoreSpecificationCategory>(entity => { entity.ToTable("SpecificationCategory", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.CategoryKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Name).HasMaxLength(200).IsRequired(); entity.HasIndex(x => x.CategoryKey).IsUnique(); });
-        modelBuilder.Entity<StoreSpecificationFeature>(entity => { entity.ToTable("SpecificationFeature", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.FeatureKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Label).HasMaxLength(200).IsRequired(); entity.HasIndex(x => x.FeatureKey).IsUnique(); });
+        modelBuilder.Entity<StoreColor>(entity =>
+        {
+            entity.ToTable("Color", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.ColorKey).IsUnique();
+        });
+        modelBuilder.Entity<StoreSpecificationGroup>(entity =>
+        {
+            entity.ToTable("SpecificationGroup", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.GroupKey).IsUnique();
+        });
+        modelBuilder.Entity<StoreSpecificationCategory>(entity =>
+        {
+            entity.ToTable("SpecificationCategory", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.CategoryKey).IsUnique();
+        });
+        modelBuilder.Entity<StoreSpecificationFeature>(entity =>
+        {
+            entity.ToTable("SpecificationFeature", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.FeatureKey).IsUnique();
+        });
         modelBuilder.Entity<StoreCatalogFeature>(entity =>
         {
-            entity.ToTable("CatalogFeature", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.IsActive).HasDefaultValue(true);
+            entity.ToTable("CatalogFeature", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasAlternateKey(x => new { x.Id, x.Kind });
             entity.HasIndex(x => new { x.Kind, x.Name }).IsUnique();
         });
         modelBuilder.Entity<StoreCatalogFeatureValue>(entity =>
         {
-            entity.ToTable("CatalogFeatureValue", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.IsActive).HasDefaultValue(true);
+            entity.ToTable("CatalogFeatureValue", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasAlternateKey(x => new { x.Id, x.IdFeature });
             entity.HasIndex(x => new { x.IdFeature, x.Name }).IsUnique();
-            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => x.IdFeature).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => x.IdFeature)
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreCategoryCatalogFeature>(entity =>
         {
-            entity.ToTable("CategoryCatalogFeature", "Store"); entity.HasKey(x => new { x.IdCategory, x.IdFeature });
-            entity.HasOne<StoreCategory>().WithMany().HasForeignKey(x => x.IdCategory).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => x.IdFeature).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable("CategoryCatalogFeature", "Store");
+            entity.HasKey(x => new { x.IdCategory, x.IdFeature });
+            entity.HasOne<StoreCategory>().WithMany().HasForeignKey(x => x.IdCategory)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => x.IdFeature)
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreProductCatalogFeatureValue>(entity =>
         {
-            entity.ToTable("ProductCatalogFeatureValue", "Store"); entity.HasKey(x => new { x.IdProduct, x.IdFeature, x.IdFeatureValue });
-            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => new { x.IdFeature, x.Kind }).HasPrincipalKey(x => new { x.Id, x.Kind }).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<StoreCatalogFeatureValue>().WithMany().HasForeignKey(x => new { x.IdFeatureValue, x.IdFeature }).HasPrincipalKey(x => new { x.Id, x.IdFeature }).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable("ProductCatalogFeatureValue", "Store");
+            entity.HasKey(x => new { x.IdProduct, x.IdFeature, x.IdFeatureValue });
+            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => new { x.IdFeature, x.Kind })
+                .HasPrincipalKey(x => new { x.Id, x.Kind }).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCatalogFeatureValue>().WithMany()
+                .HasForeignKey(x => new { x.IdFeatureValue, x.IdFeature })
+                .HasPrincipalKey(x => new { x.Id, x.IdFeature }).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreVariantCatalogFeatureValue>(entity =>
         {
-            entity.ToTable("VariantCatalogFeatureValue", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.Id).HasColumnType("numeric(30,0)").UseIdentityColumn();
-            entity.HasAlternateKey(x => new { x.IdProductVariant, x.IdFeature }).HasName("UQ_VariantCatalogFeatureValue_Variant_Feature");
-            entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => x.IdProductVariant).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => new { x.IdFeature, x.Kind }).HasPrincipalKey(x => new { x.Id, x.Kind }).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<StoreCatalogFeatureValue>().WithMany().HasForeignKey(x => new { x.IdFeatureValue, x.IdFeature }).HasPrincipalKey(x => new { x.Id, x.IdFeature }).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable("VariantCatalogFeatureValue", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasAlternateKey(x => new { x.IdProductVariant, x.IdFeature })
+                .HasName("UQ_VariantCatalogFeatureValue_Variant_Feature");
+            entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => x.IdProductVariant)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => new { x.IdFeature, x.Kind })
+                .HasPrincipalKey(x => new { x.Id, x.Kind }).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCatalogFeatureValue>().WithMany()
+                .HasForeignKey(x => new { x.IdFeatureValue, x.IdFeature })
+                .HasPrincipalKey(x => new { x.Id, x.IdFeature }).OnDelete(DeleteBehavior.Restrict);
         });
-        modelBuilder.Entity<StoreProductColor>(entity => { entity.ToTable("ProductColor", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => new { x.IdProduct, x.IdColor }).IsUnique(); });
-        modelBuilder.Entity<StoreProductSpecificationValue>(entity => { entity.ToTable("ProductSpecificationValue", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.Value).HasMaxLength(1000).IsRequired(); entity.HasIndex(x => new { x.IdProduct, x.IdSpecificationFeature }).IsUnique(); });
-        modelBuilder.Entity<StoreProductCollection>(entity => { entity.ToTable("ProductCollection", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.CollectionKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Name).HasMaxLength(150).IsRequired(); entity.HasIndex(x => x.CollectionKey).IsUnique(); });
-        modelBuilder.Entity<StoreProductCollectionItem>(entity => { entity.ToTable("ProductCollectionItem", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => new { x.IdProductCollection, x.IdProduct }).IsUnique(); });
-        modelBuilder.Entity<StoreHomeCategoryTab>(entity => { entity.ToTable("HomeCategoryTab", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => x.IdCategory).IsUnique(); entity.HasOne<StoreCategory>().WithMany().HasForeignKey(x => x.IdCategory).OnDelete(DeleteBehavior.Restrict); });
+        modelBuilder.Entity<StoreProductColor>(entity =>
+        {
+            entity.ToTable("ProductColor", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => new { x.IdProduct, x.IdColor }).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductSpecificationValue>(entity =>
+        {
+            entity.ToTable("ProductSpecificationValue", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => new { x.IdProduct, x.IdSpecificationFeature }).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductCollection>(entity =>
+        {
+            entity.ToTable("ProductCollection", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.CollectionKey).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductCollectionItem>(entity =>
+        {
+            entity.ToTable("ProductCollectionItem", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => new { x.IdProductCollection, x.IdProduct }).IsUnique();
+        });
+        modelBuilder.Entity<StoreHomeCategoryTab>(entity =>
+        {
+            entity.ToTable("HomeCategoryTab", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.IdCategory).IsUnique();
+            entity.HasOne<StoreCategory>().WithMany().HasForeignKey(x => x.IdCategory)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
         modelBuilder.Entity<StoreBrandEditorial>(entity =>
         {
-            entity.ToTable("BrandEditorial", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.Established).HasMaxLength(200); entity.Property(x => x.OfficialUrl).HasMaxLength(1000);
-            entity.Property(x => x.Specialization).HasColumnType("nvarchar(max)"); entity.Property(x => x.FeaturedProducts).HasColumnType("nvarchar(max)");
-            entity.Property(x => x.Audience).HasColumnType("nvarchar(max)"); entity.Property(x => x.ShoppingAdvice).HasColumnType("nvarchar(max)");
-            entity.Property(x => x.CompanyIntroductionsJson).HasColumnType("nvarchar(max)"); entity.Property(x => x.ProductFamiliesJson).HasColumnType("nvarchar(max)"); entity.Property(x => x.StrengthsJson).HasColumnType("nvarchar(max)");
+            entity.ToTable("BrandEditorial", "Store");
+            entity.HasKey(x => x.Id);
             entity.HasIndex(x => x.IdBrand).IsUnique();
         });
         modelBuilder.Entity<StoreBrand>(entity =>
         {
             entity.ToTable("Brand", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.BrandKey).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.NameEn).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.NameFa).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.LogoPath).HasMaxLength(500);
-            entity.Property(x => x.ShowInStore).HasDefaultValue(true).IsRequired();
             entity.HasIndex(x => x.BrandKey).IsUnique();
         });
         modelBuilder.Entity<StoreBank>(entity =>
         {
             entity.ToTable("Bank", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Code).HasMaxLength(40).IsUnicode(false).IsRequired();
-            entity.Property(x => x.NameFa).HasMaxLength(150).IsRequired();
-            entity.Property(x => x.LogoPath).HasMaxLength(500);
-            entity.Property(x => x.IsActive).HasDefaultValue(true);
         });
         modelBuilder.Entity<StoreCategory>(entity =>
         {
             entity.ToTable("Category", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.CategoryKey).HasMaxLength(150).IsRequired();
-            entity.Property(x => x.NameEn).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.NameFa).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.PathJson).HasColumnType("nvarchar(max)").IsRequired();
-            entity.Property(x => x.TreePathIds).HasMaxLength(4000).IsUnicode().IsRequired();
-            entity.Property(x => x.TreePathNames).HasMaxLength(4000).IsUnicode().IsRequired();
-            entity.Property(x => x.ProductIntro).HasMaxLength(10000);
-            entity.Property(x => x.ProductHighlightsJson).HasColumnType("nvarchar(max)");
-            entity.Property(x => x.ProductSpecsJson).HasColumnType("nvarchar(max)");
             entity.HasIndex(x => x.CategoryKey).IsUnique();
         });
         modelBuilder.Entity<GeoCountry>(entity =>
         {
             entity.ToTable("Country", "Geo");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.CountryCode).HasMaxLength(8).IsRequired();
-            entity.Property(x => x.NameFa).HasMaxLength(150).IsRequired();
-            entity.Property(x => x.NameEn).HasMaxLength(150).IsRequired();
-            entity.Property(x => x.FlagPath).HasMaxLength(500);
             entity.HasIndex(x => x.CountryCode).IsUnique();
         });
         modelBuilder.Entity<GeoProvince>(entity =>
         {
             entity.ToTable("Province", "Geo");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.NameFa).HasMaxLength(150).IsRequired();
-            entity.Property(x => x.NameEn).HasMaxLength(150).IsRequired();
-            entity.Property(x => x.Latitude).HasPrecision(12, 8);
-            entity.Property(x => x.Longitude).HasPrecision(12, 8);
         });
         modelBuilder.Entity<GeoCity>(entity =>
         {
             entity.ToTable("City", "Geo");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.SourceCountryName).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.NameFa).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.NameEn).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.Latitude).HasPrecision(12, 8);
-            entity.Property(x => x.Longitude).HasPrecision(12, 8);
         });
     }
 }

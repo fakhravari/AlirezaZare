@@ -11,22 +11,24 @@ using Shop.Data.Infrastructure;
 using Shop.Data.Infrastructure.Ftp;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddPersistentDataProtection(builder.Configuration, builder.Environment.ContentRootPath, builder.Environment.EnvironmentName);
+builder.Services.AddPersistentDataProtection(builder.Configuration, builder.Environment.ContentRootPath,
+    builder.Environment.EnvironmentName);
 builder.Services.AddScoped<MediaCdnViewDataFilter>();
 builder.Services.AddControllersWithViews(options => options.Filters.AddService<MediaCdnViewDataFilter>());
 builder.Services.AddAuthentication("AdminCookie").AddCookie("AdminCookie", options =>
-    {
-        options.Cookie.Name = "Shop.Admin.Session";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.Strict;
-        options.LoginPath = "/auth/login";
-        options.AccessDeniedPath = "/auth/denied";
-        options.SlidingExpiration = true;
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
-        options.EventsType = typeof(AdminCookieEvents);
-    });
-builder.Services.AddAuthorization(options => options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+{
+    options.Cookie.Name = "Shop.Admin.Session";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.LoginPath = "/auth/login";
+    options.AccessDeniedPath = "/auth/denied";
+    options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.EventsType = typeof(AdminCookieEvents);
+});
+builder.Services.AddAuthorization(options =>
+    options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -76,7 +78,7 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapControllerRoute( name: "areas", pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
-app.MapControllerRoute( name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute(name: "areas", pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

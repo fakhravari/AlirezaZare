@@ -6,10 +6,22 @@ public record PageModel(SeoModel Seo, string? ViewName = null, bool IsHome = fal
     public ManagedPageContent? ManagedContent { get; init; }
 }
 
-public sealed record ManagedPageContent(long Id, string PageKey, string RoutePath, string Title, string Description, bool IsPublished,
+public sealed record ManagedPageContent(
+    long Id,
+    string PageKey,
+    string RoutePath,
+    string Title,
+    string Description,
+    bool IsPublished,
     IReadOnlyList<ManagedPageSection> Sections);
 
-public sealed record ManagedPageSection(long Id, string SectionKey, string? Heading, string? Body, int SortOrder, bool IsPublished);
+public sealed record ManagedPageSection(
+    long Id,
+    string SectionKey,
+    string? Heading,
+    string? Body,
+    int SortOrder,
+    bool IsPublished);
 
 public sealed record PageModel<TModel>(TModel Data, SeoModel Seo, string? ViewName = null, bool IsHome = false)
     : PageModel(Seo, ViewName, IsHome);

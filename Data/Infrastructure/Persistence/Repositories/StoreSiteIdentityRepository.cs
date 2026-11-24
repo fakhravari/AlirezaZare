@@ -7,7 +7,8 @@ namespace Shop.Data.Infrastructure.Persistence.Repositories;
 public sealed class StoreSiteIdentityRepository(ShopDbContext dbContext) : IStoreSiteIdentityRepository
 {
     public Task<StoreSiteIdentitySnapshot?> ReadAsync(CancellationToken cancellationToken) =>
-        dbContext.StoreSiteIdentities.AsNoTracking().Where(identity => identity.Id == 1).Select(identity => new StoreSiteIdentitySnapshot(
+        dbContext.StoreSiteIdentities.AsNoTracking().Where(identity => identity.Id == 1).Select(identity =>
+            new StoreSiteIdentitySnapshot(
                 identity.DisplayName,
                 identity.StoreName,
                 identity.VisualBrandName,

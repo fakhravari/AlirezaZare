@@ -87,7 +87,9 @@
                     {
                         <div class="col-md-6 col-lg-3">
                             <article class="glass-card value-card">
-                                <span class="value-icon"><i class="bi @(icons[(i - 2) % icons.Length])" aria-hidden="true"></i></span>
+                                <span class="value-icon">
+                                    <i class="bi @(icons[(i - 2) % icons.Length])" aria-hidden="true"></i>
+                                </span>
                                 <h3>@aboutSections[i].Heading</h3>
                                 @Html.Raw(StoreHtmlSanitizer.Sanitize(aboutSections[i].Body))
                             </article>
@@ -96,46 +98,46 @@
                 }
                 else
                 {
-                <div class="col-md-6 col-lg-3">
-                    <article class="glass-card value-card">
-                        <span class="value-icon">
-                            <i class="bi bi-patch-check" aria-hidden="true"></i>
-                        </span>
-                        <h3>اصالت بدون ابهام</h3>
-                        <p>
-                            بررسی اطلاعات و شرایط درج‌شده برای هر کالا پیش از تصمیم‌گیری.
-                        </p>
-                    </article>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <article class="glass-card value-card">
-                        <span class="value-icon">
-                            <i class="bi bi-chat-heart" aria-hidden="true"></i>
-                        </span>
-                        <h3>شفافیت در انتخاب</h3>
-                        <p>ارائه اطلاعات دقیق محصول، مشخصات فنی و شرایط ضمانت.</p>
-                    </article>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <article class="glass-card value-card">
-                        <span class="value-icon">
-                            <i class="bi bi-tools" aria-hidden="true"></i>
-                        </span>
-                        <h3>خدمات ماندگار</h3>
-                        <p>برای پرسش دربارهٔ مشخصات، سفارش یا شرایط خدمات از راه‌های تماس استفاده کنید.</p>
-                    </article>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <article class="glass-card value-card">
-                        <span class="value-icon">
-                            <i class="bi bi-stars" aria-hidden="true"></i>
-                        </span>
-                        <h3>انتخاب سخت‌گیرانه</h3>
-                        <p>
-                            مقایسهٔ مدل‌ها بر اساس کاربرد، مشخصات فنی و نیاز واقعی کاربر.
-                        </p>
-                    </article>
-                </div>
+                    <div class="col-md-6 col-lg-3">
+                        <article class="glass-card value-card">
+                            <span class="value-icon">
+                                <i class="bi bi-patch-check" aria-hidden="true"></i>
+                            </span>
+                            <h3>اصالت بدون ابهام</h3>
+                            <p>
+                                بررسی اطلاعات و شرایط درج‌شده برای هر کالا پیش از تصمیم‌گیری.
+                            </p>
+                        </article>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <article class="glass-card value-card">
+                            <span class="value-icon">
+                                <i class="bi bi-chat-heart" aria-hidden="true"></i>
+                            </span>
+                            <h3>شفافیت در انتخاب</h3>
+                            <p>ارائه اطلاعات دقیق محصول، مشخصات فنی و شرایط ضمانت.</p>
+                        </article>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <article class="glass-card value-card">
+                            <span class="value-icon">
+                                <i class="bi bi-tools" aria-hidden="true"></i>
+                            </span>
+                            <h3>خدمات ماندگار</h3>
+                            <p>برای پرسش دربارهٔ مشخصات، سفارش یا شرایط خدمات از راه‌های تماس استفاده کنید.</p>
+                        </article>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <article class="glass-card value-card">
+                            <span class="value-icon">
+                                <i class="bi bi-stars" aria-hidden="true"></i>
+                            </span>
+                            <h3>انتخاب سخت‌گیرانه</h3>
+                            <p>
+                                مقایسهٔ مدل‌ها بر اساس کاربرد، مشخصات فنی و نیاز واقعی کاربر.
+                            </p>
+                        </article>
+                    </div>
                 }
             </div>
         </div>

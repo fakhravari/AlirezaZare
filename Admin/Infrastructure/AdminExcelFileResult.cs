@@ -3,7 +3,10 @@ using System.Xml;
 using System.Xml.Linq;
 
 namespace Shop.Admin.Infrastructure;
-public sealed class AdminExcelFileResult(string fileName, string sheetName,
+
+public sealed class AdminExcelFileResult(
+    string fileName,
+    string sheetName,
     Func<AdminExcelWorksheetWriter, CancellationToken, Task> writeRows) : Microsoft.AspNetCore.Mvc.IActionResult
 {
     private const string SpreadsheetNamespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
@@ -23,22 +26,36 @@ public sealed class AdminExcelFileResult(string fileName, string sheetName,
 
         AddXmlEntry(archive, "[Content_Types].xml", new XElement("Types",
             new XAttribute("xmlns", "http://schemas.openxmlformats.org/package/2006/content-types"),
-            new XElement("Default", new XAttribute("Extension", "rels"), new XAttribute("ContentType", "application/vnd.openxmlformats-package.relationships+xml")),
-            new XElement("Default", new XAttribute("Extension", "xml"), new XAttribute("ContentType", "application/xml")),
-            new XElement("Override", new XAttribute("PartName", "/xl/workbook.xml"), new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml")),
+            new XElement("Default", new XAttribute("Extension", "rels"),
+                new XAttribute("ContentType", "application/vnd.openxmlformats-package.relationships+xml")),
+            new XElement("Default", new XAttribute("Extension", "xml"),
+                new XAttribute("ContentType", "application/xml")),
+            new XElement("Override", new XAttribute("PartName", "/xl/workbook.xml"),
+                new XAttribute("ContentType",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml")),
             Enumerable.Range(1, worksheet.SheetCount).Select(index => new XElement("Override",
-                new XAttribute("PartName", $"/xl/worksheets/sheet{index}.xml"), new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml")))));
+                new XAttribute("PartName", $"/xl/worksheets/sheet{index}.xml"),
+                new XAttribute("ContentType",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml")))));
         AddXmlEntry(archive, "_rels/.rels", new XElement(XName.Get("Relationships", PackageRelationshipNamespace),
             new XElement(XName.Get("Relationship", PackageRelationshipNamespace), new XAttribute("Id", "rId1"),
-                new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"), new XAttribute("Target", "xl/workbook.xml"))));
+                new XAttribute("Type",
+                    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"),
+                new XAttribute("Target", "xl/workbook.xml"))));
         AddXmlEntry(archive, "xl/workbook.xml", new XElement(XName.Get("workbook", SpreadsheetNamespace),
             new XAttribute(XNamespace.Xmlns + "r", RelationshipNamespace),
-            new XElement(XName.Get("sheets", SpreadsheetNamespace), Enumerable.Range(1, worksheet.SheetCount).Select(index =>
-                new XElement(XName.Get("sheet", SpreadsheetNamespace), new XAttribute("name", worksheet.SheetCount == 1 ? sheetName : $"{sheetName} {index}"),
-                    new XAttribute("sheetId", index), new XAttribute(XName.Get("id", RelationshipNamespace), $"rId{index}"))))));
-        AddXmlEntry(archive, "xl/_rels/workbook.xml.rels", new XElement(XName.Get("Relationships", PackageRelationshipNamespace),
-            Enumerable.Range(1, worksheet.SheetCount).Select(index => new XElement(XName.Get("Relationship", PackageRelationshipNamespace),
-                new XAttribute("Id", $"rId{index}"), new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"),
+            new XElement(XName.Get("sheets", SpreadsheetNamespace), Enumerable.Range(1, worksheet.SheetCount)
+                .Select(index =>
+                    new XElement(XName.Get("sheet", SpreadsheetNamespace),
+                        new XAttribute("name", worksheet.SheetCount == 1 ? sheetName : $"{sheetName} {index}"),
+                        new XAttribute("sheetId", index),
+                        new XAttribute(XName.Get("id", RelationshipNamespace), $"rId{index}"))))));
+        AddXmlEntry(archive, "xl/_rels/workbook.xml.rels", new XElement(
+            XName.Get("Relationships", PackageRelationshipNamespace),
+            Enumerable.Range(1, worksheet.SheetCount).Select(index => new XElement(
+                XName.Get("Relationship", PackageRelationshipNamespace),
+                new XAttribute("Id", $"rId{index}"),
+                new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"),
                 new XAttribute("Target", $"worksheets/sheet{index}.xml")))));
         await response.Body.FlushAsync(context.HttpContext.RequestAborted);
     }
@@ -47,7 +64,8 @@ public sealed class AdminExcelFileResult(string fileName, string sheetName,
     {
         ZipArchiveEntry entry = archive.CreateEntry(name, CompressionLevel.Fastest);
         using Stream stream = entry.Open();
-        using XmlWriter writer = XmlWriter.Create(stream, new XmlWriterSettings { Encoding = new System.Text.UTF8Encoding(false) });
+        using XmlWriter writer = XmlWriter.Create(stream,
+            new XmlWriterSettings { Encoding = new System.Text.UTF8Encoding(false) });
         document.Save(writer);
     }
 }
@@ -118,12 +136,15 @@ public sealed class AdminExcelWorksheetWriter : IDisposable
                 _writer.WriteStartElement("is", _spreadsheetNamespace);
                 _writer.WriteStartElement("t", _spreadsheetNamespace);
                 _writer.WriteAttributeString("xml", "space", "http://www.w3.org/XML/1998/namespace", "preserve");
-                _writer.WriteString(Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty);
+                _writer.WriteString(Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) ??
+                                    string.Empty);
                 _writer.WriteEndElement();
                 _writer.WriteEndElement();
             }
+
             _writer.WriteEndElement();
         }
+
         _writer.WriteEndElement();
     }
 
@@ -142,7 +163,8 @@ public sealed class AdminExcelWorksheetWriter : IDisposable
         SheetCount++;
         _rowsOnSheet = 0;
         ZipArchiveEntry entry = _archive.CreateEntry($"xl/worksheets/sheet{SheetCount}.xml", CompressionLevel.Fastest);
-        _writer = XmlWriter.Create(entry.Open(), new XmlWriterSettings { Encoding = new System.Text.UTF8Encoding(false) });
+        _writer = XmlWriter.Create(entry.Open(),
+            new XmlWriterSettings { Encoding = new System.Text.UTF8Encoding(false) });
         _writer.WriteStartDocument(true);
         _writer.WriteStartElement("worksheet", _spreadsheetNamespace);
         _writer.WriteStartElement("sheetData", _spreadsheetNamespace);

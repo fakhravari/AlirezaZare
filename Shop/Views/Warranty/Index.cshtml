@@ -74,38 +74,45 @@
                     var warrantyIcons = new[] { "bi-receipt", "bi-chat-left-text", "bi-headset" };
                     @for (var i = 1; i < warrantySections.Count; i++)
                     {
-                        <li><span class="warranty-step-icon"><i class="bi @(warrantyIcons[(i - 1) % warrantyIcons.Length])" aria-hidden="true"></i></span><div><strong>@warrantySections[i].Heading</strong>@Html.Raw(StoreHtmlSanitizer.Sanitize(warrantySections[i].Body))</div></li>
+                        <li>
+                            <span class="warranty-step-icon">
+                                <i class="bi @(warrantyIcons[(i - 1) % warrantyIcons.Length])" aria-hidden="true"></i>
+                            </span>
+                            <div>
+                                <strong>@warrantySections[i].Heading</strong>@Html.Raw(StoreHtmlSanitizer.Sanitize(warrantySections[i].Body))
+                            </div>
+                        </li>
                     }
                 }
                 else
                 {
-                <li>
-                    <span class="warranty-step-icon">
-                        <i class="bi bi-receipt" aria-hidden="true"></i>
-                    </span>
-                    <div>
-                        <strong>مدارک را آماده کنید</strong>
-                        <p>فاکتور خرید، مدل و کارت ضمانت محصول را در دسترس داشته باشید.</p>
-                    </div>
-                </li>
-                <li>
-                    <span class="warranty-step-icon">
-                        <i class="bi bi-chat-left-text" aria-hidden="true"></i>
-                    </span>
-                    <div>
-                        <strong>شرح مشکل را بگویید</strong>
-                        <p>علائم و زمان بروز مشکل را برای بررسی اولیه با پشتیبانی در میان بگذارید.</p>
-                    </div>
-                </li>
-                <li>
-                    <span class="warranty-step-icon">
-                        <i class="bi bi-headset" aria-hidden="true"></i>
-                    </span>
-                    <div>
-                        <strong>شرایط را هماهنگ کنید</strong>
-                        <p>پوشش و مراحل بعدی بر اساس مدارک محصول و بررسی فروشگاه اعلام می‌شود.</p>
-                    </div>
-                </li>
+                    <li>
+                        <span class="warranty-step-icon">
+                            <i class="bi bi-receipt" aria-hidden="true"></i>
+                        </span>
+                        <div>
+                            <strong>مدارک را آماده کنید</strong>
+                            <p>فاکتور خرید، مدل و کارت ضمانت محصول را در دسترس داشته باشید.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="warranty-step-icon">
+                            <i class="bi bi-chat-left-text" aria-hidden="true"></i>
+                        </span>
+                        <div>
+                            <strong>شرح مشکل را بگویید</strong>
+                            <p>علائم و زمان بروز مشکل را برای بررسی اولیه با پشتیبانی در میان بگذارید.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="warranty-step-icon">
+                            <i class="bi bi-headset" aria-hidden="true"></i>
+                        </span>
+                        <div>
+                            <strong>شرایط را هماهنگ کنید</strong>
+                            <p>پوشش و مراحل بعدی بر اساس مدارک محصول و بررسی فروشگاه اعلام می‌شود.</p>
+                        </div>
+                    </li>
                 }
             </ol>
         </section>

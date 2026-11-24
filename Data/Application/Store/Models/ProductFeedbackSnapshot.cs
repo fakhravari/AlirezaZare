@@ -6,7 +6,7 @@ public sealed record ProductFeedbackSnapshot(
     decimal? AverageRating);
 
 public sealed record ProductFeedbackItem(
-    long Id,
+    decimal Id,
     string Name,
     string Text,
     byte? Rating,

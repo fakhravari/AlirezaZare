@@ -7,19 +7,45 @@
 <div class="modal fade" id="coupon-editor-@suffix" tabindex="-1" aria-labelledby="coupon-editor-title-@suffix" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
         <form asp-action="Save" method="post" class="modal-content">
-            @if (!isNew) { <input type="hidden" name="id" value="@Model.Id" /> }
-            <div class="modal-header"><div><h2 class="modal-title fs-5" id="coupon-editor-title-@suffix">@(isNew ? "تعریف کد تخفیف" : "ویرایش کد تخفیف")</h2><small class="text-muted">مشخصات و شرایط استفاده از کد را وارد کنید.</small></div><button class="btn-close ms-0" type="button" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+            @if (!isNew)
+            {
+                <input type="hidden" name="id" value="@Model.Id"/>
+            }
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title fs-5" id="coupon-editor-title-@suffix">@(isNew ? "تعریف کد تخفیف" : "ویرایش کد تخفیف")</h2><small class="text-muted">مشخصات و شرایط استفاده از کد را وارد کنید.</small>
+                </div><button class="btn-close ms-0" type="button" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
             <div class="modal-body admin-modal-grid-two">
-                <div class="admin-modal-field"><label for="coupon-code-@suffix" class="form-label">کد انگلیسی و عددی</label><input id="coupon-code-@suffix" name="code" value="@Model.Code" class="form-control" dir="ltr" maxlength="32" pattern="[A-Za-z0-9]+" readonly="@lockedCode" required /><small class="text-muted">@(lockedCode ? "کد دارای سابقه قابل تغییر نیست." : "فقط حروف انگلیسی و عدد، بدون فاصله.")</small></div>
-                <div class="admin-modal-field"><label for="coupon-percent-@suffix" class="form-label">درصد تخفیف</label><input id="coupon-percent-@suffix" name="discountPercent" value="@(isNew ? "" : Model.DiscountPercent.ToString())" type="number" min="1" max="99" class="form-control" required /><small class="text-muted">از ۱ تا ۹۹ درصد</small></div>
-                <div class="admin-modal-field"><label for="coupon-limit-@suffix" class="form-label">سقف کل استفاده</label><input id="coupon-limit-@suffix" name="usageLimit" value="@Model.UsageLimit" type="number" min="@Math.Max(1, Model.Uses)" class="form-control" required /><small class="text-muted">تعداد مصرف ثبت‌شده: @Model.Uses</small></div>
-                <div class="admin-modal-field"><label for="coupon-expiry-@suffix" class="form-label">تاریخ انقضا (میلادی)</label><input id="coupon-expiry-@suffix" name="expiresOn" value="@(isNew ? "" : Model.ExpiresOn.ToString("yyyy-MM-dd"))" type="date" class="form-control" required /><small class="text-muted">تا پایان این روز بر اساس UTC معتبر است.</small></div>
-                <div class="admin-modal-field"><label for="coupon-audience-@suffix" class="form-label">مخاطب کد</label><select id="coupon-audience-@suffix" name="audience" class="form-select"><option value="public" selected="@(Model.IdProfile is null)">عمومی</option><option value="personal" selected="@(Model.IdProfile is not null)">کاربر مشخص</option></select></div>
-                <div class="admin-modal-field"><label for="coupon-customer-@suffix" class="form-label">ایمیل کاربر</label><input id="coupon-customer-@suffix" name="customerEmail" type="email" maxlength="254" class="form-control" dir="ltr" value="@Model.CustomerEmail" /><small class="text-muted">برای کد اختصاصی، ایمیل حساب ثبت‌شده را وارد کنید.</small></div>
-                <div class="form-check form-switch"><input class="form-check-input" id="coupon-enabled-@suffix" type="checkbox" name="enabled" value="true" checked="@Model.Enabled" /><label class="form-check-label" for="coupon-enabled-@suffix">کد فعال باشد</label></div>
+                <div class="admin-modal-field">
+                    <label for="coupon-code-@suffix" class="form-label">کد انگلیسی و عددی</label><input id="coupon-code-@suffix" name="code" value="@Model.Code" class="form-control" dir="ltr" maxlength="32" pattern="[A-Za-z0-9]+" readonly="@lockedCode" required/><small class="text-muted">@(lockedCode ? "کد دارای سابقه قابل تغییر نیست." : "فقط حروف انگلیسی و عدد، بدون فاصله.")</small>
+                </div>
+                <div class="admin-modal-field">
+                    <label for="coupon-percent-@suffix" class="form-label">درصد تخفیف</label><input id="coupon-percent-@suffix" name="discountPercent" value="@(isNew ? "" : Model.DiscountPercent.ToString())" type="number" min="1" max="99" class="form-control" required/><small class="text-muted">از ۱ تا ۹۹ درصد</small>
+                </div>
+                <div class="admin-modal-field">
+                    <label for="coupon-limit-@suffix" class="form-label">سقف کل استفاده</label><input id="coupon-limit-@suffix" name="usageLimit" value="@Model.UsageLimit" type="number" min="@Math.Max(1, Model.Uses)" class="form-control" required/><small class="text-muted">تعداد مصرف ثبت‌شده: @Model.Uses</small>
+                </div>
+                <div class="admin-modal-field">
+                    <label for="coupon-expiry-@suffix" class="form-label">تاریخ انقضا (میلادی)</label><input id="coupon-expiry-@suffix" name="expiresOn" value="@(isNew ? "" : Model.ExpiresOn.ToString("yyyy-MM-dd"))" type="date" class="form-control" required/><small class="text-muted">تا پایان این روز بر اساس UTC معتبر است.</small>
+                </div>
+                <div class="admin-modal-field">
+                    <label for="coupon-audience-@suffix" class="form-label">مخاطب کد</label>
+                    <select id="coupon-audience-@suffix" name="audience" class="form-select">
+                        <option value="public" selected="@(Model.IdProfile is null)">عمومی</option><option value="personal" selected="@(Model.IdProfile is not null)">کاربر مشخص</option>
+                    </select>
+                </div>
+                <div class="admin-modal-field">
+                    <label for="coupon-customer-@suffix" class="form-label">ایمیل کاربر</label><input id="coupon-customer-@suffix" name="customerEmail" type="email" maxlength="254" class="form-control" dir="ltr" value="@Model.CustomerEmail"/><small class="text-muted">برای کد اختصاصی، ایمیل حساب ثبت‌شده را وارد کنید.</small>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" id="coupon-enabled-@suffix" type="checkbox" name="enabled" value="true" checked="@Model.Enabled"/><label class="form-check-label" for="coupon-enabled-@suffix">کد فعال باشد</label>
+                </div>
                 <p class="small text-muted mb-0">تخفیف فقط به اقلام واجد شرایط سبد اعمال می‌شود.</p>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button>
+            </div>
         </form>
     </div>
 </div>

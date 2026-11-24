@@ -49,11 +49,15 @@
                             <div>
                                 <div class="journal-main-meta" aria-label="دسته‌بندی و اطلاعات مطلب">
                                     <span class="journal-main-meta-copy">
-                                        <span class="journal-main-category"><i class="bi bi-bookmark-star" aria-hidden="true"></i> @lead.Category</span>
+                                        <span class="journal-main-category">
+                                            <i class="bi bi-bookmark-star" aria-hidden="true"></i> @lead.Category
+                                        </span>
                                         <span class="journal-main-read"><i class="bi bi-clock" aria-hidden="true"></i> @lead.ReadMinutes دقیقه مطالعه</span>
                                     </span>
                                 </div>
-                                <h3><a asp-controller="Magazine" asp-action="Details" asp-route-slug="@lead.Slug">@lead.Title</a></h3>
+                                <h3>
+                                    <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@lead.Slug">@lead.Title</a>
+                                </h3>
                                 <p>@lead.Summary</p>
                             </div>
                         </article>
@@ -61,18 +65,28 @@
                     <div class="col-md-6 journal-list-column">
                         <div class="journal-list">
                             <div class="journal-list-heading">
-                                <span class="journal-list-heading-icon"><i class="bi bi-journal-bookmark-fill" aria-hidden="true"></i></span>
-                                <div><small>مجلهٔ تخصصی برق و ابزار</small><strong>منتخب راهنماها</strong></div>
+                                <span class="journal-list-heading-icon">
+                                    <i class="bi bi-journal-bookmark-fill" aria-hidden="true"></i>
+                                </span>
+                                <div>
+                                    <small>مجلهٔ تخصصی برق و ابزار</small><strong>منتخب راهنماها</strong>
+                                </div>
                                 <span class="journal-list-count"><b>@posts.Skip(1).Count()</b> مطلب کاربردی</span>
                             </div>
                             @foreach (var (post, index) in posts.Skip(1).Select((post, index) => (post, index: index + 1)))
                             {
                                 <article>
                                     <span class="journal-list-number">@index</span>
-                                    <div class="journal-list-card-meta"><small>@post.Category</small></div>
-                                    <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="@post.Slug">@post.Title</a></h4>
+                                    <div class="journal-list-card-meta">
+                                        <small>@post.Category</small>
+                                    </div>
+                                    <h4>
+                                        <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@post.Slug">@post.Title</a>
+                                    </h4>
                                     <div class="journal-list-stats" aria-label="زمان مطالعه">
-                                        <span class="journal-metric"><i class="bi bi-clock" aria-hidden="true"></i><small>@post.ReadMinutes دقیقه</small></span>
+                                        <span class="journal-metric">
+                                            <i class="bi bi-clock" aria-hidden="true"></i><small>@post.ReadMinutes دقیقه</small>
+                                        </span>
                                     </div>
                                 </article>
                             }

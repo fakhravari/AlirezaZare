@@ -5,7 +5,8 @@ namespace Shop.Admin.Areas.Store.Controllers;
 [Area("Store")]
 public sealed class CatalogController : Controller
 {
-    public IActionResult Products() => CatalogPage("products", "کالاها و پیش‌نویس‌ها", "کالاهای منتشرشده و پیش‌نویس‌های کاتالوگ فروشگاه.");
+    public IActionResult Products() => CatalogPage("products", "کالاها و پیش‌نویس‌ها",
+        "کالاهای منتشرشده و پیش‌نویس‌های کاتالوگ فروشگاه.");
 
     public IActionResult ProductDetails(long id)
     {
@@ -20,6 +21,7 @@ public sealed class CatalogController : Controller
         CatalogPage("categories", "دسته‌بندی‌ها", "ساختار درختی دسته‌بندی‌های کاتالوگ.");
 
     public IActionResult Brands() => CatalogPage("brands", "برندها", "برندهای متصل به کالاهای فروشگاه.");
+
     public IActionResult Badges()
     {
         ViewData["Title"] = "نشان‌های کالا";
@@ -27,13 +29,17 @@ public sealed class CatalogController : Controller
         ViewData["FeatureId"] = "badges";
         return View();
     }
-    public IActionResult Attributes() => CatalogPage("attributes", "ویژگی‌های کالا", "تعریف ویژگی‌های فیلتر و مشخصات کالا.");
+
+    public IActionResult Attributes() =>
+        CatalogPage("attributes", "ویژگی‌های کالا", "تعریف ویژگی‌های فیلتر و مشخصات کالا.");
+
     public IActionResult PaymentInstitutions()
     {
         ViewData["Title"] = "مؤسسه‌های پرداخت";
         ViewData["AreaTitle"] = "مدیریت فروشگاه";
         ViewData["FeatureId"] = "payment-institutions";
-        ViewData["Description"] = "نام و نشان مؤسسه‌های پرداخت معرفی‌شده در فروشگاه؛ این فهرست به‌معنی اتصال عملیاتی درگاه نیست.";
+        ViewData["Description"] =
+            "نام و نشان مؤسسه‌های پرداخت معرفی‌شده در فروشگاه؛ این فهرست به‌معنی اتصال عملیاتی درگاه نیست.";
         ViewData["Section"] = "payment-institutions";
         ViewData["ApiUrl"] = "/api/admin/store/payment-institutions";
 

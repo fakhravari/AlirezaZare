@@ -29,9 +29,17 @@ public sealed class PaymentController(PaymentService payments, IAntiforgery anti
         {
             "redirect" => Ok(new { redirectUrl = result.RedirectUri!.AbsoluteUri }),
             "not-found" => NotFound(),
-            "amount-mismatch" => Conflict(new { code = result.Status, message = "مبلغ اقلام این سفارش با مبلغ فاکتور یکسان نیست. لطفاً با پشتیبانی تماس بگیرید." }),
+            "amount-mismatch" => Conflict(new
+            {
+                code = result.Status,
+                message = "مبلغ اقلام این سفارش با مبلغ فاکتور یکسان نیست. لطفاً با پشتیبانی تماس بگیرید."
+            }),
             "invalid-order" or "already-started" => Conflict(new { code = result.Status }),
-            _ => StatusCode(StatusCodes.Status503ServiceUnavailable, new { code = result.Status, message = "درگاه پرداخت در دسترس نیست؛ سفارش در انتظار پرداخت باقی مانده است." })
+            _ => StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new
+                {
+                    code = result.Status, message = "درگاه پرداخت در دسترس نیست؛ سفارش در انتظار پرداخت باقی مانده است."
+                })
         };
     }
 

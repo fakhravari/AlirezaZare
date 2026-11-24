@@ -15,8 +15,8 @@ public sealed class StoreProductMediaType
 
 public sealed class StoreProductAsset
 {
-    public long Id { get; set; }
-    public long IdProduct { get; set; }
+    public decimal Id { get; set; }
+    public decimal IdProduct { get; set; }
     public int IdMediaType { get; set; }
     public string Path { get; set; } = "";
     public string ThumbnailPath { get; set; } = "";

@@ -7,7 +7,8 @@ using System.Security.Claims;
 namespace Shop.Controllers;
 
 [Route("Profile")]
-public sealed class ProfileController(Shop.Services.IAccountDataSource accountDataSource, ShopDbContext db) : PageController
+public sealed class ProfileController(Shop.Services.IAccountDataSource accountDataSource, ShopDbContext db)
+    : PageController
 {
     [HttpGet("/account")]
     public IActionResult LegacyAccount() => RedirectToAction(nameof(Index));
@@ -52,25 +53,33 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
             long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out long profileId);
             var assignedCoupons = profileId > 0
                 ? await db.AccountCoupons.AsNoTracking().Where(coupon => coupon.IdProfile == profileId)
-                    .Select(coupon => new { coupon.CouponKey, coupon.Code, coupon.DiscountPercent, coupon.Enabled, coupon.ExpiresOn, coupon.UsageLimit })
+                    .Select(coupon => new
+                    {
+                        coupon.CouponKey, coupon.Code, coupon.DiscountPercent, coupon.Enabled, coupon.ExpiresOn,
+                        coupon.UsageLimit
+                    })
                     .ToListAsync(HttpContext.RequestAborted)
                 : [];
             var ordersById = account.Orders.ToDictionary(order => order.Id, StringComparer.Ordinal);
             DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
-            var accountCoupons = account.Coupons.Concat(assignedCoupons.Select(coupon => new Shop.Models.AccountCoupon(coupon.CouponKey, coupon.Code, coupon.DiscountPercent, coupon.Enabled, coupon.ExpiresOn, coupon.UsageLimit, Array.Empty<string>())));
+            var accountCoupons = account.Coupons.Concat(assignedCoupons.Select(coupon =>
+                new Shop.Models.AccountCoupon(coupon.CouponKey, coupon.Code, coupon.DiscountPercent, coupon.Enabled,
+                    coupon.ExpiresOn, coupon.UsageLimit, Array.Empty<string>())));
             coupons = accountCoupons.Select(coupon => new ProfileCouponViewModel(
-                    coupon.Id,
-                    coupon.Code,
-                    coupon.DiscountPercent,
-                    coupon.UsageLimit,
-                    coupon.IsActive(today),
-                    AccountDisplay.Date(coupon.ExpiresOn),
-                    coupon.OrderIds.Where(ordersById.ContainsKey).Select(id => ordersById[id]).Select(order =>
-                            new ProfileCouponUseViewModel(
-                                order.Number,
-                                order.DateLabel,
-                                order.OrderedOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture))).ToArray())).ToArray();
+                coupon.Id,
+                coupon.Code,
+                coupon.DiscountPercent,
+                coupon.UsageLimit,
+                coupon.IsActive(today),
+                AccountDisplay.Date(coupon.ExpiresOn),
+                coupon.OrderIds.Where(ordersById.ContainsKey).Select(id => ordersById[id]).Select(order =>
+                        new ProfileCouponUseViewModel(
+                            order.Number,
+                            order.DateLabel,
+                            order.OrderedOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)))
+                    .ToArray())).ToArray();
         }
+
         var genders = await db.AccountGenders.AsNoTracking().OrderBy(x => x.Id)
             .Select(x => new ProfileGenderOption(x.Id, x.Code, x.NameFa)).ToListAsync(HttpContext.RequestAborted);
         PageModel<ProfilePageViewModel> model = new(

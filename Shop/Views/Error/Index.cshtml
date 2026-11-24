@@ -3,13 +3,15 @@
 @{
     var isNotFound = Context.Response.StatusCode == 404;
     var originalPath = Context.Features.Get<IExceptionHandlerPathFeature>()?.Path
-        ?? Context.Features.Get<IStatusCodeReExecuteFeature>()?.OriginalPath;
+                       ?? Context.Features.Get<IStatusCodeReExecuteFeature>()?.OriginalPath;
     var retryPath = Url.IsLocalUrl(originalPath) ? originalPath : null;
 }
 <main class="error-page">
     <div class="container">
         <section class="error-page-card" aria-labelledby="error-page-title">
-            <div class="error-page-icon" aria-hidden="true"><i class="bi @(isNotFound ? "bi-search" : "bi-exclamation-triangle")"></i></div>
+            <div class="error-page-icon" aria-hidden="true">
+                <i class="bi @(isNotFound ? "bi-search" : "bi-exclamation-triangle")"></i>
+            </div>
             <span class="error-page-label">@(isNotFound ? "صفحه پیدا نشد" : "خطا در پردازش درخواست")</span>
             <h1 id="error-page-title">@(isNotFound ? "صفحه‌ای که دنبالش بودید پیدا نشد" : "متأسفانه مشکلی پیش آمد")</h1>
             <p>@Model.Seo.Description</p>
@@ -23,6 +25,7 @@
         </section>
     </div>
 </main>
+
 @section Styles {
-    <link rel="stylesheet" href="~/shop/css/pages/error-page.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/shop/css/pages/error-page.css" asp-append-version="true"/>
 }

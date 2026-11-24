@@ -8,7 +8,9 @@ namespace Shop.Data.Infrastructure.Persistence.Repositories;
 public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehouseReadRepository
 {
     public async Task<IReadOnlyList<WarehouseInfo>> GetWarehousesAsync(CancellationToken cancellationToken) =>
-        await dbContext.Warehouses.AsNoTracking().OrderBy(x => x.Name).Select(x => new WarehouseInfo(x.Id, x.Code, x.Name, x.Company.Name, x.IsSalesWarehouse, x.IsActive)).ToListAsync(cancellationToken);
+        await dbContext.Warehouses.AsNoTracking().OrderBy(x => x.Name)
+            .Select(x => new WarehouseInfo(x.Id, x.Code, x.Name, x.Company.Name, x.IsSalesWarehouse, x.IsActive))
+            .ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<WarehouseStockItem>> GetStockAsync(
         long? warehouseId,
@@ -42,26 +44,68 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
         int pageSize,
         CancellationToken cancellationToken)
     {
-        var query = from warehouse in dbContext.Warehouses.AsNoTracking()
-                    from inventoryItem in dbContext.InventoryItems.AsNoTracking()
-                    from plan in dbContext.SalesPlanReferences.AsNoTracking()
-                    join baseUnit in dbContext.WarehouseProductUnits.AsNoTracking().Where(x => x.IsActive && x.IsBaseUnit)
-                        on inventoryItem.IdProduct equals baseUnit.IdProduct
-                    join unit in dbContext.WarehouseUnits.AsNoTracking() on baseUnit.IdUnit equals unit.Id
-                    join balance in dbContext.StockBalances.AsNoTracking()
-                        on new
-                        {
-                            IdWarehouse = warehouse.Id,
-                            IdInventoryItem = inventoryItem.Id,
-                            IdSalesPlanReference = plan.Id
-                        }
-                        equals new { balance.IdWarehouse, balance.IdInventoryItem, balance.IdSalesPlanReference } into balances
-                    from balance in balances.DefaultIfEmpty()
-                    where warehouse.IsActive && warehouse.Company.IsActive && inventoryItem.IsActive &&
-                          inventoryItem.Product.IsWarehouseEnabled
-                          && (inventoryItem.ProductVariant == null || inventoryItem.ProductVariant!.IsActive) && plan.IsActive
-                          && dbContext.WarehouseStockOwners.Any(owner => owner.IdWarehouse == warehouse.Id && owner.IdStockOwner == plan.Id)
-                    select new { warehouse, inventoryItem, plan, unit, balance };
+        var query = dbContext.Warehouses
+            .AsNoTracking()
+            .SelectMany(
+                warehouse => dbContext.InventoryItems.AsNoTracking(),
+                (warehouse, inventoryItem) => new { warehouse, inventoryItem })
+            .SelectMany(
+                warehouseInventory => dbContext.SalesPlanReferences.AsNoTracking(),
+                (warehouseInventory, plan) => new
+                {
+                    warehouseInventory.warehouse,
+                    warehouseInventory.inventoryItem,
+                    plan
+                })
+            .Join(
+                dbContext.WarehouseProductUnits.AsNoTracking().Where(unitLink => unitLink.IsActive && unitLink.IsBaseUnit),
+                warehouseInventoryPlan => warehouseInventoryPlan.inventoryItem.IdProduct,
+                baseUnit => baseUnit.IdProduct,
+                (warehouseInventoryPlan, baseUnit) => new { warehouseInventoryPlan.warehouse,
+                    warehouseInventoryPlan.inventoryItem, warehouseInventoryPlan.plan, baseUnit })
+            .Join(
+                dbContext.WarehouseUnits.AsNoTracking(),
+                warehouseInventoryPlanUnit => warehouseInventoryPlanUnit.baseUnit.IdUnit,
+                unit => unit.Id,
+                (warehouseInventoryPlanUnit, unit) => new
+                {
+                    warehouseInventoryPlanUnit.warehouse,
+                    warehouseInventoryPlanUnit.inventoryItem,
+                    warehouseInventoryPlanUnit.plan,
+                    unit
+                })
+            .GroupJoin(
+                dbContext.StockBalances.AsNoTracking(),
+                warehouseInventoryPlanUnit => new
+                {
+                    IdWarehouse = warehouseInventoryPlanUnit.warehouse.Id,
+                    IdInventoryItem = warehouseInventoryPlanUnit.inventoryItem.Id,
+                    IdSalesPlanReference = warehouseInventoryPlanUnit.plan.Id
+                },
+                balance => new
+                {
+                    balance.IdWarehouse,
+                    balance.IdInventoryItem,
+                    balance.IdSalesPlanReference
+                },
+                (warehouseInventoryPlanUnit, balances) => new { warehouseInventoryPlanUnit, balances })
+            .SelectMany(
+                warehouseInventoryPlanBalances => warehouseInventoryPlanBalances.balances.DefaultIfEmpty(),
+                (warehouseInventoryPlanBalances, balance) => new
+                {
+                    warehouseInventoryPlanBalances.warehouseInventoryPlanUnit.warehouse,
+                    warehouseInventoryPlanBalances.warehouseInventoryPlanUnit.inventoryItem,
+                    warehouseInventoryPlanBalances.warehouseInventoryPlanUnit.plan,
+                    warehouseInventoryPlanBalances.warehouseInventoryPlanUnit.unit,
+                    balance
+                })
+            .Where(stockRow =>
+                stockRow.warehouse.IsActive && stockRow.warehouse.Company.IsActive && stockRow.inventoryItem.IsActive &&
+                stockRow.inventoryItem.Product.IsWarehouseEnabled &&
+                (stockRow.inventoryItem.ProductVariant == null || stockRow.inventoryItem.ProductVariant.IsActive) &&
+                stockRow.plan.IsActive &&
+                dbContext.WarehouseStockOwners.Any(owner =>
+                    owner.IdWarehouse == stockRow.warehouse.Id && owner.IdStockOwner == stockRow.plan.Id));
 
         if (warehouseId.HasValue) query = query.Where(x => x.warehouse.Id == warehouseId.Value);
         if (warehouseIds is not null) query = query.Where(x => warehouseIds.Contains(x.warehouse.Id));
@@ -73,27 +117,33 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                                      || (x.inventoryItem.ProductVariant != null &&
                                          x.inventoryItem.ProductVariant.VariantName.Name.Contains(search)));
         if (lowStockOnly)
-            query = query.Where(x => x.plan.IsRegular && x.balance != null && x.balance.MinimumQuantity > 0 && x.balance.Quantity <= x.balance.MinimumQuantity);
-
-        return await query.OrderBy(x => x.warehouse.Name).ThenBy(x => x.inventoryItem.Product.Name).ThenBy(x => x.inventoryItem.ProductVariant == null ? string.Empty : x.inventoryItem.ProductVariant.VariantName.Name).ThenBy(x => x.plan.StoreSalesPlanKey).Skip((page - 1) * pageSize).Take(pageSize).Select(x => new WarehouseStockItem(
-                x.warehouse.Id,
-                x.inventoryItem.Id,
-                x.plan.Id,
-                x.warehouse.Code,
-                x.warehouse.Name,
-                x.warehouse.Company.Name,
-                x.inventoryItem.Product.Id,
-                x.inventoryItem.Product.ProductKey,
-                x.inventoryItem.Product.Name,
-                x.inventoryItem.IdProductVariant,
-                x.inventoryItem.ProductVariant == null ? null : x.inventoryItem.ProductVariant.VariantName.Name,
-                x.plan.StoreSalesPlanKey,
-                x.plan.DisplayName,
-                x.unit.NameFa,
-                x.plan.IsRegular,
-                x.balance == null ? 0m : x.balance.Quantity,
-                x.plan.IsRegular && x.balance != null ? x.balance.MinimumQuantity : 0m,
+            query = query.Where(x =>
                 x.plan.IsRegular && x.balance != null && x.balance.MinimumQuantity > 0 &&
-                x.balance.Quantity <= x.balance.MinimumQuantity)).ToListAsync(cancellationToken);
+                x.balance.Quantity <= x.balance.MinimumQuantity);
+
+        return await query.OrderBy(x => x.warehouse.Name).ThenBy(x => x.inventoryItem.Product.Name)
+            .ThenBy(x =>
+                x.inventoryItem.ProductVariant == null ? string.Empty : x.inventoryItem.ProductVariant.VariantName.Name)
+            .ThenBy(x => x.plan.StoreSalesPlanKey).Skip((page - 1) * pageSize).Take(pageSize).Select(x =>
+                new WarehouseStockItem(
+                    x.warehouse.Id,
+                    x.inventoryItem.Id,
+                    x.plan.Id,
+                    x.warehouse.Code,
+                    x.warehouse.Name,
+                    x.warehouse.Company.Name,
+                    x.inventoryItem.Product.Id,
+                    x.inventoryItem.Product.ProductKey,
+                    x.inventoryItem.Product.Name,
+                    x.inventoryItem.IdProductVariant,
+                    x.inventoryItem.ProductVariant == null ? null : x.inventoryItem.ProductVariant.VariantName.Name,
+                    x.plan.StoreSalesPlanKey,
+                    x.plan.DisplayName,
+                    x.unit.NameFa,
+                    x.plan.IsRegular,
+                    x.balance == null ? 0m : x.balance.Quantity,
+                    x.plan.IsRegular && x.balance != null ? x.balance.MinimumQuantity : 0m,
+                    x.plan.IsRegular && x.balance != null && x.balance.MinimumQuantity > 0 &&
+                    x.balance.Quantity <= x.balance.MinimumQuantity)).ToListAsync(cancellationToken);
     }
 }

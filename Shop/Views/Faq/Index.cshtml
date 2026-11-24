@@ -22,7 +22,10 @@
         <h1>@(Model.ManagedContent?.Title ?? "پرسش‌های متداول")</h1>
         <p>@(Model.ManagedContent?.Description ?? "پاسخ پرسش‌های خرید، پیگیری سفارش و خدمات پس از فروش را اینجا بخوانید.")</p>
         <div class="hero-trail">
-            @foreach (var item in (Model.ManagedContent?.Sections ?? []).Take(3).Where(x => !string.IsNullOrWhiteSpace(x.Heading))) { <span>@item.Heading</span> }
+            @foreach (var item in (Model.ManagedContent?.Sections ?? []).Take(3).Where(x => !string.IsNullOrWhiteSpace(x.Heading)))
+            {
+                <span>@item.Heading</span>
+            }
         </div>
     </div>
 </header>
@@ -32,7 +35,7 @@
         <header class="faq-list-heading">
             <div>
                 <span class="faq-list-kicker"><i class="bi bi-chat-square-text" aria-hidden="true"></i>پاسخ‌های راهگشا</span>
-        <h2 id="faqListTitle">@(Model.ManagedContent?.Sections.FirstOrDefault()?.Heading ?? "پرسش‌های پرتکرار")</h2>
+                <h2 id="faqListTitle">@(Model.ManagedContent?.Sections.FirstOrDefault()?.Heading ?? "پرسش‌های پرتکرار")</h2>
             </div>
             <span class="faq-count"><i class="bi bi-patch-question" aria-hidden="true"></i>@Model.Data.Count پرسش و پاسخ</span>
         </header>

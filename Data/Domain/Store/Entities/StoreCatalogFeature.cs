@@ -30,7 +30,7 @@ public sealed class StoreCategoryCatalogFeature
 
 public sealed class StoreProductCatalogFeatureValue
 {
-    public long IdProduct { get; set; }
+    public decimal IdProduct { get; set; }
     public long IdFeature { get; set; }
     public long IdFeatureValue { get; set; }
     public byte Kind { get; set; } = StoreCatalogFeatureKinds.Display;

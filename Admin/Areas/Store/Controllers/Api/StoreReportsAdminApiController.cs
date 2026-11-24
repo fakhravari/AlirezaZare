@@ -7,8 +7,8 @@ using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Infrastructure.Persistence;
-
 using Shop.Data.Helpers;
+
 namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
@@ -45,7 +45,8 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         if (type is "products" or "inventory" || detail == "inventory-movements")
             warehouseId = await GetDefaultSalesWarehouseIdAsync(cancellationToken) ?? 0;
         if (!string.IsNullOrWhiteSpace(detail))
-            return await GetDetails(detail, id, start, end, warehouseId, salesPlanReferenceId, page, pageSize, cancellationToken);
+            return await GetDetails(detail, id, start, end, warehouseId, salesPlanReferenceId, page, pageSize,
+                cancellationToken);
 
         object? result = type switch
         {
@@ -76,7 +77,11 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         {
             "sales" => ["date", "orderCount", "revenue", "discount"],
             "products" => ["productName", "quantity", "revenue", "orderCount", "stock"],
-            "inventory" => ["warehouseLabel", "productCode", "productName", "variantName", "planName", "quantity", "minimumQuantity", "lastMovement"],
+            "inventory" =>
+            [
+                "warehouseLabel", "productCode", "productName", "variantName", "planName", "quantity",
+                "minimumQuantity", "lastMovement"
+            ],
             "customers" => ["customerName", "email", "orderCount", "revenue", "firstPurchase"],
             _ => []
         };
@@ -114,8 +119,11 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         bool fullAccess = User.IsInRole("system.full-access");
         HashSet<long> allowed = AllowedWarehouseIds();
         var warehouses = await db.Warehouses.AsNoTracking()
-            .Where(x => x.IsActive && x.Company.IsActive && x.IsSalesWarehouse && (fullAccess || allowed.Contains(x.Id)))
-            .OrderBy(x => x.Company.Name).ThenBy(x => x.Name).Select(x => new { x.Id, Label = x.Company.Name + " / " + x.Name + " (" + x.Code + ")" }).ToListAsync(cancellationToken);
+            .Where(x => x.IsActive && x.Company.IsActive && x.IsSalesWarehouse &&
+                        (fullAccess || allowed.Contains(x.Id)))
+            .OrderBy(x => x.Company.Name).ThenBy(x => x.Name)
+            .Select(x => new { x.Id, Label = x.Company.Name + " / " + x.Name + " (" + x.Code + ")" })
+            .ToListAsync(cancellationToken);
         long? defaultWarehouseId = await GetDefaultSalesWarehouseIdAsync(cancellationToken);
 
         return Ok(new { items = warehouses, defaultWarehouseId, warehouseAccess = fullAccess || allowed.Count > 0 });
@@ -125,12 +133,16 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     {
         bool fullAccess = User.IsInRole("system.full-access");
         HashSet<long> allowed = AllowedWarehouseIds();
-        long? configuredWarehouseId = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1).Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
-        var warehouses = db.Warehouses.AsNoTracking() .Where(x => x.IsActive && x.Company.IsActive && x.IsSalesWarehouse && (fullAccess || allowed.Contains(x.Id)));
-        if (configuredWarehouseId.HasValue && await warehouses.AnyAsync(x => x.Id == configuredWarehouseId.Value, cancellationToken))
+        long? configuredWarehouseId = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1)
+            .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
+        var warehouses = db.Warehouses.AsNoTracking().Where(x =>
+            x.IsActive && x.Company.IsActive && x.IsSalesWarehouse && (fullAccess || allowed.Contains(x.Id)));
+        if (configuredWarehouseId.HasValue &&
+            await warehouses.AnyAsync(x => x.Id == configuredWarehouseId.Value, cancellationToken))
             return configuredWarehouseId;
 
-        return await warehouses.OrderBy(x => x.Company.Name).ThenBy(x => x.Name).Select(x => (long?)x.Id).FirstOrDefaultAsync(cancellationToken);
+        return await warehouses.OrderBy(x => x.Company.Name).ThenBy(x => x.Name).Select(x => (long?)x.Id)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     private async Task<object> GetSales(DateTime start, DateTime end, int page, int pageSize,
@@ -146,19 +158,22 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             Discount = group.Sum(x => x.CouponDiscountAmount)
         }).SingleOrDefaultAsync(cancellationToken);
         var previous = await PaidOrders().Where(x => x.CreatedAtUtc >= previousStart && x.CreatedAtUtc < start)
-            .GroupBy(_ => 1).Select(group => new { Revenue = group.Sum(x => x.TotalAmount) }).SingleOrDefaultAsync(cancellationToken);
+            .GroupBy(_ => 1).Select(group => new { Revenue = group.Sum(x => x.TotalAmount) })
+            .SingleOrDefaultAsync(cancellationToken);
         int ordersWithoutVerifiedPayment = await db.StoreCustomerOrders.CountAsync(order =>
-            order.CreatedAtUtc >= start && order.CreatedAtUtc < end && SalesStatuses.Contains(order.StatusReference.Code)
+            order.CreatedAtUtc >= start && order.CreatedAtUtc < end &&
+            SalesStatuses.Contains(order.StatusReference.Code)
             && !db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id
-                && payment.StatusReference.Code == "verified" && payment.Amount == order.TotalAmount), cancellationToken);
+                                                       && payment.StatusReference.Code == "verified" &&
+                                                       payment.Amount == order.TotalAmount), cancellationToken);
 
         var daily = await orders.GroupBy(x => x.CreatedAtUtc.Date).Select(group => new
-            {
-                Date = group.Key,
-                OrderCount = group.Count(),
-                Revenue = group.Sum(x => x.TotalAmount),
-                Discount = group.Sum(x => x.CouponDiscountAmount)
-            }).OrderBy(x => x.Date).ToListAsync(cancellationToken);
+        {
+            Date = group.Key,
+            OrderCount = group.Count(),
+            Revenue = group.Sum(x => x.TotalAmount),
+            Discount = group.Sum(x => x.CouponDiscountAmount)
+        }).OrderBy(x => x.Date).ToListAsync(cancellationToken);
         var items = daily.Skip((page - 1) * pageSize).Take(pageSize).Select(x => new
         {
             date = x.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
@@ -191,28 +206,61 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     private async Task<object> GetProducts(DateTime start, DateTime end, long? warehouseId, int page, int pageSize,
         CancellationToken cancellationToken)
     {
-        var sold = from item in db.StoreCustomerOrderItems.AsNoTracking()
-                   join order in PaidOrders() on item.IdOrder equals order.Id
-                   join product in db.Products.AsNoTracking() on item.IdProduct equals product.Id
-                   join amount in db.StoreOrderItemAmounts.AsNoTracking() on item.Id equals amount.IdOrderItem
-                   where order.CreatedAtUtc >= start && order.CreatedAtUtc < end
-                   group new { item, UnitAmount = amount.UnitAmount } by new { item.IdProduct, ProductName = product.Name } into g
-                   select new
-                   {
-                       ProductId = g.Key.IdProduct,
-                       ProductName = g.Key.ProductName,
-                       Quantity = g.Sum(x => x.item.Quantity),
-                       Revenue = g.Sum(x => x.UnitAmount * x.item.Quantity),
-                       OrderCount = g.Select(x => x.item.IdOrder).Distinct().Count()
-                   };
+        var sold = db.StoreCustomerOrderItems
+            .AsNoTracking()
+            .Join(
+                PaidOrders(),
+                item => item.IdOrder,
+                order => order.Id,
+                (item, order) => new { item, order })
+            .Join(
+                db.Products.AsNoTracking(),
+                itemOrder => itemOrder.item.IdProduct,
+                product => product.Id,
+                (itemOrder, product) => new { itemOrder.item, itemOrder.order, product })
+            .Join(
+                db.StoreOrderItemAmounts.AsNoTracking(),
+                itemOrderProduct => itemOrderProduct.item.Id,
+                amount => amount.IdOrderItem,
+                (itemOrderProduct, amount) => new { itemOrderProduct.item, itemOrderProduct.order,
+                    itemOrderProduct.product, amount })
+            .Where(itemDetails => itemDetails.order.CreatedAtUtc >= start && itemDetails.order.CreatedAtUtc < end)
+            .GroupBy(itemDetails => new { itemDetails.item.IdProduct, ProductName = itemDetails.product.Name })
+            .Select(productGroup => new
+            {
+                ProductId = productGroup.Key.IdProduct,
+                ProductName = productGroup.Key.ProductName,
+                Quantity = productGroup.Sum(itemDetails => itemDetails.item.Quantity),
+                Revenue = productGroup.Sum(itemDetails =>
+                    itemDetails.amount.UnitAmount * itemDetails.item.Quantity),
+                OrderCount = productGroup.Select(itemDetails => itemDetails.item.IdOrder).Distinct().Count()
+            });
         int total = await sold.Select(x => x.ProductId).Distinct().CountAsync(cancellationToken);
-        var previous = await (from item in db.StoreCustomerOrderItems.AsNoTracking()
-                              join order in PaidOrders() on item.IdOrder equals order.Id
-                              join amount in db.StoreOrderItemAmounts.AsNoTracking() on item.Id equals amount.IdOrderItem
-                              where order.CreatedAtUtc >= start.AddDays(-((end - start).Days)) && order.CreatedAtUtc < start
-                              group new { item, UnitAmount = amount.UnitAmount } by 1 into g
-                              select g.Sum(x => x.UnitAmount * x.item.Quantity)).SingleOrDefaultAsync(cancellationToken);
-        var values = await sold.OrderByDescending(x => x.Revenue).ThenBy(x => x.ProductName) .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        var previous = await db.StoreCustomerOrderItems
+            .AsNoTracking()
+            .Join(
+                PaidOrders(),
+                item => item.IdOrder,
+                order => order.Id,
+                (item, order) => new { item, order })
+            .Join(
+                db.StoreOrderItemAmounts.AsNoTracking(),
+                itemOrder => itemOrder.item.Id,
+                amount => amount.IdOrderItem,
+                (itemOrder, amount) => new { itemOrder.item, itemOrder.order, amount })
+            .Where(itemDetails =>
+                itemDetails.order.CreatedAtUtc >= start.AddDays(-((end - start).Days)) &&
+                itemDetails.order.CreatedAtUtc < start)
+            .GroupBy(_ => 1)
+            .Select(itemGroup => itemGroup.Sum(itemDetails =>
+                itemDetails.amount.UnitAmount * itemDetails.item.Quantity))
+            .SingleOrDefaultAsync(cancellationToken);
+        var values = await sold
+            .OrderByDescending(product => product.Revenue)
+            .ThenBy(product => product.ProductName)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
 
         HashSet<long> allowed = AllowedWarehouseIds();
         bool fullAccess = User.IsInRole("system.full-access");
@@ -226,10 +274,16 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
 
         decimal revenue = values.Sum(x => x.Revenue);
         decimal totalRevenue = await sold.Select(x => x.Revenue).SumAsync(cancellationToken);
-        int totalQuantity = await (from item in db.StoreCustomerOrderItems.AsNoTracking()
-                                   join order in PaidOrders() on item.IdOrder equals order.Id
-                                   where order.CreatedAtUtc >= start && order.CreatedAtUtc < end
-                                   select item.Quantity).SumAsync(cancellationToken);
+        int totalQuantity = await db.StoreCustomerOrderItems
+            .AsNoTracking()
+            .Join(
+                PaidOrders(),
+                item => item.IdOrder,
+                order => order.Id,
+                (item, order) => new { item, order })
+            .Where(itemOrder => itemOrder.order.CreatedAtUtc >= start && itemOrder.order.CreatedAtUtc < end)
+            .Select(itemOrder => itemOrder.item.Quantity)
+            .SumAsync(cancellationToken);
 
         return new
         {
@@ -246,7 +300,11 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             page,
             pageSize,
             hasNext = AdminListQuery.HasNext(page, pageSize, total),
-            summary = new { quantity = totalQuantity, revenue = totalRevenue, productCount = total, previousRevenue = previous, revenueChangePercent = ChangePercent(totalRevenue, previous) }
+            summary = new
+            {
+                quantity = totalQuantity, revenue = totalRevenue, productCount = total, previousRevenue = previous,
+                revenueChangePercent = ChangePercent(totalRevenue, previous)
+            }
         };
     }
 
@@ -254,35 +312,44 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         CancellationToken cancellationToken)
     {
         var currentOrders = PaidOrders().Where(x => x.CreatedAtUtc >= start && x.CreatedAtUtc < end);
-        var grouped = from order in currentOrders
-                      join profile in db.AccountProfiles.AsNoTracking() on order.IdProfile equals profile.Id
-                      group new { order, profile } by new
-                      {
-                          profile.Id,
-                          profile.FirstName,
-                          profile.LastName,
-                          profile.Email
-                      } into g
-                      select new
-                      {
-                          CustomerId = g.Key.Id,
-                          CustomerName = (g.Key.FirstName + " " + g.Key.LastName).Trim(),
-                          g.Key.Email,
-                          OrderCount = g.Count(),
-                          Revenue = g.Sum(x => x.order.TotalAmount),
-                          FirstPurchase = g.Min(x => x.order.CreatedAtUtc)
-                      };
+        var grouped = currentOrders
+            .Join(
+                db.AccountProfiles.AsNoTracking(),
+                order => order.IdProfile,
+                profile => profile.Id,
+                (order, profile) => new { order, profile })
+            .GroupBy(orderProfile => new
+            {
+                orderProfile.profile.Id,
+                orderProfile.profile.FirstName,
+                orderProfile.profile.LastName,
+                orderProfile.profile.Email
+            })
+            .Select(customerGroup => new
+            {
+                CustomerId = customerGroup.Key.Id,
+                CustomerName = (customerGroup.Key.FirstName + " " + customerGroup.Key.LastName).Trim(),
+                customerGroup.Key.Email,
+                OrderCount = customerGroup.Count(),
+                Revenue = customerGroup.Sum(orderProfile => orderProfile.order.TotalAmount),
+                FirstPurchase = customerGroup.Min(orderProfile => orderProfile.order.CreatedAtUtc)
+            });
         int total = await grouped.CountAsync(cancellationToken);
-        var firstPurchase = PaidOrders().GroupBy(x => x.IdProfile) .Select(group => new { CustomerId = group.Key, FirstPurchase = group.Min(x => x.CreatedAtUtc) });
-        int newBuyerCount = await firstPurchase.CountAsync(x => x.FirstPurchase >= start && x.FirstPurchase < end, cancellationToken);
+        var firstPurchase = PaidOrders().GroupBy(x => x.IdProfile).Select(group =>
+            new { CustomerId = group.Key, FirstPurchase = group.Min(x => x.CreatedAtUtc) });
+        int newBuyerCount =
+            await firstPurchase.CountAsync(x => x.FirstPurchase >= start && x.FirstPurchase < end, cancellationToken);
         int repeatBuyerCount = await grouped.CountAsync(x => x.OrderCount > 1, cancellationToken);
         decimal revenue = await currentOrders.SumAsync(x => (decimal?)x.TotalAmount, cancellationToken) ?? 0;
-        int previousBuyers = await PaidOrders().Where(x => x.CreatedAtUtc >= start.AddDays(-((end - start).Days)) && x.CreatedAtUtc < start)
+        int previousBuyers = await PaidOrders()
+            .Where(x => x.CreatedAtUtc >= start.AddDays(-((end - start).Days)) && x.CreatedAtUtc < start)
             .Select(x => x.IdProfile).Distinct().CountAsync(cancellationToken);
-        var values = await grouped.OrderByDescending(x => x.Revenue).ThenBy(x => x.CustomerName) .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
-        long[] customerIds = values.Select(x => x.CustomerId).ToArray();
-        Dictionary<long, DateTime> firstPurchases = await PaidOrders().Where(x => customerIds.Contains(x.IdProfile))
-            .GroupBy(x => x.IdProfile).Select(g => new { CustomerId = g.Key, FirstPurchase = g.Min(x => x.CreatedAtUtc) })
+        var values = await grouped.OrderByDescending(x => x.Revenue).ThenBy(x => x.CustomerName)
+            .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        decimal[] customerIds = values.Select(x => x.CustomerId).ToArray();
+        Dictionary<decimal, DateTime> firstPurchases = await PaidOrders().Where(x => customerIds.Contains(x.IdProfile))
+            .GroupBy(x => x.IdProfile)
+            .Select(g => new { CustomerId = g.Key, FirstPurchase = g.Min(x => x.CreatedAtUtc) })
             .ToDictionaryAsync(x => x.CustomerId, x => x.FirstPurchase, cancellationToken);
 
         return new
@@ -294,13 +361,15 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                 email = x.Email,
                 orderCount = x.OrderCount,
                 revenue = x.Revenue,
-                firstPurchase = firstPurchases.GetValueOrDefault(x.CustomerId, x.FirstPurchase).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+                firstPurchase = firstPurchases.GetValueOrDefault(x.CustomerId, x.FirstPurchase)
+                    .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
             }),
             total,
             page,
             pageSize,
             hasNext = AdminListQuery.HasNext(page, pageSize, total),
-            summary = new { buyerCount = total, newBuyerCount, repeatBuyerCount, revenue, previousBuyerCount = previousBuyers }
+            summary = new
+                { buyerCount = total, newBuyerCount, repeatBuyerCount, revenue, previousBuyerCount = previousBuyers }
         };
     }
 
@@ -309,14 +378,17 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     {
         bool fullAccess = User.IsInRole("system.full-access");
         HashSet<long> allowed = AllowedWarehouseIds();
-        var balances = db.StockBalances.AsNoTracking().Where(x => x.Warehouse.IsActive && x.Warehouse.Company.IsActive && x.Warehouse.IsSalesWarehouse
-                && (fullAccess || allowed.Contains(x.IdWarehouse)));
+        var balances = db.StockBalances.AsNoTracking().Where(x =>
+            x.Warehouse.IsActive && x.Warehouse.Company.IsActive && x.Warehouse.IsSalesWarehouse
+            && (fullAccess || allowed.Contains(x.IdWarehouse)));
         if (warehouseId.HasValue) balances = balances.Where(x => x.IdWarehouse == warehouseId.Value);
         int total = await balances.CountAsync(cancellationToken);
-        int lowStockCount = await balances.CountAsync(x => x.MinimumQuantity > 0 && x.Quantity <= x.MinimumQuantity, cancellationToken);
+        int lowStockCount = await balances.CountAsync(x => x.MinimumQuantity > 0 && x.Quantity <= x.MinimumQuantity,
+            cancellationToken);
         int outOfStockCount = await balances.CountAsync(x => x.Quantity <= 0, cancellationToken);
         var values = await balances.OrderBy(x => x.Warehouse.Company.Name).ThenBy(x => x.Warehouse.Name)
-            .ThenBy(x => x.InventoryItem.Product.Name).ThenBy(x => x.SalesPlanReference.DisplayName).Skip((page - 1) * pageSize).Take(pageSize).Select(x => new
+            .ThenBy(x => x.InventoryItem.Product.Name).ThenBy(x => x.SalesPlanReference.DisplayName)
+            .Skip((page - 1) * pageSize).Take(pageSize).Select(x => new
             {
                 warehouseId = x.IdWarehouse,
                 inventoryItemId = x.IdInventoryItem,
@@ -324,15 +396,21 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                 warehouseLabel = x.Warehouse.Company.Name + " / " + x.Warehouse.Name + " (" + x.Warehouse.Code + ")",
                 productCode = x.InventoryItem.Product.ProductKey,
                 productName = x.InventoryItem.Product.Name,
-                variantName = x.InventoryItem.ProductVariant == null ? "—" : x.InventoryItem.ProductVariant.VariantName.Name,
+                variantName = x.InventoryItem.ProductVariant == null
+                    ? "—"
+                    : x.InventoryItem.ProductVariant.VariantName.Name,
                 planName = x.SalesPlanReference.DisplayName,
                 quantity = x.Quantity,
                 minimumQuantity = x.MinimumQuantity,
-                lastMovement = db.WarehouseStockMovements.Where(m => m.IdWarehouse == x.IdWarehouse && m.IdInventoryItem == x.IdInventoryItem && m.IdSalesPlanReference == x.IdSalesPlanReference)
+                lastMovement = db.WarehouseStockMovements.Where(m =>
+                        m.IdWarehouse == x.IdWarehouse && m.IdInventoryItem == x.IdInventoryItem &&
+                        m.IdSalesPlanReference == x.IdSalesPlanReference)
                     .Select(m => (DateTime?)m.OccurredAtUtc).Max()
             }).ToListAsync(cancellationToken);
         var movements = await db.WarehouseStockMovements.AsNoTracking()
-            .Where(x => x.OccurredAtUtc >= start && x.OccurredAtUtc < end && (fullAccess || allowed.Contains(x.IdWarehouse)) && (!warehouseId.HasValue || x.IdWarehouse == warehouseId.Value))
+            .Where(x => x.OccurredAtUtc >= start && x.OccurredAtUtc < end &&
+                        (fullAccess || allowed.Contains(x.IdWarehouse)) &&
+                        (!warehouseId.HasValue || x.IdWarehouse == warehouseId.Value))
             .GroupBy(_ => 1).Select(group => new
             {
                 MovementIn = group.Where(x => x.QuantityDelta > 0).Sum(x => (decimal?)x.QuantityDelta) ?? 0,
@@ -369,7 +447,8 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         {
             "product-orders" => await GetProductOrders(id.Value, start, end, page, pageSize, cancellationToken),
             "customer-orders" => await GetCustomerOrders(id.Value, start, end, page, pageSize, cancellationToken),
-            "inventory-movements" => await GetInventoryMovements(id.Value, start, end, warehouseId, salesPlanReferenceId, page, pageSize, cancellationToken),
+            "inventory-movements" => await GetInventoryMovements(id.Value, start, end, warehouseId,
+                salesPlanReferenceId, page, pageSize, cancellationToken),
             _ => null
         };
 
@@ -379,20 +458,47 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     private async Task<object> GetProductOrders(long productId, DateTime start, DateTime end, int page, int pageSize,
         CancellationToken cancellationToken)
     {
-        var query = from order in PaidOrders().Where(x => x.CreatedAtUtc >= start && x.CreatedAtUtc < end)
-                    join item in db.StoreCustomerOrderItems.AsNoTracking().Where(x => x.IdProduct == productId) on order.Id equals item.IdOrder
-                    join profile in db.AccountProfiles.AsNoTracking() on order.IdProfile equals profile.Id
-                    join amount in db.StoreOrderItemAmounts.AsNoTracking() on item.Id equals amount.IdOrderItem
-                    orderby order.CreatedAtUtc descending
-                    select new { order.OrderNumber, order.CreatedAtUtc, Customer = (profile.FirstName + " " + profile.LastName).Trim(), item.Quantity, Amount = amount.UnitAmount * item.Quantity };
+        var query = PaidOrders()
+            .Where(order => order.CreatedAtUtc >= start && order.CreatedAtUtc < end)
+            .Join(
+                db.StoreCustomerOrderItems.AsNoTracking().Where(item => item.IdProduct == productId),
+                order => order.Id,
+                item => item.IdOrder,
+                (order, item) => new { order, item })
+            .Join(
+                db.AccountProfiles.AsNoTracking(),
+                orderItem => orderItem.order.IdProfile,
+                profile => profile.Id,
+                (orderItem, profile) => new { orderItem.order, orderItem.item, profile })
+            .Join(
+                db.StoreOrderItemAmounts.AsNoTracking(),
+                orderItemProfile => orderItemProfile.item.Id,
+                amount => amount.IdOrderItem,
+                (orderItemProfile, amount) => new { orderItemProfile.order, orderItemProfile.item,
+                    orderItemProfile.profile, amount })
+            .OrderByDescending(orderItemDetails => orderItemDetails.order.CreatedAtUtc)
+            .Select(orderItemDetails => new
+            {
+                orderItemDetails.order.OrderNumber,
+                orderItemDetails.order.CreatedAtUtc,
+                Customer = (orderItemDetails.profile.FirstName + " " + orderItemDetails.profile.LastName).Trim(),
+                orderItemDetails.item.Quantity,
+                Amount = orderItemDetails.amount.UnitAmount * orderItemDetails.item.Quantity
+            });
         int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
         return new
         {
             title = "سفارش‌های کالا",
-            columns = DetailColumns(("orderNumber", "شماره سفارش"), ("date", "تاریخ"), ("customer", "مشتری"), ("quantity", "تعداد"), ("amount", "مبلغ (تومان)")),
-            items = rows.Select(x => new { orderNumber = x.OrderNumber, date = x.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), customer = x.Customer, quantity = x.Quantity, amount = x.Amount }),
+            columns = DetailColumns(("orderNumber", "شماره سفارش"), ("date", "تاریخ"), ("customer", "مشتری"),
+                ("quantity", "تعداد"), ("amount", "مبلغ (تومان)")),
+            items = rows.Select(x => new
+            {
+                orderNumber = x.OrderNumber,
+                date = x.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), customer = x.Customer,
+                quantity = x.Quantity, amount = x.Amount
+            }),
             total,
             page,
             pageSize,
@@ -403,16 +509,24 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     private async Task<object> GetCustomerOrders(long customerId, DateTime start, DateTime end, int page, int pageSize,
         CancellationToken cancellationToken)
     {
-        var query = PaidOrders().Where(x => x.IdProfile == customerId && x.CreatedAtUtc >= start && x.CreatedAtUtc < end)
-            .OrderByDescending(x => x.CreatedAtUtc).Select(x => new { x.OrderNumber, x.CreatedAtUtc, Status = x.StatusReference.NameFa, x.TotalAmount });
+        var query = PaidOrders()
+            .Where(x => x.IdProfile == customerId && x.CreatedAtUtc >= start && x.CreatedAtUtc < end)
+            .OrderByDescending(x => x.CreatedAtUtc).Select(x => new
+                { x.OrderNumber, x.CreatedAtUtc, Status = x.StatusReference.NameFa, x.TotalAmount });
         int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
         return new
         {
             title = "خریدهای مشتری",
-            columns = DetailColumns(("orderNumber", "شماره سفارش"), ("date", "تاریخ"), ("status", "وضعیت"), ("amount", "مبلغ (تومان)")),
-            items = rows.Select(x => new { orderNumber = x.OrderNumber, date = x.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), status = x.Status, amount = x.TotalAmount }),
+            columns = DetailColumns(("orderNumber", "شماره سفارش"), ("date", "تاریخ"), ("status", "وضعیت"),
+                ("amount", "مبلغ (تومان)")),
+            items = rows.Select(x => new
+            {
+                orderNumber = x.OrderNumber,
+                date = x.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), status = x.Status,
+                amount = x.TotalAmount
+            }),
             total,
             page,
             pageSize,
@@ -425,23 +539,50 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     {
         bool fullAccess = User.IsInRole("system.full-access");
         HashSet<long> allowed = AllowedWarehouseIds();
-        var query = from movement in db.WarehouseStockMovements.AsNoTracking()
-                    join warehouse in db.Warehouses.AsNoTracking() on movement.IdWarehouse equals warehouse.Id
-                    join company in db.Companies.AsNoTracking() on warehouse.IdCompany equals company.Id
-                    where movement.IdInventoryItem == inventoryItemId && movement.OccurredAtUtc >= start && movement.OccurredAtUtc < end
-                        && (fullAccess || allowed.Contains(movement.IdWarehouse))
-                        && (!warehouseId.HasValue || movement.IdWarehouse == warehouseId.Value)
-                        && (!salesPlanReferenceId.HasValue || movement.IdSalesPlanReference == salesPlanReferenceId.Value)
-                    orderby movement.OccurredAtUtc descending
-                    select new { movement.OccurredAtUtc, movement.QuantityDelta, warehouse.Name, warehouse.Code, Company = company.Name, movement.IdVoucher };
+        var query = db.WarehouseStockMovements
+            .AsNoTracking()
+            .Join(
+                db.Warehouses.AsNoTracking(),
+                movement => movement.IdWarehouse,
+                warehouse => warehouse.Id,
+                (movement, warehouse) => new { movement, warehouse })
+            .Join(
+                db.Companies.AsNoTracking(),
+                movementWarehouse => movementWarehouse.warehouse.IdCompany,
+                company => company.Id,
+                (movementWarehouse, company) => new { movementWarehouse.movement, movementWarehouse.warehouse,
+                    company })
+            .Where(movementDetails =>
+                movementDetails.movement.IdInventoryItem == inventoryItemId &&
+                movementDetails.movement.OccurredAtUtc >= start && movementDetails.movement.OccurredAtUtc < end &&
+                (fullAccess || allowed.Contains(movementDetails.movement.IdWarehouse)) &&
+                (!warehouseId.HasValue || movementDetails.movement.IdWarehouse == warehouseId.Value) &&
+                (!salesPlanReferenceId.HasValue ||
+                 movementDetails.movement.IdSalesPlanReference == salesPlanReferenceId.Value))
+            .OrderByDescending(movementDetails => movementDetails.movement.OccurredAtUtc)
+            .Select(movementDetails => new
+            {
+                movementDetails.movement.OccurredAtUtc,
+                movementDetails.movement.QuantityDelta,
+                movementDetails.warehouse.Name,
+                movementDetails.warehouse.Code,
+                Company = movementDetails.company.Name,
+                movementDetails.movement.IdVoucher
+            });
         int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
         return new
         {
             title = "گردش موجودی کالا",
-            columns = DetailColumns(("date", "تاریخ"), ("warehouse", "شرکت / انبار"), ("change", "تغییر موجودی"), ("voucherId", "شناسهٔ حواله")),
-            items = rows.Select(x => new { date = x.OccurredAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), warehouse = x.Company + " / " + x.Name + " (" + x.Code + ")", change = x.QuantityDelta, voucherId = x.IdVoucher }),
+            columns = DetailColumns(("date", "تاریخ"), ("warehouse", "شرکت / انبار"), ("change", "تغییر موجودی"),
+                ("voucherId", "شناسهٔ حواله")),
+            items = rows.Select(x => new
+            {
+                date = x.OccurredAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                warehouse = x.Company + " / " + x.Name + " (" + x.Code + ")", change = x.QuantityDelta,
+                voucherId = x.IdVoucher
+            }),
             total,
             page,
             pageSize,
@@ -449,12 +590,17 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         };
     }
 
-    private IQueryable<StoreCustomerOrderReference> PaidOrders() => db.StoreCustomerOrders.AsNoTracking().Where(order => SalesStatuses.Contains(order.StatusReference.Code)
-            && db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.StatusReference.Code == "verified" && payment.Amount == order.TotalAmount));
+    private IQueryable<StoreCustomerOrderReference> PaidOrders() => db.StoreCustomerOrders.AsNoTracking().Where(order =>
+        SalesStatuses.Contains(order.StatusReference.Code)
+        && db.StorePaymentAttempts.Any(payment =>
+            payment.IdOrder == order.Id && payment.StatusReference.Code == "verified" &&
+            payment.Amount == order.TotalAmount));
 
-    private HashSet<long> AllowedWarehouseIds() => User.FindAll("admin_warehouse").Select(claim => long.TryParse(claim.Value, out long id) ? id : 0).Where(id => id > 0).ToHashSet();
+    private HashSet<long> AllowedWarehouseIds() => User.FindAll("admin_warehouse")
+        .Select(claim => long.TryParse(claim.Value, out long id) ? id : 0).Where(id => id > 0).ToHashSet();
 
-    private static bool TryGetRange(DateOnly? from, DateOnly? to, out DateTime start, out DateTime end, out string? error)
+    private static bool TryGetRange(DateOnly? from, DateOnly? to, out DateTime start, out DateTime end,
+        out string? error)
     {
         DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
         DateOnly endDate = to ?? today;
@@ -462,8 +608,18 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         start = DateTime.SpecifyKind(startDate.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
         end = DateTime.SpecifyKind(endDate.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
 
-        if (startDate > endDate) { error = "تاریخ شروع باید قبل از تاریخ پایان باشد."; return false; }
-        if ((endDate.DayNumber - startDate.DayNumber) > 365) { error = "بازهٔ گزارش نمی‌تواند بیشتر از ۳۶۶ روز باشد."; return false; }
+        if (startDate > endDate)
+        {
+            error = "تاریخ شروع باید قبل از تاریخ پایان باشد.";
+            return false;
+        }
+
+        if ((endDate.DayNumber - startDate.DayNumber) > 365)
+        {
+            error = "بازهٔ گزارش نمی‌تواند بیشتر از ۳۶۶ روز باشد.";
+            return false;
+        }
+
         error = null;
 
         return true;
@@ -498,7 +654,8 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
 
     private static object? ExportValue(JsonElement item, string key)
     {
-        if (!item.TryGetProperty(key, out JsonElement value) || value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined) return null;
+        if (!item.TryGetProperty(key, out JsonElement value) ||
+            value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined) return null;
 
         return value.ValueKind switch
         {
@@ -509,5 +666,4 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             _ => value.ToString()
         };
     }
-
 }

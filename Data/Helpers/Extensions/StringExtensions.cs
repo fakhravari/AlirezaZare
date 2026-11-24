@@ -12,7 +12,11 @@ public static class StringExtensions
         var result = new StringBuilder(value.Length);
         foreach (char character in value)
         {
-            char normalized = character switch { >= '۰' and <= '۹' => (char)('0' + character - '۰'), >= '٠' and <= '٩' => (char)('0' + character - '٠'), _ => character };
+            char normalized = character switch
+            {
+                >= '۰' and <= '۹' => (char)('0' + character - '۰'),
+                >= '٠' and <= '٩' => (char)('0' + character - '٠'), _ => character
+            };
 
             result.Append(normalized);
         }

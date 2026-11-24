@@ -51,7 +51,8 @@ public sealed class SeoController : Controller
             "/brands"
         ];
 
-        IEnumerable<string> paths = staticPaths.Concat(catalog.Brands.Select(brand => $"/brands/{brand.Slug}")).Concat(magazine.Posts.Select(post => $"/magazine/{post.Slug}"))
+        IEnumerable<string> paths = staticPaths.Concat(catalog.Brands.Select(brand => $"/brands/{brand.Slug}"))
+            .Concat(magazine.Posts.Select(post => $"/magazine/{post.Slug}"))
             .Concat(catalog.Products.Select(product => $"/products/{product.Slug}-{product.Id}"));
 
         XNamespace sitemapNamespace = "http://www.sitemaps.org/schemas/sitemap/0.9";
@@ -61,7 +62,8 @@ public sealed class SeoController : Controller
                     new XElement(sitemapNamespace + "url",
                         new XElement(sitemapNamespace + "loc", SeoUrlBuilder.AbsolutePageUrl(SiteRoot(), path))))));
 
-        return Content(document.ToString(SaveOptions.DisableFormatting), "application/xml; charset=utf-8", Encoding.UTF8);
+        return Content(document.ToString(SaveOptions.DisableFormatting), "application/xml; charset=utf-8",
+            Encoding.UTF8);
     }
 
     private string SiteRoot() => SeoUrlBuilder.SiteRoot(_options.SiteUrl, Request);

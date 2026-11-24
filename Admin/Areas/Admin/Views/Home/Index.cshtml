@@ -10,7 +10,9 @@
         <div class="col-xl-6">
             <section class="admin-dashboard__area admin-dashboard__area--store h-100" aria-labelledby="store-area-title">
                 <header class="admin-dashboard__header">
-                    <span class="admin-dashboard__icon" aria-hidden="true"><i class="fa fa-store"></i></span>
+                    <span class="admin-dashboard__icon" aria-hidden="true">
+                        <i class="fa fa-store"></i>
+                    </span>
                     <div class="admin-dashboard__heading">
                         <span class="admin-dashboard__eyebrow">کاتالوگ و ارتباط با مشتریان</span>
                         <h2 id="store-area-title">مدیریت فروشگاه</h2>
@@ -22,18 +24,30 @@
                 <p class="admin-dashboard__description">محصولات، سفارش‌ها و بازخورد مشتریان را از اینجا مدیریت کنید.</p>
                 <nav class="admin-dashboard__links" aria-label="میان‌برهای مدیریت فروشگاه">
                     <a class="admin-dashboard__link" asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav>
-                        <span class="admin-dashboard__link-icon" aria-hidden="true"><i class="fa fa-box-open"></i></span>
-                        <span class="admin-dashboard__link-copy"><strong>محصولات</strong><small>کالاها و کاتالوگ فروشگاه</small></span>
+                        <span class="admin-dashboard__link-icon" aria-hidden="true">
+                            <i class="fa fa-box-open"></i>
+                        </span>
+                        <span class="admin-dashboard__link-copy">
+                            <strong>محصولات</strong><small>کالاها و کاتالوگ فروشگاه</small>
+                        </span>
                         <i class="fa fa-arrow-left admin-dashboard__arrow" aria-hidden="true"></i>
                     </a>
                     <a class="admin-dashboard__link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="orders" data-admin-nav>
-                        <span class="admin-dashboard__link-icon" aria-hidden="true"><i class="fa fa-receipt"></i></span>
-                        <span class="admin-dashboard__link-copy"><strong>سفارش‌ها</strong><small>بررسی و پیگیری سفارش‌ها</small></span>
+                        <span class="admin-dashboard__link-icon" aria-hidden="true">
+                            <i class="fa fa-receipt"></i>
+                        </span>
+                        <span class="admin-dashboard__link-copy">
+                            <strong>سفارش‌ها</strong><small>بررسی و پیگیری سفارش‌ها</small>
+                        </span>
                         <i class="fa fa-arrow-left admin-dashboard__arrow" aria-hidden="true"></i>
                     </a>
                     <a class="admin-dashboard__link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="reviews" data-admin-nav>
-                        <span class="admin-dashboard__link-icon" aria-hidden="true"><i class="fa fa-comments"></i></span>
-                        <span class="admin-dashboard__link-copy"><strong>بازخورد محصول</strong><small>دیدگاه‌ها و پرسش‌های مشتریان</small></span>
+                        <span class="admin-dashboard__link-icon" aria-hidden="true">
+                            <i class="fa fa-comments"></i>
+                        </span>
+                        <span class="admin-dashboard__link-copy">
+                            <strong>بازخورد محصول</strong><small>دیدگاه‌ها و پرسش‌های مشتریان</small>
+                        </span>
                         <i class="fa fa-arrow-left admin-dashboard__arrow" aria-hidden="true"></i>
                     </a>
                 </nav>
@@ -42,7 +56,9 @@
         <div class="col-xl-6">
             <section class="admin-dashboard__area admin-dashboard__area--warehouse h-100" aria-labelledby="warehouse-area-title">
                 <header class="admin-dashboard__header">
-                    <span class="admin-dashboard__icon" aria-hidden="true"><i class="fa fa-warehouse"></i></span>
+                    <span class="admin-dashboard__icon" aria-hidden="true">
+                        <i class="fa fa-warehouse"></i>
+                    </span>
                     <div class="admin-dashboard__heading">
                         <span class="admin-dashboard__eyebrow">موجودی و عملیات کالا</span>
                         <h2 id="warehouse-area-title">مدیریت انبار</h2>
@@ -54,18 +70,30 @@
                 <p class="admin-dashboard__description">موجودی، محل‌های نگهداری و جابه‌جایی کالا را دنبال کنید.</p>
                 <nav class="admin-dashboard__links" aria-label="میان‌برهای مدیریت انبار">
                     <a class="admin-dashboard__link" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav>
-                        <span class="admin-dashboard__link-icon" aria-hidden="true"><i class="fa fa-building"></i></span>
-                        <span class="admin-dashboard__link-copy"><strong>انبارها</strong><small>مدیریت محل‌های نگهداری</small></span>
+                        <span class="admin-dashboard__link-icon" aria-hidden="true">
+                            <i class="fa fa-building"></i>
+                        </span>
+                        <span class="admin-dashboard__link-copy">
+                            <strong>انبارها</strong><small>مدیریت محل‌های نگهداری</small>
+                        </span>
                         <i class="fa fa-arrow-left admin-dashboard__arrow" aria-hidden="true"></i>
                     </a>
                     <a class="admin-dashboard__link" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav>
-                        <span class="admin-dashboard__link-icon" aria-hidden="true"><i class="fa fa-boxes-stacked"></i></span>
-                        <span class="admin-dashboard__link-copy"><strong>موجودی کالا</strong><small>مشاهدهٔ ماندهٔ کالاها</small></span>
+                        <span class="admin-dashboard__link-icon" aria-hidden="true">
+                            <i class="fa fa-boxes-stacked"></i>
+                        </span>
+                        <span class="admin-dashboard__link-copy">
+                            <strong>موجودی کالا</strong><small>مشاهدهٔ ماندهٔ کالاها</small>
+                        </span>
                         <i class="fa fa-arrow-left admin-dashboard__arrow" aria-hidden="true"></i>
                     </a>
                     <a class="admin-dashboard__link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav>
-                        <span class="admin-dashboard__link-icon" aria-hidden="true"><i class="fa fa-arrows-rotate"></i></span>
-                        <span class="admin-dashboard__link-copy"><strong>گردش کالا</strong><small>رسید، حواله و سابقهٔ تغییرات</small></span>
+                        <span class="admin-dashboard__link-icon" aria-hidden="true">
+                            <i class="fa fa-arrows-rotate"></i>
+                        </span>
+                        <span class="admin-dashboard__link-copy">
+                            <strong>گردش کالا</strong><small>رسید، حواله و سابقهٔ تغییرات</small>
+                        </span>
                         <i class="fa fa-arrow-left admin-dashboard__arrow" aria-hidden="true"></i>
                     </a>
                 </nav>
@@ -73,7 +101,9 @@
         </div>
     </div>
     <section class="admin-dashboard__system mt-3 mt-xl-4" aria-labelledby="system-area-title">
-        <span class="admin-dashboard__system-icon" aria-hidden="true"><i class="fa fa-users-gear"></i></span>
+        <span class="admin-dashboard__system-icon" aria-hidden="true">
+            <i class="fa fa-users-gear"></i>
+        </span>
         <div class="admin-dashboard__system-copy">
             <span class="admin-dashboard__eyebrow">مدیریت سامانه</span>
             <h2 id="system-area-title">کاربران و دسترسی‌ها</h2>

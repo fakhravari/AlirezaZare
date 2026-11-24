@@ -28,12 +28,20 @@ public static class DependencyInjection
         services.AddScoped<IEmailVerificationCodeStore, DatabaseEmailVerificationCodeStore>();
         services.AddScoped<IWarehouseStockLedger, WarehouseStockLedger>();
 
-        string mediaCdnBaseUrl = configuration[$"{MediaCdnOptions.SectionName}:BaseUrl"] ?? MediaCdnOptions.DefaultBaseUrl;
+        string mediaCdnBaseUrl =
+            configuration[$"{MediaCdnOptions.SectionName}:BaseUrl"] ?? MediaCdnOptions.DefaultBaseUrl;
         services.AddOptions<MediaCdnOptions>().Configure(options => options.BaseUrl = mediaCdnBaseUrl)
             .Validate(options =>
             {
-                try { MediaCdnOptions.NormalizeBaseUrl(options.BaseUrl); return true; }
-                catch (InvalidOperationException) { return false; }
+                try
+                {
+                    MediaCdnOptions.NormalizeBaseUrl(options.BaseUrl);
+                    return true;
+                }
+                catch (InvalidOperationException)
+                {
+                    return false;
+                }
             }, "MediaCdn:BaseUrl must be a valid HTTPS origin.").ValidateOnStart();
 
         services.AddScoped<IWarehouseReadRepository, WarehouseReadRepository>();

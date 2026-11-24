@@ -6,7 +6,8 @@ using Shop.Data.Helpers;
 using Shop.Data.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddPersistentDataProtection(builder.Configuration, builder.Environment.ContentRootPath, builder.Environment.EnvironmentName);
+builder.Services.AddPersistentDataProtection(builder.Configuration, builder.Environment.ContentRootPath,
+    builder.Environment.EnvironmentName);
 builder.Services.AddScoped<MediaCdnViewDataFilter>();
 builder.Services.AddControllersWithViews(options => options.Filters.AddService<MediaCdnViewDataFilter>());
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
@@ -20,7 +21,11 @@ builder.Services.AddAuthentication("ShopCookie").AddCookie("ShopCookie", options
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
-    options.Events.OnRedirectToLogin = context => { context.Response.StatusCode = 401; return Task.CompletedTask; };
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
 });
 builder.Services.AddShopDatabase(builder.Configuration);
 builder.Services.AddResponseCompression(options => options.EnableForHttps = true);
@@ -82,16 +87,21 @@ builder.Services.AddRateLimiter(options =>
         }));
 });
 builder.Services.AddSingleton<IPasswordHasher<string>, PasswordHasher<string>>();
-builder.Services.AddScoped<Shop.Data.Application.Store.Contracts.IPaymentGateway, Shop.Services.UnconfiguredPaymentGateway>();
+builder.Services
+    .AddScoped<Shop.Data.Application.Store.Contracts.IPaymentGateway, Shop.Services.UnconfiguredPaymentGateway>();
 builder.Services.AddScoped<Shop.Data.Infrastructure.Payments.PaymentService>();
 builder.Services.AddScoped<Shop.Services.IMagazineContentSource, Shop.Services.DatabaseMagazineContentSource>();
 builder.Services.AddScoped<Shop.Services.CatalogRepository>();
-builder.Services.AddScoped<Shop.Services.ICatalogSource>(services => services.GetRequiredService<Shop.Services.CatalogRepository>());
+builder.Services.AddScoped<Shop.Services.ICatalogSource>(services =>
+    services.GetRequiredService<Shop.Services.CatalogRepository>());
 builder.Services.AddScoped<Shop.Services.DatabaseSalesPlanSource>();
-builder.Services.AddScoped<Shop.Services.ISalesPlanSource>(services => services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
-builder.Services.AddScoped<Shop.Services.IProductPurchaseConfigurationSource>(services => services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
+builder.Services.AddScoped<Shop.Services.ISalesPlanSource>(services =>
+    services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
+builder.Services.AddScoped<Shop.Services.IProductPurchaseConfigurationSource>(services =>
+    services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
 builder.Services.AddScoped<Shop.Services.DatabaseAccountDataSource>();
-builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services => services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
+builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services =>
+    services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
 var persianHtmlEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Arabic);
 persianHtmlEncoderSettings.AllowCharacter('\u200C');
 builder.Services.AddWebEncoders(options => options.TextEncoderSettings = persianHtmlEncoderSettings);
@@ -99,14 +109,18 @@ builder.Services.Configure<Shop.Models.SeoMetadataOptions>(builder.Configuration
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<Shop.Services.DatabaseSiteIdentitySource>();
 builder.Services.AddScoped<Shop.Services.SiteIdentityRequestContext>();
-builder.Services.AddScoped<Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions>, Shop.Services.RequestSiteIdentityOptions>();
-builder.Services.AddOptions<Shop.Models.ApiClientOptions>().BindConfiguration("ApiClient").Validate(options => options.BasePath.StartsWith("~/", StringComparison.Ordinal)
-                         && options.BasePath.EndsWith("/", StringComparison.Ordinal)
-                         && !options.BasePath.Contains("..", StringComparison.Ordinal)
-                         && !options.BasePath.Contains("?", StringComparison.Ordinal)
-                         && !options.BasePath.Contains("#", StringComparison.Ordinal),
-        "ApiClient:BasePath must be a local application path ending in '/'.").Validate(options => options.TimeoutMilliseconds is >= 1000 and <= 120000,
-        "ApiClient:TimeoutMilliseconds must be between 1000 and 120000.").ValidateOnStart();
+builder.Services
+    .AddScoped<Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions>,
+        Shop.Services.RequestSiteIdentityOptions>();
+builder.Services.AddOptions<Shop.Models.ApiClientOptions>().BindConfiguration("ApiClient").Validate(options =>
+        options.BasePath.StartsWith("~/", StringComparison.Ordinal)
+        && options.BasePath.EndsWith("/", StringComparison.Ordinal)
+        && !options.BasePath.Contains("..", StringComparison.Ordinal)
+        && !options.BasePath.Contains("?", StringComparison.Ordinal)
+        && !options.BasePath.Contains("#", StringComparison.Ordinal),
+    "ApiClient:BasePath must be a local application path ending in '/'.").Validate(
+    options => options.TimeoutMilliseconds is >= 1000 and <= 120000,
+    "ApiClient:TimeoutMilliseconds must be between 1000 and 120000.").ValidateOnStart();
 builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteOptions>(options => options.LowercaseUrls = true);
 
 var app = builder.Build();

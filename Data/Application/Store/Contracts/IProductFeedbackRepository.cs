@@ -7,7 +7,7 @@ public interface IProductFeedbackRepository
     Task<ProductFeedbackSnapshot?> ReadAsync(int productId, string type, long? profileId,
         CancellationToken cancellationToken);
 
-    Task<long?> AddAsync(int productId, long? profileId, string type, string name, string text, byte? rating,
+    Task<decimal?> AddAsync(int productId, long? profileId, string type, string name, string text, byte? rating,
         CancellationToken cancellationToken);
 
     Task<int?> ImportLegacyAsync(int productId, long? profileId, string type,

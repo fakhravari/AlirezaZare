@@ -15,4 +15,5 @@ public sealed class StoreCategory
     public string? ProductIntro { get; set; }
     public string? ProductHighlightsJson { get; set; }
     public string? ProductSpecsJson { get; set; }
+    public string IconClass { get; set; } = "bi-grid-3x3-gap";
 }

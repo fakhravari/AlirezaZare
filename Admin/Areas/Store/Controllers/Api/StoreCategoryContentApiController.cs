@@ -13,21 +13,26 @@ public sealed class StoreCategoryContentApiController(ShopDbContext db) : Contro
     [HttpGet("{key}")]
     public async Task<IActionResult> Get(string key, CancellationToken cancellationToken)
     {
-        var category = await db.StoreCategories.AsNoTracking().SingleOrDefaultAsync(x => x.CategoryKey == key, cancellationToken);
+        var category = await db.StoreCategories.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.CategoryKey == key, cancellationToken);
 
-        return category is null ? NotFound() : Ok(new
-        {
-            intro = category.ProductIntro ?? "",
-            highlights = category.ProductHighlightsJson ?? "[]",
-            specs = category.ProductSpecsJson ?? "[]"
-        });
+        return category is null
+            ? NotFound()
+            : Ok(new
+            {
+                intro = category.ProductIntro ?? "",
+                highlights = category.ProductHighlightsJson ?? "[]",
+                specs = category.ProductSpecsJson ?? "[]"
+            });
     }
 
     [HttpPut("{key}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update(string key, [FromBody] CategoryContentInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(string key, [FromBody] CategoryContentInput input,
+        CancellationToken cancellationToken)
     {
-        if ((input.Intro?.Length ?? 0) > 10000 || !ValidArray(input.Highlights, false) || !ValidArray(input.Specs, true))
+        if ((input.Intro?.Length ?? 0) > 10000 || !ValidArray(input.Highlights, false) ||
+            !ValidArray(input.Specs, true))
             return ValidationProblem(detail: "معرفی یا قالب نکات و مشخصات معتبر نیست.", statusCode: 400);
 
         var category = await db.StoreCategories.SingleOrDefaultAsync(x => x.CategoryKey == key, cancellationToken);
@@ -51,15 +56,19 @@ public sealed class StoreCategoryContentApiController(ShopDbContext db) : Contro
 
             return doc.RootElement.ValueKind == JsonValueKind.Array && doc.RootElement.GetArrayLength() <= 100 &&
                    doc.RootElement.EnumerateArray().All(x => pairs
-                       ? x.ValueKind == JsonValueKind.Array && x.GetArrayLength() == 2 && x.EnumerateArray().All(ValidText)
+                       ? x.ValueKind == JsonValueKind.Array && x.GetArrayLength() == 2 &&
+                         x.EnumerateArray().All(ValidText)
                        : ValidText(x));
         }
-        catch (JsonException) { return false; }
+        catch (JsonException)
+        {
+            return false;
+        }
     }
 
     private static bool ValidText(JsonElement value) => value.ValueKind == JsonValueKind.String &&
-        value.GetString() is { Length: > 0 and <= 1000 } text && !string.IsNullOrWhiteSpace(text);
-
+                                                        value.GetString() is { Length: > 0 and <= 1000 } text &&
+                                                        !string.IsNullOrWhiteSpace(text);
 }
 
 public sealed record CategoryContentInput(string? Intro, string? Highlights, string? Specs);

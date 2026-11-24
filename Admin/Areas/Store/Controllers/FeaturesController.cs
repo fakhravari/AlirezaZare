@@ -20,24 +20,28 @@ public sealed class FeaturesController : Controller
 
             return View("~/Areas/Store/Views/Features/Geography.cshtml", page);
         }
+
         if (page.FeatureId == "paid-orders-dispatch")
         {
             if (!User.IsInRole("system.full-access")) return Forbid();
 
             return View("~/Areas/Store/Views/Features/PaidOrdersDispatch.cshtml", page);
         }
+
         if (page.FeatureId == "orders")
         {
             if (!User.IsInRole("system.full-access")) return Forbid();
 
             return View("~/Areas/Store/Views/Features/Orders.cshtml", page);
         }
+
         if (page.FeatureId == "customers")
         {
             if (!User.IsInRole("system.full-access")) return Forbid();
 
             return View("~/Areas/Store/Views/Features/Customers.cshtml", page);
         }
+
         if (page.FeatureId == "newsletter-subscribers")
             return View("~/Areas/Store/Views/Features/NewsletterSubscribers.cshtml", page);
 
@@ -60,10 +64,14 @@ public sealed class FeaturesController : Controller
 
             section = section!.ToLowerInvariant();
             ViewData["ContentSection"] = section;
-            ViewData["Title"] = section switch { "magazine" => "مقاله‌های مجله", "pages" => "صفحه‌های خدماتی", _ => "پرسش‌های متداول" };
+            ViewData["Title"] = section switch
+            {
+                "magazine" => "مقاله‌های مجله", "pages" => "صفحه‌های خدماتی", _ => "پرسش‌های متداول"
+            };
 
             return View("~/Areas/Store/Views/Features/Faq.cshtml", page);
         }
+
         if (page.FeatureId == "promotions")
         {
             string[] sections = ["plans", "offers", "variant-prices", "history"];

@@ -25,8 +25,10 @@ public sealed class WarehouseApiController(IWarehouseReadService warehouseReadSe
         CancellationToken cancellationToken = default)
     {
         if (page < 1 || pageSize is < 1 or > 200)
-            return ValidationProblem(detail: "page must be positive and pageSize must be between 1 and 200.", statusCode: 400);
+            return ValidationProblem(detail: "page must be positive and pageSize must be between 1 and 200.",
+                statusCode: 400);
 
-        return Ok(await warehouseReadService.GetStockAsync( warehouseId, salesPlanKey, search, lowStockOnly, page, pageSize, cancellationToken));
+        return Ok(await warehouseReadService.GetStockAsync(warehouseId, salesPlanKey, search, lowStockOnly, page,
+            pageSize, cancellationToken));
     }
 }

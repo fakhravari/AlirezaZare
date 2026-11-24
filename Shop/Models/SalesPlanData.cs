@@ -21,7 +21,8 @@ public sealed record SalesPlanCatalog(
     public static SalesPlanCatalog Parse(string json, IReadOnlySet<int> productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
-        SalesPlanCatalog catalog = JsonSerializer.Deserialize<SalesPlanCatalog>(json, JsonOptions) ?? throw new InvalidDataException("Missing sales-plan catalog.");
+        SalesPlanCatalog catalog = JsonSerializer.Deserialize<SalesPlanCatalog>(json, JsonOptions) ??
+                                   throw new InvalidDataException("Missing sales-plan catalog.");
         catalog.Validate(productIds);
 
         return catalog;
@@ -29,7 +30,8 @@ public sealed record SalesPlanCatalog(
 
     public static SalesPlanCatalog ParseConfiguration(string json, string catalogJson)
     {
-        SalesPlanCatalog configured = JsonSerializer.Deserialize<SalesPlanCatalog>(json, JsonOptions) ?? throw new InvalidDataException("Missing sales-plan configuration.");
+        SalesPlanCatalog configured = JsonSerializer.Deserialize<SalesPlanCatalog>(json, JsonOptions) ??
+                                      throw new InvalidDataException("Missing sales-plan configuration.");
         if (configured.Plans is null || configured.Offers is null)
             throw new InvalidDataException("Sales-plan configuration must include plans and offers.");
         using JsonDocument catalogDocument = JsonDocument.Parse(catalogJson);
@@ -44,7 +46,8 @@ public sealed record SalesPlanCatalog(
             int id = product.GetProperty("id").GetInt32();
             decimal currentAmount = product.GetProperty("price").GetDecimal() * 1_000_000m;
             decimal discount = product.GetProperty("discountPercent").GetDecimal();
-            decimal listAmount = decimal.Round(currentAmount * 100m / (100m - discount), 0, MidpointRounding.AwayFromZero);
+            decimal listAmount =
+                decimal.Round(currentAmount * 100m / (100m - discount), 0, MidpointRounding.AwayFromZero);
             productIds.Add(id);
             HashSet<string> ids = [];
             HashSet<string> requiredIds = [];
@@ -76,15 +79,18 @@ public sealed record SalesPlanCatalog(
         }
 
         if (configured.Offers.Any(offer => offer is null || offer.SalesPlanId == "regular"))
-            throw new InvalidDataException( "The default-plan offer is derived from the product catalog and cannot be duplicated.");
+            throw new InvalidDataException(
+                "The default-plan offer is derived from the product catalog and cannot be duplicated.");
         List<ProductSalesOffer> configuredOffers = [];
         foreach (ProductSalesOffer offer in configured.Offers)
         {
             if (!accessoryIds.TryGetValue(offer.ProductId, out HashSet<string>? productAccessoryIds) ||
                 productAccessoryIds is null)
                 throw new InvalidDataException("An offer references an unknown product.");
-            Dictionary<string, decimal> resolvedPrices = new(accessoryPricesByProduct[offer.ProductId], StringComparer.Ordinal);
-            IReadOnlyDictionary<string, decimal> overrides = offer.AccessoryPriceAmounts ?? new Dictionary<string, decimal>();
+            Dictionary<string, decimal> resolvedPrices =
+                new(accessoryPricesByProduct[offer.ProductId], StringComparer.Ordinal);
+            IReadOnlyDictionary<string, decimal> overrides =
+                offer.AccessoryPriceAmounts ?? new Dictionary<string, decimal>();
             if (overrides.Keys.Any(key => !productAccessoryIds.Contains(key)))
                 throw new InvalidDataException("An offer references an unknown accessory.");
             foreach ((string accessoryId, decimal amount) in overrides)
@@ -92,9 +98,13 @@ public sealed record SalesPlanCatalog(
             string[] selectedAccessoryIds = offer.AccessoryIds?.ToArray() ?? productAccessoryIds.ToArray();
             if (selectedAccessoryIds.Distinct(StringComparer.Ordinal).Count() != selectedAccessoryIds.Length ||
                 selectedAccessoryIds.Any(id => !productAccessoryIds.Contains(id)) ||
-                requiredAccessoryIds[offer.ProductId].Any(id => !selectedAccessoryIds.Contains(id, StringComparer.Ordinal)))
+                requiredAccessoryIds[offer.ProductId]
+                    .Any(id => !selectedAccessoryIds.Contains(id, StringComparer.Ordinal)))
                 throw new InvalidDataException("An offer has an invalid or incomplete accessory selection.");
-            configuredOffers.Add(offer with { AccessoryPriceAmounts = resolvedPrices, AccessoryIds = selectedAccessoryIds });
+            configuredOffers.Add(offer with
+            {
+                AccessoryPriceAmounts = resolvedPrices, AccessoryIds = selectedAccessoryIds
+            });
         }
 
         SalesPlanCatalog complete = configured with { Offers = defaultOffers.Concat(configuredOffers).ToArray() };
@@ -206,7 +216,8 @@ public sealed record SalesPlanCatalog(
         if (quantity < 1) throw new ArgumentOutOfRangeException(nameof(quantity));
 
         string planId = requestedPlanId ?? Plans.Single(plan => plan.IsDefault).Id;
-        SalesPlan plan = Plans.SingleOrDefault(candidate => candidate.Id == planId) ?? throw new SalesPlanUnavailableException("unknown-plan");
+        SalesPlan plan = Plans.SingleOrDefault(candidate => candidate.Id == planId) ??
+                         throw new SalesPlanUnavailableException("unknown-plan");
         if (!plan.IsEnabled ||
             (plan.StartsAtUtc is { } starts && nowUtc < starts) ||
             (plan.EndsAtUtc is { } ends && nowUtc >= ends))
@@ -221,7 +232,8 @@ public sealed record SalesPlanCatalog(
 
         decimal unitPrice = offer.FinalPriceAmount;
 
-        return new(productId, plan.Id, plan.Code, quantity, offer.PriceAmount, offer.DiscountPercent, unitPrice, checked(unitPrice * quantity), Currency, nowUtc);
+        return new(productId, plan.Id, plan.Code, quantity, offer.PriceAmount, offer.DiscountPercent, unitPrice,
+            checked(unitPrice * quantity), Currency, nowUtc);
     }
 
     private static bool IsUtc(DateTimeOffset value) => value.Offset == TimeSpan.Zero;
@@ -246,8 +258,10 @@ public sealed record ProductInventoryVariant(
     IReadOnlyDictionary<string, decimal> PriceBySalesPlan,
     IReadOnlyDictionary<string, decimal> DiscountBySalesPlan)
 {
-    public IReadOnlyDictionary<string, decimal> FinalPriceBySalesPlan { get; init; } = new Dictionary<string, decimal>();
-    public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
+    public IReadOnlyDictionary<string, decimal> FinalPriceBySalesPlan { get; init; } =
+        new Dictionary<string, decimal>();
+
+    public IReadOnlyDictionary<string, decimal> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, decimal>();
     public IReadOnlyList<string> DisabledSalesPlanIds { get; init; } = [];
 }
 
@@ -274,11 +288,12 @@ public sealed record ProductSalesOffer(
 {
     public decimal PriceBeforeDiscountAmount => PriceAmount;
     public decimal FinalPriceAmount { get; init; }
+
     public IReadOnlyDictionary<string, decimal> AccessoryPriceAmounts { get; init; } =
         new Dictionary<string, decimal>();
 
-    public long PriceVersionId { get; init; }
-    public IReadOnlyDictionary<string, long> AccessoryPriceVersionIds { get; init; } = new Dictionary<string, long>();
+    public decimal PriceVersionId { get; init; }
+    public IReadOnlyDictionary<string, decimal> AccessoryPriceVersionIds { get; init; } = new Dictionary<string, decimal>();
 
     public IReadOnlyList<string>? AccessoryIds { get; init; }
     public IReadOnlyDictionary<string, string> SpecificationOverrides { get; init; } = new Dictionary<string, string>();

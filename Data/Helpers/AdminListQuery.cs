@@ -39,12 +39,12 @@ public static class AdminListQuery
 
     public static bool HasNext(int page, int pageSize, long total) => (long)page * pageSize < total;
 
-    public static AdminPageResult<T> CreateResult<T>(IReadOnlyCollection<T> items, int total, AdminPageRequest request) =>
+    public static AdminPageResult<T>
+        CreateResult<T>(IReadOnlyCollection<T> items, int total, AdminPageRequest request) =>
         new(items, total, request.Page, request.PageSize, HasNext(request.Page, request.PageSize, total));
 
     public static AdminPageResult<T> CreateLookaheadResult<T>(IReadOnlyCollection<T> items, bool hasNext,
         AdminPageRequest request) => new(items, null, request.Page, request.PageSize, hasNext);
-
 }
 
 public readonly record struct AdminPageRequest(int Page, int PageSize, int Offset, string Search);

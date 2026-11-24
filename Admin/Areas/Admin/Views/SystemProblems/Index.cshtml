@@ -4,7 +4,8 @@
     ViewData["Title"] = "مشکلات سیستمی";
     ViewData["AreaTitle"] = "مدیریت سامانه";
     var tehran = TimeZoneInfo.ConvertTime(Model.CheckedAtUtc, TimeZoneInfo.FindSystemTimeZoneById("Asia/Tehran"));
-    var destination = Model.Selected.Key switch {
+    var destination = Model.Selected.Key switch
+    {
         "configuration" => Url.Action("Index", "SiteSettings", new { area = "Admin" }),
         "variant-prices" or "default-sale" => Url.Action("Index", "Features", new { area = "Store", feature = "promotions", section = "variant-prices" }),
         "product-prices" => Url.Action("Index", "Features", new { area = "Store", feature = "promotions", section = "offers" }),
@@ -18,7 +19,7 @@
     @await Html.PartialAsync("_AdminPageIntro", ("مشکلات سیستمی", "بررسی داده‌های فروش، انبار و سفارش برای شناسایی موارد نیازمند رسیدگی."))
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
         <form asp-area="Admin" asp-controller="SystemProblems" asp-action="Index" method="get" data-system-problems-refresh>
-            <input type="hidden" name="check" value="@Model.Selected.Key" />
+            <input type="hidden" name="check" value="@Model.Selected.Key"/>
             <button type="submit" class="btn btn-primary"><i class="fa fa-arrows-rotate" aria-hidden="true"></i> بررسی مجدد سیستم</button>
         </form>
         <span class="text-muted" data-system-problems-time>زمان این بررسی: @tehran.ToString("yyyy/MM/dd HH:mm:ss") به وقت تهران</span>
@@ -26,31 +27,72 @@
     <p>با بررسی مجدد، گزارش قبلی پاک و تمام کنترل‌ها از داده‌های جاری دوباره اجرا می‌شوند. اطلاعات پایگاه داده تغییر نمی‌کند. صفر بودن موارد فقط به معنی موفقیت کنترل‌های فهرست زیر است.</p>
     <p role="status" aria-live="polite" data-system-problems-status></p>
     <section class="panel panel-inverse" aria-labelledby="checks-title" data-system-problems-results>
-        <div class="panel-heading"><h2 id="checks-title" class="panel-title">نتیجهٔ بررسی‌ها</h2></div>
+        <div class="panel-heading">
+            <h2 id="checks-title" class="panel-title">نتیجهٔ بررسی‌ها</h2>
+        </div>
         <div class="panel-body">
-            <div class="table-responsive"><table class="table table-striped align-middle">
-                <thead><tr><th scope="col">بررسی</th><th scope="col">دامنه</th><th scope="col">تعداد موارد</th><th scope="col">جزئیات</th></tr></thead>
-                <tbody>@foreach (var item in Model.Checks) {
-                    <tr><th scope="row">@item.Title</th><td>@item.Description</td><td>@item.Count</td>
-                        <td><a asp-action="Index" asp-route-check="@item.Key" aria-current="@(item.Key == Model.Selected.Key ? "true" : null)" class="btn btn-sm @(item.Key == Model.Selected.Key ? "btn-primary" : "btn-default")">نمایش</a></td></tr>
-                }</tbody>
-            </table></div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                    <tr>
+                        <th scope="col">بررسی</th><th scope="col">دامنه</th><th scope="col">تعداد موارد</th><th scope="col">جزئیات</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.Checks)
+                    {
+                        <tr>
+                            <th scope="row">@item.Title</th><td>@item.Description</td><td>@item.Count</td>
+                            <td>
+                                <a asp-action="Index" asp-route-check="@item.Key" aria-current="@(item.Key == Model.Selected.Key ? "true" : null)" class="btn btn-sm @(item.Key == Model.Selected.Key ? "btn-primary" : "btn-default")">نمایش</a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </section>
     <section class="panel panel-inverse" aria-labelledby="problems-title" data-system-problems-results>
-        <div class="panel-heading"><h2 id="problems-title" class="panel-title">@Model.Selected.Title — @Model.Selected.Count مورد</h2></div>
+        <div class="panel-heading">
+            <h2 id="problems-title" class="panel-title">@Model.Selected.Title — @Model.Selected.Count مورد</h2>
+        </div>
         <div class="panel-body">
             <p>@Model.Selected.Description</p>
             <a href="@destination" data-admin-nav class="btn btn-default mb-3">رفتن به بخش رسیدگی</a>
-            @if (Model.Selected.Count == 0) { <p role="status">در این بررسی موردی پیدا نشد.</p> }
-            else {
-                <div class="table-responsive"><table class="table table-striped"><thead><tr><th scope="col">شناسهٔ ردیف</th><th scope="col">کالا / سفارش / تنظیم</th><th scope="col">تنوع / متعلقه</th><th scope="col">طرح / انبار</th><th scope="col">مشکل</th></tr></thead><tbody>
-                @foreach (var row in Model.Rows) { <tr><td>@(row.Id == 0 ? "—" : row.Id.ToString())</td><td>@row.Subject</td><td>@row.Context</td><td>@row.Plan</td><td>@row.Detail</td></tr> }
-                </tbody></table></div>
+            @if (Model.Selected.Count == 0)
+            {
+                <p role="status">در این بررسی موردی پیدا نشد.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">شناسهٔ ردیف</th><th scope="col">کالا / سفارش / تنظیم</th><th scope="col">تنوع / متعلقه</th><th scope="col">طرح / انبار</th><th scope="col">مشکل</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var row in Model.Rows)
+                        {
+                            <tr>
+                                <td>@(row.Id == 0 ? "—" : row.Id.ToString())</td><td>@row.Subject</td><td>@row.Context</td><td>@row.Plan</td><td>@row.Detail</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
                 <nav aria-label="صفحه‌بندی مشکلات">
-                    @if (Model.Page > 1) { <a asp-action="Index" asp-route-check="@Model.Selected.Key" asp-route-page="@(Model.Page - 1)" class="btn btn-default">صفحهٔ قبل</a> }
+                    @if (Model.Page > 1)
+                    {
+                        <a asp-action="Index" asp-route-check="@Model.Selected.Key" asp-route-page="@(Model.Page - 1)" class="btn btn-default">صفحهٔ قبل</a>
+                    }
                     <span>صفحهٔ @Model.Page از @Model.LastPage</span>
-                    @if (Model.Page < Model.LastPage) { <a asp-action="Index" asp-route-check="@Model.Selected.Key" asp-route-page="@(Model.Page + 1)" class="btn btn-default">صفحهٔ بعد</a> }
+                    @if (Model.Page < Model.LastPage)
+                    {
+                        <a asp-action="Index" asp-route-check="@Model.Selected.Key" asp-route-page="@(Model.Page + 1)" class="btn btn-default">صفحهٔ بعد</a>
+                    }
                 </nav>
             }
         </div>

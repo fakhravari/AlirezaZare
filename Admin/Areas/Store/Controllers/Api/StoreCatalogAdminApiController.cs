@@ -7,14 +7,17 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Admin.Infrastructure;
 using Shop.Data.Domain.Store.Entities;
-
 using Shop.Data.Helpers;
+
 namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
 [ApiController]
 [Route("api/admin/store/catalog")]
-public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBaseUrlProvider mediaCdn, IStorePriceVersionService priceVersions) : ControllerBase
+public sealed class StoreCatalogAdminApiController(
+    ShopDbContext db,
+    IMediaCdnBaseUrlProvider mediaCdn,
+    IStorePriceVersionService priceVersions) : ControllerBase
 {
     private IQueryable<StorePriceVersion> RegularProductPrices() =>
         from version in db.StorePriceVersions.AsNoTracking()
@@ -32,75 +35,154 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!User.IsInRole("system.full-access")) return Forbid();
         if (!await db.Products.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
         var items = await (from link in db.StoreProductAccessories.AsNoTracking()
-                           join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
-                           where link.IdProduct == id
-                           orderby link.SortOrder, link.Id
-                           select new { link.Id, accessory.Name, accessory.Description, accessory.IsActive, link.IsRequired, link.SortOrder, link.DisplayDiscountPercent,
-                               PriceAmount = (from version in db.StorePriceVersions join plan in db.SalesPlanReferences on version.IdSalesPlan equals (long?)plan.Id where version.IdProduct == id && version.IdAccessory == link.IdAccessory && version.IsActive && plan.IsRegular && plan.IdStockOwnerType == 1 orderby plan.Id select (decimal?)version.FinalPriceAmount).FirstOrDefault() })
-                          .ToListAsync(cancellationToken);
+                join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
+                where link.IdProduct == id
+                orderby link.SortOrder, link.Id
+                select new
+                {
+                    link.Id, accessory.Name, accessory.Description, accessory.IsActive, link.IsRequired, link.SortOrder,
+                    link.DisplayDiscountPercent,
+                    PriceAmount = (from version in db.StorePriceVersions
+                        join plan in db.SalesPlanReferences on version.IdSalesPlan equals (long?)plan.Id
+                        where version.IdProduct == id && version.IdAccessory == link.IdAccessory && version.IsActive &&
+                              plan.IsRegular && plan.IdStockOwnerType == 1
+                        orderby plan.Id
+                        select (decimal?)version.FinalPriceAmount).FirstOrDefault()
+                })
+            .ToListAsync(cancellationToken);
         return Ok(items);
     }
 
     [HttpPost("products/manage/{id:long}/accessories")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateProductAccessory(long id, [FromBody] ProductAccessoryInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateProductAccessory(long id, [FromBody] ProductAccessoryInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
         if (!ValidAccessory(input)) return BadRequest(new { title = "نام، توضیح، ترتیب یا قیمت متعلقه معتبر نیست." });
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         if (!await db.Products.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
-        var accessory = new StoreAccessory { Name = input.Name.Trim(), Description = input.Description?.Trim(), IsActive = input.IsActive };
+        var accessory = new StoreAccessory
+            { Name = input.Name.Trim(), Description = input.Description?.Trim(), IsActive = input.IsActive };
         db.StoreAccessories.Add(accessory);
         await db.SaveChangesAsync(cancellationToken);
-        var link = new StoreProductAccessory { IdProduct = id, IdAccessory = accessory.Id, IsRequired = input.IsRequired, SortOrder = input.SortOrder, DisplayDiscountPercent = input.DisplayDiscountPercent };
+        var link = new StoreProductAccessory
+        {
+            IdProduct = id, IdAccessory = accessory.Id, IsRequired = input.IsRequired, SortOrder = input.SortOrder,
+            DisplayDiscountPercent = input.DisplayDiscountPercent
+        };
         db.StoreProductAccessories.Add(link);
         var offers = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id).ToListAsync(cancellationToken);
-        db.StoreProductSalesPlanOfferAccessories.AddRange(offers.Select(x => new StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = x.Id, IdAccessory = accessory.Id, IsAllowed = true, IsIncludedByDefault = input.IsRequired }));
+        db.StoreProductSalesPlanOfferAccessories.AddRange(offers.Select(x => new StoreProductSalesPlanOfferAccessory
+        {
+            IdProductSalesPlanOffer = x.Id, IdAccessory = accessory.Id, IsAllowed = true,
+            IsIncludedByDefault = input.IsRequired
+        }));
         await db.SaveChangesAsync(cancellationToken);
-        var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1).Select(x => x.Id).ToListAsync(cancellationToken);
+        var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1)
+            .Select(x => x.Id).ToListAsync(cancellationToken);
         foreach (long planId in regularPlans.Concat(offers.Select(x => x.IdSalesPlan)).Distinct())
-            await priceVersions.AppendAsync(id, planId, null, accessory.Id, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+            await priceVersions.AppendAsync(id, planId, null, accessory.Id, input.PriceAmount, 0,
+                long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { link.Id, message = "متعلقه ساخته و به کالا متصل شد." });
     }
 
     [HttpPut("products/manage/{id:long}/accessories/{linkId:long}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateProductAccessory(long id, long linkId, [FromBody] ProductAccessoryInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateProductAccessory(long id, long linkId,
+        [FromBody] ProductAccessoryInput input, CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
         if (!ValidAccessory(input)) return BadRequest(new { title = "نام، توضیح، ترتیب یا قیمت متعلقه معتبر نیست." });
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        var link = await db.StoreProductAccessories.SingleOrDefaultAsync(x => x.Id == linkId && x.IdProduct == id, cancellationToken);
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        var link = await db.StoreProductAccessories.SingleOrDefaultAsync(x => x.Id == linkId && x.IdProduct == id,
+            cancellationToken);
         if (link is null) return NotFound();
         var accessory = await db.StoreAccessories.SingleAsync(x => x.Id == link.IdAccessory, cancellationToken);
-        if (await db.StoreProductAccessories.AnyAsync(x => x.IdAccessory == accessory.Id && x.Id != link.Id, cancellationToken) && (accessory.Name != input.Name.Trim() || (accessory.Description ?? "") != (input.Description?.Trim() ?? "") || accessory.IsActive != input.IsActive))
+        if (await db.StoreProductAccessories.AnyAsync(x => x.IdAccessory == accessory.Id && x.Id != link.Id,
+                cancellationToken) && (accessory.Name != input.Name.Trim() ||
+                                       (accessory.Description ?? "") != (input.Description?.Trim() ?? "") ||
+                                       accessory.IsActive != input.IsActive))
             return Conflict(new { title = "نام، توضیح و وضعیت متعلقهٔ مشترک از این مسیر قابل تغییر نیست." });
-        accessory.Name = input.Name.Trim(); accessory.Description = input.Description?.Trim(); accessory.IsActive = input.IsActive;
-        link.IsRequired = input.IsRequired; link.SortOrder = input.SortOrder; link.DisplayDiscountPercent = input.DisplayDiscountPercent;
+        accessory.Name = input.Name.Trim();
+        accessory.Description = input.Description?.Trim();
+        accessory.IsActive = input.IsActive;
+        link.IsRequired = input.IsRequired;
+        link.SortOrder = input.SortOrder;
+        link.DisplayDiscountPercent = input.DisplayDiscountPercent;
         if (input.IsRequired)
         {
-            var overrides = await (from row in db.StoreProductSalesPlanOfferAccessories join offer in db.StoreProductSalesPlanOffers on row.IdProductSalesPlanOffer equals offer.Id where offer.IdProduct == id && row.IdAccessory == accessory.Id select row).ToListAsync(cancellationToken);
-            foreach (var row in overrides) { row.IsAllowed = true; row.IsIncludedByDefault = true; }
-            var offerIds = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id).Select(x => x.Id).ToListAsync(cancellationToken);
+            var overrides = await (from row in db.StoreProductSalesPlanOfferAccessories
+                join offer in db.StoreProductSalesPlanOffers on row.IdProductSalesPlanOffer equals offer.Id
+                where offer.IdProduct == id && row.IdAccessory == accessory.Id
+                select row).ToListAsync(cancellationToken);
+            foreach (var row in overrides)
+            {
+                row.IsAllowed = true;
+                row.IsIncludedByDefault = true;
+            }
+
+            var offerIds = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id).Select(x => x.Id)
+                .ToListAsync(cancellationToken);
             var existingIds = overrides.Select(x => x.IdProductSalesPlanOffer).ToHashSet();
-            db.StoreProductSalesPlanOfferAccessories.AddRange(offerIds.Where(x => !existingIds.Contains(x)).Select(x => new StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = x, IdAccessory = accessory.Id, IsAllowed = true, IsIncludedByDefault = true }));
-            var offerPlans = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id).Select(x => x.IdSalesPlan).ToListAsync(cancellationToken);
+            db.StoreProductSalesPlanOfferAccessories.AddRange(offerIds.Where(x => !existingIds.Contains(x)).Select(x =>
+                new StoreProductSalesPlanOfferAccessory
+                {
+                    IdProductSalesPlanOffer = x, IdAccessory = accessory.Id, IsAllowed = true,
+                    IsIncludedByDefault = true
+                }));
+            var offerPlans = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id)
+                .Select(x => x.IdSalesPlan).ToListAsync(cancellationToken);
             foreach (long planId in offerPlans)
-                if (!await db.StorePriceVersions.AnyAsync(v => v.IdProduct == id && v.IdAccessory == accessory.Id && v.IdSalesPlan == planId && v.IsActive, cancellationToken))
-                    await priceVersions.AppendAsync(id, planId, null, accessory.Id, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+                if (!await db.StorePriceVersions.AnyAsync(
+                        v => v.IdProduct == id && v.IdAccessory == accessory.Id && v.IdSalesPlan == planId &&
+                             v.IsActive, cancellationToken))
+                    await priceVersions.AppendAsync(id, planId, null, accessory.Id, input.PriceAmount, 0,
+                        long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value),
+                        cancellationToken);
         }
+
         await db.SaveChangesAsync(cancellationToken);
-        var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1).Select(x => x.Id).ToListAsync(cancellationToken);
+        var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1)
+            .Select(x => x.Id).ToListAsync(cancellationToken);
         foreach (long planId in regularPlans)
-            if (!await db.StorePriceVersions.AnyAsync(v => v.IdProduct == id && v.IdAccessory == accessory.Id && v.IdSalesPlan == planId && v.IsActive && v.PriceBeforeDiscountAmount == input.PriceAmount, cancellationToken))
-                await priceVersions.AppendAsync(id, planId, null, accessory.Id, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+            if (!await db.StorePriceVersions.AnyAsync(
+                    v => v.IdProduct == id && v.IdAccessory == accessory.Id && v.IdSalesPlan == planId && v.IsActive &&
+                         v.PriceBeforeDiscountAmount == input.PriceAmount, cancellationToken))
+                await priceVersions.AppendAsync(id, planId, null, accessory.Id, input.PriceAmount, 0,
+                    long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value),
+                    cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { message = "متعلقهٔ کالا ذخیره شد." });
     }
 
-    public sealed record ProductAccessoryInput(string Name, string? Description, decimal PriceAmount, bool IsRequired, int SortOrder, bool IsActive, decimal? DisplayDiscountPercent = null);
-    private static bool ValidAccessory(ProductAccessoryInput input) => input is not null && !string.IsNullOrWhiteSpace(input.Name) && input.Name.Trim().Length <= 300 && (input.Description?.Trim().Length ?? 0) <= 1000 && input.SortOrder >= 0 && input.PriceAmount >= 0 && input.PriceAmount <= 9007199254740991m && input.PriceAmount == decimal.Truncate(input.PriceAmount) && (!input.DisplayDiscountPercent.HasValue || (input.DisplayDiscountPercent.Value is >= 0 and < 100 && decimal.Round(input.DisplayDiscountPercent.Value, 2) == input.DisplayDiscountPercent.Value));
+    public sealed record ProductAccessoryInput(
+        string Name,
+        string? Description,
+        decimal PriceAmount,
+        bool IsRequired,
+        int SortOrder,
+        bool IsActive,
+        decimal? DisplayDiscountPercent = null);
+
+    private static bool ValidAccessory(ProductAccessoryInput input) => input is not null &&
+                                                                       !string.IsNullOrWhiteSpace(input.Name) &&
+                                                                       input.Name.Trim().Length <= 300 &&
+                                                                       (input.Description?.Trim().Length ?? 0) <=
+                                                                       1000 && input.SortOrder >= 0 &&
+                                                                       input.PriceAmount >= 0 &&
+                                                                       input.PriceAmount <= 9007199254740991m &&
+                                                                       input.PriceAmount ==
+                                                                       decimal.Truncate(input.PriceAmount) &&
+                                                                       (!input.DisplayDiscountPercent.HasValue ||
+                                                                        (input.DisplayDiscountPercent.Value is >= 0
+                                                                             and < 100 &&
+                                                                         decimal.Round(
+                                                                             input.DisplayDiscountPercent.Value, 2) ==
+                                                                         input.DisplayDiscountPercent.Value));
 
     [HttpGet("products/manage/{id:long}")]
     public async Task<IActionResult> ProductEditor(long id, CancellationToken cancellationToken)
@@ -108,7 +190,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!User.IsInRole("system.full-access")) return Forbid();
 
         var product = await db.Products.AsNoTracking().Where(x => x.Id == id)
-            .Select(x => new { x.Id, code = x.ProductKey, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.MaxPurchaseQuantity })
+            .Select(x => new
+                { x.Id, code = x.ProductKey, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.MaxPurchaseQuantity })
             .SingleOrDefaultAsync(cancellationToken);
         if (product is null) return NotFound();
         var price = await RegularProductPrices().FirstOrDefaultAsync(x => x.IdProduct == id, cancellationToken);
@@ -119,51 +202,68 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
         var productUnitLinks = await db.WarehouseProductUnits.AsNoTracking().Where(x => x.IdProduct == id)
             .Select(x => new { x.IdUnit, x.ConversionFactor, x.IsBaseUnit, x.IsActive }).ToListAsync(cancellationToken);
-        long? baseUnitId = productUnitLinks.Where(x => x.IsActive && x.IsBaseUnit).Select(x => (long?)x.IdUnit).SingleOrDefault();
+        long? baseUnitId = productUnitLinks.Where(x => x.IsActive && x.IsBaseUnit).Select(x => (long?)x.IdUnit)
+            .SingleOrDefault();
         if (!baseUnitId.HasValue) return Conflict(new { title = "واحد پایهٔ فعال برای کالا تعریف نشده است." });
         long[] historicalUnitIds = productUnitLinks.Where(x => !x.IsActive).Select(x => x.IdUnit).ToArray();
-        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IdParent != null && (x.IsActive || x.Id == baseUnitId.Value)).OrderBy(x => x.NameFa)
+        var units = await db.WarehouseUnits.AsNoTracking()
+            .Where(x => x.IdParent != null && (x.IsActive || x.Id == baseUnitId.Value)).OrderBy(x => x.NameFa)
             .Where(x => x.Id == baseUnitId.Value || !historicalUnitIds.Contains(x.Id))
-            .Select(x => new { x.Id, Name = x.IsActive ? x.NameFa : x.NameFa + " (غیرفعال)", x.IsActive }).ToListAsync(cancellationToken);
+            .Select(x => new { x.Id, Name = x.IsActive ? x.NameFa : x.NameFa + " (غیرفعال)", x.IsActive })
+            .ToListAsync(cancellationToken);
         var unitConversions = await (from link in db.WarehouseProductUnits.AsNoTracking()
-                                     join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
-                                     where link.IdProduct == id && link.IsActive && !link.IsBaseUnit
-                                     orderby unit.NameFa
-                                     select new { link.IdUnit, UnitName = unit.NameFa, link.ConversionFactor }).ToListAsync(cancellationToken);
+            join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
+            where link.IdProduct == id && link.IsActive && !link.IsBaseUnit
+            orderby unit.NameFa
+            select new { link.IdUnit, UnitName = unit.NameFa, link.ConversionFactor }).ToListAsync(cancellationToken);
         bool hasVouchers = await HasVouchers(id, cancellationToken);
-        return Ok(new { product = new { product.Id, product.code, product.Name, product.EnglishName, product.IdBrand, product.IdCategory, IdBaseUnit = baseUnitId.Value, PriceAmount = price?.PriceBeforeDiscountAmount ?? 0m, DiscountPercent = price?.DiscountPercent ?? 0m, FinalPriceAmount = price?.FinalPriceAmount ?? 0m, product.MaxPurchaseQuantity }, brands, categories, units, unitConversions, unavailableUnitIds = historicalUnitIds, hasVouchers });
+        return Ok(new
+        {
+            product = new
+            {
+                product.Id, product.code, product.Name, product.EnglishName, product.IdBrand, product.IdCategory,
+                IdBaseUnit = baseUnitId.Value, PriceAmount = price?.PriceBeforeDiscountAmount ?? 0m,
+                DiscountPercent = price?.DiscountPercent ?? 0m, FinalPriceAmount = price?.FinalPriceAmount ?? 0m,
+                product.MaxPurchaseQuantity
+            },
+            brands, categories, units, unitConversions, unavailableUnitIds = historicalUnitIds, hasVouchers
+        });
     }
 
     private Task<bool> HasVouchers(long productId, CancellationToken cancellationToken) =>
         (from line in db.VoucherLines.AsNoTracking()
-         join item in db.InventoryItems.AsNoTracking() on line.IdInventoryItem equals item.Id
-         where item.IdProduct == productId select line.Id).AnyAsync(cancellationToken);
+            join item in db.InventoryItems.AsNoTracking() on line.IdInventoryItem equals item.Id
+            where item.IdProduct == productId
+            select line.Id).AnyAsync(cancellationToken);
 
     [HttpGet("products/{id:long}/details")]
     public async Task<IActionResult> ProductDetails(long id, CancellationToken cancellationToken)
     {
         var product = await db.Products.AsNoTracking().Where(x => x.Id == id).Select(x => new
-            {
-                x.Id, x.ProductKey, Code = x.ProductKey, x.Name, x.EnglishName, x.IdBrand, x.IdCategory,
-                x.MaxPurchaseQuantity,
-                x.Slug, Badge = x.ProductBadge == null ? null : x.ProductBadge.Title, x.IsStoreEnabled,
-                x.IsWarehouseEnabled, x.CreatedAtUtc, x.UpdatedAtUtc
-            }).SingleOrDefaultAsync(cancellationToken);
+        {
+            x.Id, x.ProductKey, Code = x.ProductKey, x.Name, x.EnglishName, x.IdBrand, x.IdCategory,
+            x.MaxPurchaseQuantity,
+            x.Slug, Badge = x.ProductBadge == null ? null : x.ProductBadge.Title, x.IsStoreEnabled,
+            x.IsWarehouseEnabled, x.CreatedAtUtc, x.UpdatedAtUtc
+        }).SingleOrDefaultAsync(cancellationToken);
         if (product is null) return NotFound();
         long? baseUnitId = await db.WarehouseProductUnits.AsNoTracking()
-            .Where(x => x.IdProduct == id && x.IsActive && x.IsBaseUnit).Select(x => (long?)x.IdUnit).SingleOrDefaultAsync(cancellationToken);
+            .Where(x => x.IdProduct == id && x.IsActive && x.IsBaseUnit).Select(x => (long?)x.IdUnit)
+            .SingleOrDefaultAsync(cancellationToken);
         if (!baseUnitId.HasValue) return Conflict(new { title = "واحد پایهٔ فعال برای کالا تعریف نشده است." });
         var price = await RegularProductPrices().FirstOrDefaultAsync(x => x.IdProduct == id, cancellationToken);
 
         string? brandName = product.IdBrand is long brandId
-            ? await db.StoreBrands.AsNoTracking().Where(x => x.Id == brandId).Select(x => x.NameFa).SingleOrDefaultAsync(cancellationToken)
+            ? await db.StoreBrands.AsNoTracking().Where(x => x.Id == brandId).Select(x => x.NameFa)
+                .SingleOrDefaultAsync(cancellationToken)
             : null;
-        string? unitName = await db.WarehouseUnits.AsNoTracking().Where(x => x.Id == baseUnitId.Value).Select(x => x.NameFa).SingleOrDefaultAsync(cancellationToken);
+        string? unitName = await db.WarehouseUnits.AsNoTracking().Where(x => x.Id == baseUnitId.Value)
+            .Select(x => x.NameFa).SingleOrDefaultAsync(cancellationToken);
         var secondaryUnits = await (from link in db.WarehouseProductUnits.AsNoTracking()
-                                    join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
-                                    where link.IdProduct == id && link.IsActive && !link.IsBaseUnit
-                                    orderby unit.NameFa
-                                    select new { link.IdUnit, UnitName = unit.NameFa, link.ConversionFactor })
+                join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
+                where link.IdProduct == id && link.IsActive && !link.IsBaseUnit
+                orderby unit.NameFa
+                select new { link.IdUnit, UnitName = unit.NameFa, link.ConversionFactor })
             .ToListAsync(cancellationToken);
 
         string? categoryPath = null;
@@ -173,19 +273,27 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                 .Select(x => x.TreePathNames).SingleOrDefaultAsync(cancellationToken);
         }
 
-        var variantRows = await db.ProductVariants.AsNoTracking().Where(x => x.IdProduct == id).OrderByDescending(x => x.IsDefault).ThenBy(x => x.VariantName.Name)
-            .Select(x => new { x.Id, Name = x.VariantName.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc, x.UpdatedAtUtc })
+        var variantRows = await db.ProductVariants.AsNoTracking().Where(x => x.IdProduct == id)
+            .OrderByDescending(x => x.IsDefault).ThenBy(x => x.VariantName.Name)
+            .Select(x => new
+                { x.Id, Name = x.VariantName.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc, x.UpdatedAtUtc })
             .ToListAsync(cancellationToken);
         long[] variantIds = variantRows.Select(x => x.Id).ToArray();
         var variantAttributes = await (from link in db.ProductVariantAttributeValues.AsNoTracking()
-                                       join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
-                                       join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
-                                       where variantIds.Contains(link.IdProductVariant)
-                                       orderby attribute.SortOrder, attribute.Id
-                                       select new { link.IdProductVariant, attribute.Key, attribute.Label, value.ValueKey, value.DisplayValue, value.Swatch })
+                join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
+                join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
+                where variantIds.Contains(link.IdProductVariant)
+                orderby attribute.SortOrder, attribute.Id
+                select new
+                {
+                    link.IdProductVariant, attribute.Key, attribute.Label, value.ValueKey, value.DisplayValue,
+                    value.Swatch
+                })
             .ToListAsync(cancellationToken);
         var attributesByVariant = variantAttributes.GroupBy(x => x.IdProductVariant).ToDictionary(x => x.Key,
-            x => x.Select(a => new { key = a.Key, label = a.Label, value = a.ValueKey, display = a.DisplayValue, swatch = a.Swatch }).ToArray());
+            x => x.Select(a => new
+                    { key = a.Key, label = a.Label, value = a.ValueKey, display = a.DisplayValue, swatch = a.Swatch })
+                .ToArray());
         var variants = variantRows.Select(x => new
         {
             x.Id, x.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc, x.UpdatedAtUtc,
@@ -196,67 +304,105 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             .Select(claim => long.TryParse(claim.Value, out long warehouseId) ? warehouseId : 0)
             .Where(warehouseId => warehouseId > 0).ToArray();
         var inventory = await (from balance in db.StockBalances.AsNoTracking()
-                               join item in db.InventoryItems.AsNoTracking() on balance.IdInventoryItem equals item.Id
-                               join warehouse in db.Warehouses.AsNoTracking() on balance.IdWarehouse equals warehouse.Id
-                               join company in db.Companies.AsNoTracking() on warehouse.IdCompany equals company.Id
-                               join plan in db.SalesPlanReferences.AsNoTracking() on balance.IdSalesPlanReference equals plan.Id
-                               where item.IdProduct == id && (fullAccess || allowedWarehouseIds.Contains(balance.IdWarehouse))
-                               orderby company.Name, warehouse.Name, plan.DisplayName
-                               select new
-                               {
-                                   CompanyName = company.Name,
-                                   WarehouseName = warehouse.Name,
-                                   WarehouseCode = warehouse.Code,
-                                   SalesPlanName = plan.DisplayName,
-                                   VariantName = item.ProductVariant == null ? null : item.ProductVariant!.VariantName.Name,
-                                   balance.Quantity,
-                                   balance.MinimumQuantity,
-                                   balance.UpdatedAtUtc
-                               }).ToListAsync(cancellationToken);
-        var benefits = await db.StoreProductBenefits.AsNoTracking().Where(x => x.IdProduct == id).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Select(x => new { x.Title, x.Detail, x.Icon, x.SortOrder, x.IsActive }).ToListAsync(cancellationToken);
+            join item in db.InventoryItems.AsNoTracking() on balance.IdInventoryItem equals item.Id
+            join warehouse in db.Warehouses.AsNoTracking() on balance.IdWarehouse equals warehouse.Id
+            join company in db.Companies.AsNoTracking() on warehouse.IdCompany equals company.Id
+            join plan in db.SalesPlanReferences.AsNoTracking() on balance.IdSalesPlanReference equals plan.Id
+            where item.IdProduct == id && (fullAccess || allowedWarehouseIds.Contains(balance.IdWarehouse))
+            orderby company.Name, warehouse.Name, plan.DisplayName
+            select new
+            {
+                CompanyName = company.Name,
+                WarehouseName = warehouse.Name,
+                WarehouseCode = warehouse.Code,
+                SalesPlanName = plan.DisplayName,
+                VariantName = item.ProductVariant == null ? null : item.ProductVariant!.VariantName.Name,
+                balance.Quantity,
+                balance.MinimumQuantity,
+                balance.UpdatedAtUtc
+            }).ToListAsync(cancellationToken);
+        var benefits = await db.StoreProductBenefits.AsNoTracking().Where(x => x.IdProduct == id)
+            .OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
+            .Select(x => new { x.Title, x.Detail, x.Icon, x.SortOrder, x.IsActive }).ToListAsync(cancellationToken);
         var specifications = await (from selected in db.StoreProductCatalogFeatureValues.AsNoTracking()
-                                    join feature in db.StoreCatalogFeatures.AsNoTracking() on selected.IdFeature equals feature.Id
-                                    join value in db.StoreCatalogFeatureValues.AsNoTracking() on selected.IdFeatureValue equals value.Id
-                                    where selected.IdProduct == id && feature.IsActive && value.IsActive
-                                    orderby feature.Name, value.Name
-                                    select new { Feature = feature.Name, Value = value.Name }).ToListAsync(cancellationToken);
-        var assets = await db.StoreProductAssets.AsNoTracking().Where(x => x.IdProduct == id).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
-        var documents = assets.Where(x => x.IdMediaType == ProductMediaTypes.Document).OrderByDescending(x => x.CreatedAtUtc).Select(x => new { x.Title, x.Path, x.CreatedAtUtc }).ToList();
+            join feature in db.StoreCatalogFeatures.AsNoTracking() on selected.IdFeature equals feature.Id
+            join value in db.StoreCatalogFeatureValues.AsNoTracking() on selected.IdFeatureValue equals value.Id
+            where selected.IdProduct == id && feature.IsActive && value.IsActive
+            orderby feature.Name, value.Name
+            select new { Feature = feature.Name, Value = value.Name }).ToListAsync(cancellationToken);
+        var assets = await db.StoreProductAssets.AsNoTracking().Where(x => x.IdProduct == id).OrderBy(x => x.SortOrder)
+            .ThenBy(x => x.Id).ToListAsync(cancellationToken);
+        var documents = assets.Where(x => x.IdMediaType == ProductMediaTypes.Document)
+            .OrderByDescending(x => x.CreatedAtUtc).Select(x => new { x.Title, x.Path, x.CreatedAtUtc }).ToList();
         var media = assets.FirstOrDefault(x => x.IdMediaType == ProductMediaTypes.Image && x.IsDefault);
-        var imageList = assets.Where(x => x.IdMediaType == ProductMediaTypes.Image && !x.IsDefault).Select(x => new { src = x.Path, thumbnail = x.ThumbnailPath }).ToList();
+        var imageList = assets.Where(x => x.IdMediaType == ProductMediaTypes.Image && !x.IsDefault)
+            .Select(x => new { src = x.Path, thumbnail = x.ThumbnailPath }).ToList();
         var videoList = assets.Where(x => x.IdMediaType == ProductMediaTypes.Video).Select(x => x.Path).ToList();
 
-        object? accessories = null, unitHistory = null, attributeDefinitions = null, currentPlanPrices = null, priceHistory = null, salesOffers = null;
+        object? accessories = null,
+            unitHistory = null,
+            attributeDefinitions = null,
+            currentPlanPrices = null,
+            priceHistory = null,
+            salesOffers = null;
         if (fullAccess)
         {
             accessories = await (from link in db.StoreProductAccessories.AsNoTracking()
-                                 join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
-                                 where link.IdProduct == id orderby link.SortOrder, link.Id
-                                 select new { accessory.Name, accessory.Description, accessory.IsActive, link.IsRequired, link.DisplayDiscountPercent, link.SortOrder }).ToListAsync(cancellationToken);
+                join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
+                where link.IdProduct == id
+                orderby link.SortOrder, link.Id
+                select new
+                {
+                    accessory.Name, accessory.Description, accessory.IsActive, link.IsRequired,
+                    link.DisplayDiscountPercent, link.SortOrder
+                }).ToListAsync(cancellationToken);
             unitHistory = await (from link in db.WarehouseProductUnits.AsNoTracking()
-                                 join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
-                                 where link.IdProduct == id && !link.IsActive
-                                 orderby unit.NameFa
-                                 select new { UnitName = unit.NameFa, link.ConversionFactor, link.IsBaseUnit }).ToListAsync(cancellationToken);
+                    join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
+                    where link.IdProduct == id && !link.IsActive
+                    orderby unit.NameFa
+                    select new { UnitName = unit.NameFa, link.ConversionFactor, link.IsBaseUnit })
+                .ToListAsync(cancellationToken);
             var attributeRows = await db.ProductAttributes.AsNoTracking().Where(x => x.IdProduct == id)
-                .OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Select(x => new { x.Id, x.Label, x.Key, x.IsActive }).ToListAsync(cancellationToken);
+                .OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Select(x => new { x.Id, x.Label, x.Key, x.IsActive })
+                .ToListAsync(cancellationToken);
             var attributeValues = await db.ProductAttributeValues.AsNoTracking().Where(x => x.IdProduct == id)
-                .OrderBy(x => x.Id).Select(x => new { x.IdProductAttribute, x.Label, x.DisplayValue, x.ValueKey, x.IsActive }).ToListAsync(cancellationToken);
-            attributeDefinitions = attributeRows.Select(x => new { x.Label, x.Key, x.IsActive, Values = attributeValues.Where(v => v.IdProductAttribute == x.Id).Select(v => new { v.Label, v.DisplayValue, v.ValueKey, v.IsActive }).ToArray() }).ToArray();
+                .OrderBy(x => x.Id)
+                .Select(x => new { x.IdProductAttribute, x.Label, x.DisplayValue, x.ValueKey, x.IsActive })
+                .ToListAsync(cancellationToken);
+            attributeDefinitions = attributeRows.Select(x => new
+            {
+                x.Label, x.Key, x.IsActive,
+                Values = attributeValues.Where(v => v.IdProductAttribute == x.Id)
+                    .Select(v => new { v.Label, v.DisplayValue, v.ValueKey, v.IsActive }).ToArray()
+            }).ToArray();
             salesOffers = await (from offer in db.StoreProductSalesPlanOffers.AsNoTracking()
-                                 join plan in db.SalesPlanReferences.AsNoTracking() on offer.IdSalesPlan equals plan.Id
-                                 where offer.IdProduct == id orderby plan.DisplayName
-                                 select new { SalesPlanName = plan.DisplayName, offer.IsEnabled, offer.MaxPurchaseQuantity }).ToListAsync(cancellationToken);
+                    join plan in db.SalesPlanReferences.AsNoTracking() on offer.IdSalesPlan equals plan.Id
+                    where offer.IdProduct == id
+                    orderby plan.DisplayName
+                    select new { SalesPlanName = plan.DisplayName, offer.IsEnabled, offer.MaxPurchaseQuantity })
+                .ToListAsync(cancellationToken);
             var prices = from version in db.StorePriceVersions.AsNoTracking()
-                         join plan in db.SalesPlanReferences.AsNoTracking() on version.IdSalesPlan equals plan.Id
-                         join variant in db.ProductVariants.AsNoTracking() on version.IdProductVariant equals (long?)variant.Id into variantGroup
-                         from variant in variantGroup.DefaultIfEmpty()
-                         join accessory in db.StoreAccessories.AsNoTracking() on version.IdAccessory equals (long?)accessory.Id into accessoryGroup
-                         from accessory in accessoryGroup.DefaultIfEmpty()
-                         where version.IdProduct == id
-                         select new { version.Id, SalesPlanName = plan.DisplayName, VariantName = variant == null ? null : variant.VariantName.Name, AccessoryName = accessory == null ? null : accessory.Name, PriceVersionAmount = version.PriceBeforeDiscountAmount, version.DiscountPercent, version.FinalPriceAmount, version.IsActive, version.CreatedAtUtc, version.IdChangedBy, version.ChangeReason };
-            currentPlanPrices = await prices.Where(x => x.IsActive).OrderBy(x => x.SalesPlanName).ToListAsync(cancellationToken);
-            priceHistory = await prices.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Take(200).ToListAsync(cancellationToken);
+                join plan in db.SalesPlanReferences.AsNoTracking() on version.IdSalesPlan equals plan.Id
+                join variant in db.ProductVariants.AsNoTracking() on version.IdProductVariant equals (long?)variant.Id
+                    into variantGroup
+                from variant in variantGroup.DefaultIfEmpty()
+                join accessory in db.StoreAccessories.AsNoTracking() on version.IdAccessory equals (long?)accessory.Id
+                    into accessoryGroup
+                from accessory in accessoryGroup.DefaultIfEmpty()
+                where version.IdProduct == id
+                select new
+                {
+                    version.Id, SalesPlanName = plan.DisplayName,
+                    VariantName = variant == null ? null : variant.VariantName.Name,
+                    AccessoryName = accessory == null ? null : accessory.Name,
+                    PriceVersionAmount = version.PriceBeforeDiscountAmount, version.DiscountPercent,
+                    version.FinalPriceAmount, version.IsActive, version.CreatedAtUtc, version.IdChangedBy,
+                    version.ChangeReason
+                };
+            currentPlanPrices = await prices.Where(x => x.IsActive).OrderBy(x => x.SalesPlanName)
+                .ToListAsync(cancellationToken);
+            priceHistory = await prices.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Take(200)
+                .ToListAsync(cancellationToken);
         }
 
         return Ok(new
@@ -295,62 +441,90 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             Benefits = benefits,
             Specifications = specifications,
             Documents = documents,
-            Media = media is null && imageList.Count == 0 && videoList.Count == 0 ? null : new
-            {
-                MainPath = media?.Path,
-                CardPath = media?.CardPath,
-                ThumbnailPath = media?.ThumbnailPath,
-                ImageList = JsonSerializer.Serialize(imageList),
-                VideoList = JsonSerializer.Serialize(videoList)
-            }
+            Media = media is null && imageList.Count == 0 && videoList.Count == 0
+                ? null
+                : new
+                {
+                    MainPath = media?.Path,
+                    CardPath = media?.CardPath,
+                    ThumbnailPath = media?.ThumbnailPath,
+                    ImageList = JsonSerializer.Serialize(imageList),
+                    VideoList = JsonSerializer.Serialize(videoList)
+                }
         });
     }
 
     [HttpPut("products/manage/{id:long}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateProduct(long id, [FromBody] ProductEditorInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateProduct(long id, [FromBody] ProductEditorInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        string name = input.Name?.Trim() ?? "", englishName = input.EnglishName?.Trim() ?? "", key = input.Key?.Trim() ?? "";
-        if (id < 1 || key.Length is < 1 or > 100 || name.Length is < 1 or > 300 || englishName.Length is < 1 or > 300 || input.BrandId < 1 || input.CategoryId < 1 || input.UnitId < 1 ||
-            !ValidUnitConversions(input.UnitConversions, input.UnitId) || input.PriceAmount < 0 || input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount) ||
-            input.DiscountPercent is < 0 or >= 100 || decimal.Round(input.DiscountPercent, 2) != input.DiscountPercent || input.MaxPurchaseQuantity is < 1 or > 99)
+        string name = input.Name?.Trim() ?? "",
+            englishName = input.EnglishName?.Trim() ?? "",
+            key = input.Key?.Trim() ?? "";
+        if (id < 1 || key.Length is < 1 or > 100 || name.Length is < 1 or > 300 || englishName.Length is < 1 or > 300 ||
+            input.BrandId < 1 || input.CategoryId < 1 || input.UnitId < 1 ||
+            !ValidUnitConversions(input.UnitConversions, input.UnitId) || input.PriceAmount < 0 ||
+            input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount) ||
+            input.DiscountPercent is < 0 or >= 100 ||
+            decimal.Round(input.DiscountPercent, 2) != input.DiscountPercent ||
+            input.MaxPurchaseQuantity is < 1 or > 99)
             return BadRequest(new { title = "نام، دسته، برند، قیمت، تخفیف یا حداکثر خرید معتبر نیست." });
 
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         bool validCategory = await db.StoreCategories.AnyAsync(c => c.Id == input.CategoryId && c.IsActive &&
-            !db.StoreCategories.Any(child => child.IsActive && child.IdParentCategory == c.Id), cancellationToken);
+                                                                    !db.StoreCategories.Any(child =>
+                                                                        child.IsActive &&
+                                                                        child.IdParentCategory == c.Id),
+            cancellationToken);
         bool validBrand = await db.StoreBrands.AnyAsync(x => x.Id == input.BrandId && x.IsActive, cancellationToken);
-        bool validUnits = await ActiveUnitsExistAsync(input.UnitConversions?.Select(x => x.UnitId) ?? [], cancellationToken);
-        if (!validCategory || !validBrand || !validUnits) return BadRequest(new { title = "برند، دسته یا واحد انتخاب‌شده معتبر نیست." });
+        bool validUnits =
+            await ActiveUnitsExistAsync(input.UnitConversions?.Select(x => x.UnitId) ?? [], cancellationToken);
+        if (!validCategory || !validBrand || !validUnits)
+            return BadRequest(new { title = "برند، دسته یا واحد انتخاب‌شده معتبر نیست." });
 
         var product = await db.Products.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (product is null) return NotFound();
         if (product.IdCategory != input.CategoryId)
         {
-            var nodes = await db.StoreCategories.AsNoTracking().Select(x => new { x.Id, x.IdParentCategory }).ToDictionaryAsync(x => x.Id, cancellationToken);
+            var nodes = await db.StoreCategories.AsNoTracking().Select(x => new { x.Id, x.IdParentCategory })
+                .ToDictionaryAsync(x => x.Id, cancellationToken);
             var ancestors = new HashSet<long>();
             long? current = input.CategoryId;
-            while (current is long categoryId && nodes.TryGetValue(categoryId, out var node) && ancestors.Add(categoryId)) current = node.IdParentCategory;
+            while (current is long categoryId && nodes.TryGetValue(categoryId, out var node) &&
+                   ancestors.Add(categoryId)) current = node.IdParentCategory;
             if (current is not null) return Conflict(new { title = "ساختار دستهٔ انتخاب‌شده معتبر نیست." });
-            var allowed = (await db.StoreCategoryCatalogFeatures.Where(x => ancestors.Contains(x.IdCategory)).Select(x => x.IdFeature).Distinct().ToListAsync(cancellationToken)).ToHashSet();
-            var displayFeatures = await db.StoreProductCatalogFeatureValues.Where(x => x.IdProduct == id).Select(x => x.IdFeature).ToListAsync(cancellationToken);
-            var variantFeatures = await (from selection in db.StoreVariantCatalogFeatureValues join variant in db.ProductVariants on selection.IdProductVariant equals variant.Id where variant.IdProduct == id select selection.IdFeature).ToListAsync(cancellationToken);
+            var allowed = (await db.StoreCategoryCatalogFeatures.Where(x => ancestors.Contains(x.IdCategory))
+                .Select(x => x.IdFeature).Distinct().ToListAsync(cancellationToken)).ToHashSet();
+            var displayFeatures = await db.StoreProductCatalogFeatureValues.Where(x => x.IdProduct == id)
+                .Select(x => x.IdFeature).ToListAsync(cancellationToken);
+            var variantFeatures =
+                await (from selection in db.StoreVariantCatalogFeatureValues
+                    join variant in db.ProductVariants on selection.IdProductVariant equals variant.Id
+                    where variant.IdProduct == id
+                    select selection.IdFeature).ToListAsync(cancellationToken);
             if (displayFeatures.Concat(variantFeatures).Any(featureId => !allowed.Contains(featureId)))
-                return Conflict(new { title = "دستهٔ جدید باید همهٔ ویژگی‌های ثبت‌شدهٔ کالا و تنوع‌های آن را داشته باشد." });
+                return Conflict(new
+                    { title = "دستهٔ جدید باید همهٔ ویژگی‌های ثبت‌شدهٔ کالا و تنوع‌های آن را داشته باشد." });
         }
+
         var unitLinks = await db.WarehouseProductUnits.Where(x => x.IdProduct == id).ToListAsync(cancellationToken);
-        long? currentBaseUnitId = unitLinks.Where(x => x.IsBaseUnit && x.IsActive).Select(x => (long?)x.IdUnit).SingleOrDefault();
+        long? currentBaseUnitId = unitLinks.Where(x => x.IsBaseUnit && x.IsActive).Select(x => (long?)x.IdUnit)
+            .SingleOrDefault();
         if (!currentBaseUnitId.HasValue) return Conflict(new { title = "واحد پایهٔ فعال برای کالا تعریف نشده است." });
         bool baseUnitChanged = input.UnitId != currentBaseUnitId.Value;
         if (baseUnitChanged)
         {
-            if (!await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IdParent != null && x.IsActive, cancellationToken))
+            if (!await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IdParent != null && x.IsActive,
+                    cancellationToken))
                 return BadRequest(new { title = "واحد پایهٔ انتخاب‌شده فعال نیست." });
             if (await HasVouchers(id, cancellationToken))
                 return Conflict(new { title = "برای این کالا سند انبار ثبت شده است؛ تغییر واحد پایه مجاز نیست." });
         }
+
         var baseLink = unitLinks.SingleOrDefault(x => x.IdUnit == input.UnitId);
         if (baseUnitChanged && baseLink is { IsActive: false })
             return Conflict(new { title = "واحد غیرفعال‌شدهٔ این کالا قابل فعال‌سازی مجدد نیست." });
@@ -358,16 +532,19 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         bool createBaseLink = baseLink is null;
         if (baseLink is null)
         {
-            baseLink = new Shop.Data.Domain.Warehouse.Entities.WarehouseProductUnit { IdProduct = id, IdUnit = input.UnitId };
+            baseLink = new Shop.Data.Domain.Warehouse.Entities.WarehouseProductUnit
+                { IdProduct = id, IdUnit = input.UnitId };
             unitLinks.Add(baseLink);
             db.WarehouseProductUnits.Add(baseLink);
         }
+
         if (baseLink.IsActive || createBaseLink)
         {
             baseLink.IsActive = true;
             baseLink.IsBaseUnit = true;
             baseLink.ConversionFactor = 1m;
         }
+
         HashSet<long>? requestedConversionIds = input.UnitConversions is null
             ? null
             : input.UnitConversions.Select(x => x.UnitId).ToHashSet();
@@ -383,17 +560,21 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         {
             var link = unitLinks.SingleOrDefault(x => x.IdUnit == conversion.UnitId);
             if (link is { IsActive: false })
-                return Conflict(new { title = "واحد غیرفعال‌شدهٔ این کالا فقط در تاریخچه قابل مشاهده است و دوباره فعال نمی‌شود." });
+                return Conflict(new
+                    { title = "واحد غیرفعال‌شدهٔ این کالا فقط در تاریخچه قابل مشاهده است و دوباره فعال نمی‌شود." });
             if (link is null)
             {
-                link = new Shop.Data.Domain.Warehouse.Entities.WarehouseProductUnit { IdProduct = id, IdUnit = conversion.UnitId };
+                link = new Shop.Data.Domain.Warehouse.Entities.WarehouseProductUnit
+                    { IdProduct = id, IdUnit = conversion.UnitId };
                 unitLinks.Add(link);
                 db.WarehouseProductUnits.Add(link);
             }
+
             link.IsBaseUnit = false;
             link.ConversionFactor = NormalizeConversionFactor(conversion.ConversionFactor);
             link.IsActive = true;
         }
+
         if (await db.Products.AnyAsync(x => x.Id != id && x.ProductKey == key, cancellationToken))
             return Conflict(new { title = "کد کالا قبلاً ثبت شده است." });
 
@@ -406,29 +587,54 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         product.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
-        var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1).Select(x => x.Id).ToListAsync(cancellationToken);
+        var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1)
+            .Select(x => x.Id).ToListAsync(cancellationToken);
         if (regularPlans.Count == 0) return Conflict(new { title = "طرح فروش عادی تعریف نشده است." });
         foreach (long planId in regularPlans)
         {
-            var currentPrice = await db.StorePriceVersions.SingleOrDefaultAsync(x => x.IdProduct == id && x.IdSalesPlan == planId && x.IsActive &&
+            var currentPrice = await db.StorePriceVersions.SingleOrDefaultAsync(x => x.IdProduct == id &&
+                x.IdSalesPlan == planId && x.IsActive &&
                 x.IdProductVariant == null && x.IdAccessory == null, cancellationToken);
-            if (currentPrice is null || currentPrice.PriceBeforeDiscountAmount != input.PriceAmount || currentPrice.DiscountPercent != input.DiscountPercent)
-                await priceVersions.AppendAsync(id, planId, null, null, input.PriceAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+            if (currentPrice is null || currentPrice.PriceBeforeDiscountAmount != input.PriceAmount ||
+                currentPrice.DiscountPercent != input.DiscountPercent)
+                await priceVersions.AppendAsync(id, planId, null, null, input.PriceAmount, input.DiscountPercent,
+                    long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value),
+                    cancellationToken);
         }
+
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { message = "اطلاعات کالا ذخیره شد." });
     }
 
-    public sealed class EditorOption { public long Id { get; set; } public string Name { get; set; } = ""; }
-    public sealed record ProductUnitConversionInput(long UnitId, decimal ConversionFactor);
-    public sealed record ProductEditorInput(string? Key, string? Name, string? EnglishName, long BrandId, long CategoryId, long UnitId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity, ProductUnitConversionInput[]? UnitConversions = null);
+    public sealed class EditorOption
+    {
+        public long Id { get; set; }
+        public string Name { get; set; } = "";
+    }
 
-    private static bool ValidUnitConversions(IReadOnlyCollection<ProductUnitConversionInput>? conversions, long baseUnitId) =>
+    public sealed record ProductUnitConversionInput(long UnitId, decimal ConversionFactor);
+
+    public sealed record ProductEditorInput(
+        string? Key,
+        string? Name,
+        string? EnglishName,
+        long BrandId,
+        long CategoryId,
+        long UnitId,
+        decimal PriceAmount,
+        decimal DiscountPercent,
+        int MaxPurchaseQuantity,
+        ProductUnitConversionInput[]? UnitConversions = null);
+
+    private static bool ValidUnitConversions(IReadOnlyCollection<ProductUnitConversionInput>? conversions,
+        long baseUnitId) =>
         conversions is null || (conversions.Count <= 100 &&
-            conversions.All(x => x is not null && x.UnitId > 0 && x.UnitId != baseUnitId && x.ConversionFactor > 0 &&
-                                 x.ConversionFactor <= 999999999.999999999m && NormalizeConversionFactor(x.ConversionFactor) > 0) &&
-            conversions.Select(x => x.UnitId).Distinct().Count() == conversions.Count);
+                                conversions.All(x =>
+                                    x is not null && x.UnitId > 0 && x.UnitId != baseUnitId && x.ConversionFactor > 0 &&
+                                    x.ConversionFactor <= 999999999.999999999m &&
+                                    NormalizeConversionFactor(x.ConversionFactor) > 0) &&
+                                conversions.Select(x => x.UnitId).Distinct().Count() == conversions.Count);
 
     private static decimal NormalizeConversionFactor(decimal factor) =>
         decimal.Truncate(factor * 1_000_000_000m) / 1_000_000_000m;
@@ -436,24 +642,30 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     private async Task<bool> ActiveUnitsExistAsync(IEnumerable<long> unitIds, CancellationToken cancellationToken)
     {
         long[] ids = unitIds.Distinct().ToArray();
-        return ids.Length == 0 || await db.WarehouseUnits.CountAsync(x => ids.Contains(x.Id) && x.IdParent != null && x.IsActive, cancellationToken) == ids.Length;
+        return ids.Length == 0 ||
+               await db.WarehouseUnits.CountAsync(x => ids.Contains(x.Id) && x.IdParent != null && x.IsActive,
+                   cancellationToken) == ids.Length;
     }
 
     [HttpPost("product-badges")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateProductBadge([FromBody] ProductBadgeInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateProductBadge([FromBody] ProductBadgeInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
         string title = input.Title?.Trim() ?? "";
         if (title.Length is < 1 or > 100) return BadRequest(new { title = "عنوان نشان باید بین ۱ تا ۱۰۰ نویسه باشد." });
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        if (await db.StoreProductBadges.AnyAsync(x => x.Title == title, cancellationToken)) return Conflict(new { title = "این نشان قبلاً ثبت شده است." });
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        if (await db.StoreProductBadges.AnyAsync(x => x.Title == title, cancellationToken))
+            return Conflict(new { title = "این نشان قبلاً ثبت شده است." });
         var badge = new StoreProductBadge { Title = title };
         db.StoreProductBadges.Add(badge);
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { badge.Id, badge.Title });
     }
+
     public sealed record ProductBadgeInput(string? Title);
 
     [HttpGet("products/manage/{id:long}/benefits")]
@@ -463,14 +675,18 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
         if (!await db.Products.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
 
-        var items = await db.StoreProductBenefits.AsNoTracking().Where(x => x.IdProduct == id).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Select(x => new ProductBenefitRow(x.Id, x.Title, x.Detail, x.Icon, x.SortOrder, x.IsActive)).ToListAsync(cancellationToken);
+        var items = await db.StoreProductBenefits.AsNoTracking().Where(x => x.IdProduct == id).OrderBy(x => x.SortOrder)
+            .ThenBy(x => x.Id)
+            .Select(x => new ProductBenefitRow(x.Id, x.Title, x.Detail, x.Icon, x.SortOrder, x.IsActive))
+            .ToListAsync(cancellationToken);
 
         return Ok(items);
     }
 
     [HttpPost("products/manage/{id:long}/benefits")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateProductBenefit(long id, [FromBody] ProductBenefitInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateProductBenefit(long id, [FromBody] ProductBenefitInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
@@ -495,13 +711,16 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
     [HttpPut("products/manage/{id:long}/benefits/{benefitId:long}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateProductBenefit(long id, long benefitId, [FromBody] ProductBenefitInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateProductBenefit(long id, long benefitId, [FromBody] ProductBenefitInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
         if (!TryNormalizeBenefit(input, out var value, out string error)) return BadRequest(new { title = error });
 
-        var benefit = await db.StoreProductBenefits.SingleOrDefaultAsync(x => x.Id == benefitId && x.IdProduct == id, cancellationToken);
+        var benefit =
+            await db.StoreProductBenefits.SingleOrDefaultAsync(x => x.Id == benefitId && x.IdProduct == id,
+                cancellationToken);
         if (benefit is null) return NotFound();
 
         benefit.Title = value.Title;
@@ -520,7 +739,9 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        var benefit = await db.StoreProductBenefits.SingleOrDefaultAsync(x => x.Id == benefitId && x.IdProduct == id, cancellationToken);
+        var benefit =
+            await db.StoreProductBenefits.SingleOrDefaultAsync(x => x.Id == benefitId && x.IdProduct == id,
+                cancellationToken);
         if (benefit is null) return NotFound();
 
         db.StoreProductBenefits.Remove(benefit);
@@ -529,7 +750,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         return Ok(new { message = "مزیت کالا حذف شد." });
     }
 
-    private static bool TryNormalizeBenefit(ProductBenefitInput input, out NormalizedProductBenefit value, out string error)
+    private static bool TryNormalizeBenefit(ProductBenefitInput input, out NormalizedProductBenefit value,
+        out string error)
     {
         string title = input.Title?.Trim() ?? "";
         string detail = input.Detail?.Trim() ?? "";
@@ -544,20 +766,36 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             return false;
         }
 
-        value = new(title, detail.Length == 0 ? null : detail, icon.Length == 0 ? null : icon, input.SortOrder, input.IsActive);
+        value = new(title, detail.Length == 0 ? null : detail, icon.Length == 0 ? null : icon, input.SortOrder,
+            input.IsActive);
         error = "";
 
         return true;
     }
 
     public sealed record ProductBenefitInput(string? Title, string? Detail, string? Icon, int SortOrder, bool IsActive);
-    public sealed record ProductBenefitRow(long Id, string Title, string? Detail, string? Icon, int SortOrder, bool IsActive);
-    private readonly record struct NormalizedProductBenefit(string Title, string? Detail, string? Icon, int SortOrder, bool IsActive);
+
+    public sealed record ProductBenefitRow(
+        decimal Id,
+        string Title,
+        string? Detail,
+        string? Icon,
+        int SortOrder,
+        bool IsActive);
+
+    private readonly record struct NormalizedProductBenefit(
+        string Title,
+        string? Detail,
+        string? Icon,
+        int SortOrder,
+        bool IsActive);
 
     private async Task<List<EditorOption>> GetLeafCategoryOptions(CancellationToken cancellationToken)
     {
-        var nodes = await db.StoreCategories.AsNoTracking().Where(x => x.IsActive).Select(x => new { x.Id, x.NameFa, x.IdParentCategory, x.TreePathNames }).ToListAsync(cancellationToken);
-        var parentIds = nodes.Where(x => x.IdParentCategory.HasValue).Select(x => x.IdParentCategory!.Value).ToHashSet();
+        var nodes = await db.StoreCategories.AsNoTracking().Where(x => x.IsActive)
+            .Select(x => new { x.Id, x.NameFa, x.IdParentCategory, x.TreePathNames }).ToListAsync(cancellationToken);
+        var parentIds = nodes.Where(x => x.IdParentCategory.HasValue).Select(x => x.IdParentCategory!.Value)
+            .ToHashSet();
         return nodes.Where(x => !parentIds.Contains(x.Id))
             .Select(node => new EditorOption { Id = node.Id, Name = node.TreePathNames })
             .OrderBy(x => x.Name, StringComparer.CurrentCulture).ToList();
@@ -577,28 +815,32 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
         var regularPrices = RegularProductPrices();
         var drafts = from product in db.Products.AsNoTracking()
-                     where !product.IsStoreEnabled
-                     join brand in db.StoreBrands.AsNoTracking() on product.IdBrand equals brand.Id into brands
-                     from brand in brands.DefaultIfEmpty()
-                     join category in db.StoreCategories.AsNoTracking() on product.IdCategory equals category.Id into categories
-                     from category in categories.DefaultIfEmpty()
-                     select new DraftProduct
-                     {
-                         Id = product.Id,
-                         CreatedAtUtc = product.CreatedAtUtc,
-                         Code = product.ProductKey,
-                         Name = product.Name,
-                         BrandName = brand == null ? null : brand.NameFa,
-                         CategoryName = category == null ? null : category.NameFa,
-                         PriceAmount = regularPrices.Where(x => x.IdProduct == product.Id).Select(x => (decimal?)x.FinalPriceAmount).FirstOrDefault(),
-                         HasImage = db.StoreProductAssets.Any(media => media.IdProduct == product.Id && media.IdMediaType == ProductMediaTypes.Image && media.IsDefault)
-                     };
+            where !product.IsStoreEnabled
+            join brand in db.StoreBrands.AsNoTracking() on product.IdBrand equals brand.Id into brands
+            from brand in brands.DefaultIfEmpty()
+            join category in db.StoreCategories.AsNoTracking() on product.IdCategory equals category.Id into categories
+            from category in categories.DefaultIfEmpty()
+            select new DraftProduct
+            {
+                Id = product.Id,
+                CreatedAtUtc = product.CreatedAtUtc,
+                Code = product.ProductKey,
+                Name = product.Name,
+                BrandName = brand == null ? null : brand.NameFa,
+                CategoryName = category == null ? null : category.NameFa,
+                PriceAmount = regularPrices.Where(x => x.IdProduct == product.Id)
+                    .Select(x => (decimal?)x.FinalPriceAmount).FirstOrDefault(),
+                HasImage = db.StoreProductAssets.Any(media =>
+                    media.IdProduct == product.Id && media.IdMediaType == ProductMediaTypes.Image && media.IsDefault)
+            };
         string query = paging.Search;
         if (query.Length > 0)
             drafts = drafts.Where(x => x.Code.Contains(query) || x.Name.Contains(query) ||
-                (x.BrandName != null && x.BrandName.Contains(query)) || (x.CategoryName != null && x.CategoryName.Contains(query)));
+                                       (x.BrandName != null && x.BrandName.Contains(query)) ||
+                                       (x.CategoryName != null && x.CategoryName.Contains(query)));
         int total = await drafts.CountAsync(cancellationToken);
-        var items = await drafts.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        var items = await drafts.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset)
+            .Take(paging.PageSize).ToListAsync(cancellationToken);
 
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
@@ -611,7 +853,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         var brands = await db.StoreBrands.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.NameFa)
             .Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
         var categories = await GetLeafCategoryOptions(cancellationToken);
-        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive && x.IdParent != null).OrderBy(x => x.NameFa)
+        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive && x.IdParent != null)
+            .OrderBy(x => x.NameFa)
             .Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
 
         return Ok(new { brands, categories, units });
@@ -619,28 +862,41 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
     [HttpPost("products/manage")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateProduct([FromBody] ProductCreateInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateProduct([FromBody] ProductCreateInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        string key = input.Key?.Trim() ?? "", name = input.Name?.Trim() ?? "", english = input.EnglishName?.Trim() ?? "";
+        string key = input.Key?.Trim() ?? "",
+            name = input.Name?.Trim() ?? "",
+            english = input.EnglishName?.Trim() ?? "";
         if (key.Length > 100 ||
-            name.Length is < 1 or > 300 || english.Length is < 1 or > 300 || input.BrandId < 1 || input.CategoryId < 1 || input.UnitId < 1 ||
-            !ValidUnitConversions(input.UnitConversions, input.UnitId) || input.PriceAmount < 0 || input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount) ||
-            input.DiscountPercent is < 0 or >= 100 || decimal.Round(input.DiscountPercent, 2) != input.DiscountPercent || input.MaxPurchaseQuantity is < 1 or > 99)
+            name.Length is < 1 or > 300 || english.Length is < 1 or > 300 || input.BrandId < 1 ||
+            input.CategoryId < 1 || input.UnitId < 1 ||
+            !ValidUnitConversions(input.UnitConversions, input.UnitId) || input.PriceAmount < 0 ||
+            input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount) ||
+            input.DiscountPercent is < 0 or >= 100 ||
+            decimal.Round(input.DiscountPercent, 2) != input.DiscountPercent ||
+            input.MaxPurchaseQuantity is < 1 or > 99)
             return BadRequest(new { title = "اطلاعات کالا معتبر نیست." });
 
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         long id = await db.Products.Select(x => (long?)x.Id).MaxAsync(cancellationToken) is long maxId ? maxId + 1 : 1;
         if (id > int.MaxValue) return Conflict(new { title = "ظرفیت شناسهٔ کالا تکمیل شده است." });
         if (key.Length == 0) key = id.ToString(System.Globalization.CultureInfo.InvariantCulture);
         string slug = $"product-{id}";
-        while (await db.Products.AnyAsync(x => x.Slug == slug, cancellationToken)) slug = $"product-{id}-{Guid.NewGuid():N}";
+        while (await db.Products.AnyAsync(x => x.Slug == slug, cancellationToken))
+            slug = $"product-{id}-{Guid.NewGuid():N}";
 
         bool validCategory = await db.StoreCategories.AnyAsync(c => c.Id == input.CategoryId && c.IsActive &&
-            !db.StoreCategories.Any(child => child.IsActive && child.IdParentCategory == c.Id), cancellationToken);
+                                                                    !db.StoreCategories.Any(child =>
+                                                                        child.IsActive &&
+                                                                        child.IdParentCategory == c.Id),
+            cancellationToken);
         bool validBrand = await db.StoreBrands.AnyAsync(x => x.Id == input.BrandId && x.IsActive, cancellationToken);
-        bool validUnits = await ActiveUnitsExistAsync(new[] { input.UnitId }.Concat(input.UnitConversions?.Select(x => x.UnitId) ?? []), cancellationToken);
+        bool validUnits = await ActiveUnitsExistAsync(
+            new[] { input.UnitId }.Concat(input.UnitConversions?.Select(x => x.UnitId) ?? []), cancellationToken);
         bool duplicate = await db.Products.AnyAsync(x => x.ProductKey == key, cancellationToken);
         if (!validCategory || !validBrand || !validUnits || duplicate)
             return Conflict(new { title = "برند، دسته یا واحد معتبر نیست یا شناسه و کد قبلاً ثبت شده‌اند." });
@@ -680,10 +936,12 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             });
         await db.SaveChangesAsync(cancellationToken);
 
-        var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1).Select(x => x.Id).ToListAsync(cancellationToken);
+        var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1)
+            .Select(x => x.Id).ToListAsync(cancellationToken);
         if (regularPlans.Count == 0) return Conflict(new { title = "طرح فروش عادی تعریف نشده است." });
         foreach (long planId in regularPlans)
-            await priceVersions.AppendAsync(id, planId, null, null, input.PriceAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+            await priceVersions.AppendAsync(id, planId, null, null, input.PriceAmount, input.DiscountPercent,
+                long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
 
@@ -699,18 +957,24 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         var product = await db.Products.SingleOrDefaultAsync(x => x.Id == id && !x.IsStoreEnabled, cancellationToken);
         if (product is null) return Conflict(new { title = "پیش‌نویس پیدا نشد یا اطلاعات و تصویر آن کامل نیست." });
 
-        bool validCategory = product.IdCategory is long categoryId && await db.StoreCategories.AnyAsync(c => c.Id == categoryId && c.IsActive &&
+        bool validCategory = product.IdCategory is long categoryId && await db.StoreCategories.AnyAsync(c =>
+            c.Id == categoryId && c.IsActive &&
             !db.StoreCategories.Any(child => child.IsActive && child.IdParentCategory == c.Id), cancellationToken);
-        bool validBrand = product.IdBrand is long brandId && await db.StoreBrands.AnyAsync(x => x.Id == brandId && x.IsActive, cancellationToken);
-        var media = await db.StoreProductAssets.AsNoTracking().SingleOrDefaultAsync(x => x.IdProduct == product.Id && x.IdMediaType == ProductMediaTypes.Image && x.IsDefault, cancellationToken);
+        bool validBrand = product.IdBrand is long brandId &&
+                          await db.StoreBrands.AnyAsync(x => x.Id == brandId && x.IsActive, cancellationToken);
+        var media = await db.StoreProductAssets.AsNoTracking().SingleOrDefaultAsync(
+            x => x.IdProduct == product.Id && x.IdMediaType == ProductMediaTypes.Image && x.IsDefault,
+            cancellationToken);
         bool validMedia = media is not null &&
-            media.Path.StartsWith("content/products/images/main/", StringComparison.OrdinalIgnoreCase) &&
-            media.CardPath?.StartsWith("content/products/images/card/", StringComparison.OrdinalIgnoreCase) == true &&
-            media.ThumbnailPath?.StartsWith("content/products/images/thumbnail/", StringComparison.OrdinalIgnoreCase) == true;
+                          media.Path.StartsWith("content/products/images/main/", StringComparison.OrdinalIgnoreCase) &&
+                          media.CardPath?.StartsWith("content/products/images/card/",
+                              StringComparison.OrdinalIgnoreCase) == true &&
+                          media.ThumbnailPath?.StartsWith("content/products/images/thumbnail/",
+                              StringComparison.OrdinalIgnoreCase) == true;
         bool hasPrice = await RegularProductPrices().AnyAsync(x => x.IdProduct == id, cancellationToken);
         bool validProduct = hasPrice && product.MaxPurchaseQuantity is >= 1 and <= 99 &&
-            !string.IsNullOrWhiteSpace(product.Slug) &&
-            !string.IsNullOrWhiteSpace(product.EnglishName);
+                            !string.IsNullOrWhiteSpace(product.Slug) &&
+                            !string.IsNullOrWhiteSpace(product.EnglishName);
         if (!validCategory || !validBrand || !validMedia || !validProduct)
             return Conflict(new { title = "پیش‌نویس پیدا نشد یا اطلاعات و تصویر آن کامل نیست." });
 
@@ -741,12 +1005,40 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     {
         if (value is null) return true;
 
-        try { using var _ = JsonDocument.Parse(value); return true; }
-        catch (JsonException) { return false; }
+        try
+        {
+            using var _ = JsonDocument.Parse(value);
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
     }
 
-    public sealed record ProductCreateInput(string? Key, string? Name, string? EnglishName, long BrandId, long CategoryId, long UnitId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity, ProductUnitConversionInput[]? UnitConversions = null);
-    public sealed class DraftProduct { public long Id { get; set; } public DateTime CreatedAtUtc { get; set; } public string Code { get; set; } = ""; public string Name { get; set; } = ""; public string? BrandName { get; set; } public string? CategoryName { get; set; } public decimal? PriceAmount { get; set; } public bool HasImage { get; set; } }
+    public sealed record ProductCreateInput(
+        string? Key,
+        string? Name,
+        string? EnglishName,
+        long BrandId,
+        long CategoryId,
+        long UnitId,
+        decimal PriceAmount,
+        decimal DiscountPercent,
+        int MaxPurchaseQuantity,
+        ProductUnitConversionInput[]? UnitConversions = null);
+
+    public sealed class DraftProduct
+    {
+        public decimal Id { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string? BrandName { get; set; }
+        public string? CategoryName { get; set; }
+        public decimal? PriceAmount { get; set; }
+        public bool HasImage { get; set; }
+    }
 
     [HttpGet("brands/countries")]
     public async Task<IActionResult> BrandCountries(CancellationToken cancellationToken)
@@ -754,16 +1046,20 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!User.IsInRole("system.full-access")) return Forbid();
 
         return Ok(await db.GeoCountries.AsNoTracking().OrderBy(x => x.NameFa)
-            .Select(x => new CountryRow { CountryCode = x.CountryCode, NameFa = x.NameFa }).ToListAsync(cancellationToken));
+            .Select(x => new CountryRow { CountryCode = x.CountryCode, NameFa = x.NameFa })
+            .ToListAsync(cancellationToken));
     }
 
     [HttpPost("brands/manage")]
     [ValidateAntiForgeryToken]
-    public Task<IActionResult> CreateBrand([FromBody] BrandInput input, CancellationToken cancellationToken) => SaveBrand(null, input, cancellationToken);
+    public Task<IActionResult> CreateBrand([FromBody] BrandInput input, CancellationToken cancellationToken) =>
+        SaveBrand(null, input, cancellationToken);
 
     [HttpPut("brands/manage/{key}")]
     [ValidateAntiForgeryToken]
-    public Task<IActionResult> UpdateBrand(string key, [FromBody] BrandInput input, CancellationToken cancellationToken) => SaveBrand(key, input, cancellationToken);
+    public Task<IActionResult>
+        UpdateBrand(string key, [FromBody] BrandInput input, CancellationToken cancellationToken) =>
+        SaveBrand(key, input, cancellationToken);
 
     private async Task<IActionResult> SaveBrand(string? key, BrandInput input, CancellationToken cancellationToken)
     {
@@ -772,7 +1068,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         string brandKey = (key ?? input.Key ?? "").Trim();
         string nameFa = input.NameFa?.Trim() ?? "", nameEn = input.NameEn?.Trim() ?? "";
         string countryCode = input.CountryCode?.Trim() ?? "";
-        if (brandKey.Length is < 1 or > 100 || !System.Text.RegularExpressions.Regex.IsMatch(brandKey, "^[a-z0-9]+(?:-[a-z0-9]+)*$") ||
+        if (brandKey.Length is < 1 or > 100 ||
+            !System.Text.RegularExpressions.Regex.IsMatch(brandKey, "^[a-z0-9]+(?:-[a-z0-9]+)*$") ||
             nameFa.Length is < 1 or > 200 || nameEn.Length is < 1 or > 200 || countryCode.Length > 10)
             return BadRequest(new { title = "شناسه، نام یا کشور برند معتبر نیست." });
 
@@ -781,11 +1078,17 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             if (!await db.GeoCountries.AnyAsync(x => x.CountryCode == countryCode, cancellationToken))
                 return BadRequest(new { title = "کشور انتخاب‌شده معتبر نیست." });
         }
-        long? countryId = countryCode.Length == 0 ? null : await db.GeoCountries
-            .Where(x => x.CountryCode == countryCode).Select(x => (long?)x.Id).SingleOrDefaultAsync(cancellationToken);
+
+        long? countryId = countryCode.Length == 0
+            ? null
+            : await db.GeoCountries
+                .Where(x => x.CountryCode == countryCode).Select(x => (long?)x.Id)
+                .SingleOrDefaultAsync(cancellationToken);
         try
         {
-            var brand = key is null ? null : await db.StoreBrands.SingleOrDefaultAsync(x => x.BrandKey == brandKey, cancellationToken);
+            var brand = key is null
+                ? null
+                : await db.StoreBrands.SingleOrDefaultAsync(x => x.BrandKey == brandKey, cancellationToken);
             if (key is not null && brand is null) return NotFound();
 
             if (brand is null)
@@ -793,6 +1096,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                 brand = new Shop.Data.Domain.Store.Entities.StoreBrand { BrandKey = brandKey, IsActive = true };
                 db.StoreBrands.Add(brand);
             }
+
             brand.NameFa = nameFa;
             brand.NameEn = nameEn;
             brand.IdCountry = countryId;
@@ -808,8 +1112,18 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         }
     }
 
-    public sealed record BrandInput(string? Key, string? NameFa, string? NameEn, string? CountryCode, bool? ShowInStore);
-    public sealed class CountryRow { public string CountryCode { get; set; } = ""; public string NameFa { get; set; } = ""; }
+    public sealed record BrandInput(
+        string? Key,
+        string? NameFa,
+        string? NameEn,
+        string? CountryCode,
+        bool? ShowInStore);
+
+    public sealed class CountryRow
+    {
+        public string CountryCode { get; set; } = "";
+        public string NameFa { get; set; } = "";
+    }
 
     [HttpGet("categories/manage/options")]
     public async Task<IActionResult> CategoryOptions(CancellationToken cancellationToken)
@@ -817,53 +1131,76 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!User.IsInRole("system.full-access")) return Forbid();
 
         return Ok(await db.StoreCategories.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.NameFa)
-            .Select(x => new CategoryOption(x.Id, x.CategoryKey, x.NameFa, x.NameEn, x.IdParentCategory, x.TreePathIds, x.TreePathNames)).ToListAsync(cancellationToken));
+            .Select(x => new CategoryOption(x.Id, x.CategoryKey, x.NameFa, x.NameEn, x.IdParentCategory, x.TreePathIds,
+                x.TreePathNames)).ToListAsync(cancellationToken));
     }
 
     [HttpPost("categories/manage")]
     [ValidateAntiForgeryToken]
-    public Task<IActionResult> CreateCategory([FromBody] CategoryInput input, CancellationToken cancellationToken) => SaveCategory(null, input, cancellationToken);
+    public Task<IActionResult> CreateCategory([FromBody] CategoryInput input, CancellationToken cancellationToken) =>
+        SaveCategory(null, input, cancellationToken);
 
     [HttpPut("categories/manage/{key}")]
     [ValidateAntiForgeryToken]
-    public Task<IActionResult> UpdateCategory(string key, [FromBody] CategoryInput input, CancellationToken cancellationToken) => SaveCategory(key, input, cancellationToken);
+    public Task<IActionResult> UpdateCategory(string key, [FromBody] CategoryInput input,
+        CancellationToken cancellationToken) => SaveCategory(key, input, cancellationToken);
 
-    private async Task<IActionResult> SaveCategory(string? key, CategoryInput input, CancellationToken cancellationToken)
+    private async Task<IActionResult> SaveCategory(string? key, CategoryInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        string categoryKey = (key ?? input.Key ?? "").Trim(), nameFa = input.NameFa?.Trim() ?? "", nameEn = input.NameEn?.Trim() ?? "";
-        if (categoryKey.Length is < 1 or > 150 || !System.Text.RegularExpressions.Regex.IsMatch(categoryKey, "^[a-z0-9]+(?:-[a-z0-9]+)*$") ||
-            nameFa.Length is < 1 or > 200 || nameEn.Length is < 1 or > 200 || !nameEn.Any(c => c is >= 'A' and <= 'Z' or >= 'a' and <= 'z') ||
+        string categoryKey = (key ?? input.Key ?? "").Trim(),
+            nameFa = input.NameFa?.Trim() ?? "",
+            nameEn = input.NameEn?.Trim() ?? "";
+        if (categoryKey.Length is < 1 or > 150 ||
+            !System.Text.RegularExpressions.Regex.IsMatch(categoryKey, "^[a-z0-9]+(?:-[a-z0-9]+)*$") ||
+            nameFa.Length is < 1 or > 200 || nameEn.Length is < 1 or > 200 ||
+            !nameEn.Any(c => c is >= 'A' and <= 'Z' or >= 'a' and <= 'z') ||
             nameFa.Any(char.IsControl) || nameEn.Any(char.IsControl) || input.ParentId is <= 0)
             return BadRequest(new { title = "شناسه یا نام دسته معتبر نیست." });
 
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         var nodes = await db.StoreCategories.ToListAsync(cancellationToken);
         var current = key is null ? null : nodes.SingleOrDefault(x => x.CategoryKey == categoryKey && x.IsActive);
         if (key is not null && current is null) return NotFound();
 
-        if (current is null && nodes.Any(x => string.Equals(x.CategoryKey, categoryKey, StringComparison.OrdinalIgnoreCase))) return Conflict(new { title = "شناسهٔ دسته قبلاً ثبت شده است." });
+        if (current is null &&
+            nodes.Any(x => string.Equals(x.CategoryKey, categoryKey, StringComparison.OrdinalIgnoreCase)))
+            return Conflict(new { title = "شناسهٔ دسته قبلاً ثبت شده است." });
 
         long? parentId = current?.IdParentCategory ?? input.ParentId;
-        if (current is not null && input.ParentId != current.IdParentCategory) return BadRequest(new { title = "تغییر والد دسته از این فرم مجاز نیست." });
+        if (current is not null && input.ParentId != current.IdParentCategory)
+            return BadRequest(new { title = "تغییر والد دسته از این فرم مجاز نیست." });
 
         var parent = parentId is null ? null : nodes.SingleOrDefault(x => x.Id == parentId && x.IsActive);
-        if (parentId is not null && parent is null) return BadRequest(new { title = "دستهٔ والد فعال نیست یا وجود ندارد." });
+        if (parentId is not null && parent is null)
+            return BadRequest(new { title = "دستهٔ والد فعال نیست یا وجود ندارد." });
 
-        if (nodes.Any(x => x.IsActive && x.Id != current?.Id && x.IdParentCategory == parentId && string.Equals(x.NameFa, nameFa, StringComparison.Ordinal)))
+        if (nodes.Any(x =>
+                x.IsActive && x.Id != current?.Id && x.IdParentCategory == parentId &&
+                string.Equals(x.NameFa, nameFa, StringComparison.Ordinal)))
             return Conflict(new { title = "دسته‌ای با این نام در همین سطح وجود دارد." });
 
         if (current is null && parent is not null)
         {
-            bool hasPublishedProducts = await db.Products.AnyAsync(x => x.IdCategory == parent.Id && x.IsStoreEnabled, cancellationToken);
-            if (hasPublishedProducts) return Conflict(new { title = "برای دستهٔ دارای کالای منتشرشده نمی‌توان زیردسته ساخت؛ ابتدا دستهٔ کالاها را تغییر دهید." });
+            bool hasPublishedProducts =
+                await db.Products.AnyAsync(x => x.IdCategory == parent.Id && x.IsStoreEnabled, cancellationToken);
+            if (hasPublishedProducts)
+                return Conflict(new
+                {
+                    title = "برای دستهٔ دارای کالای منتشرشده نمی‌توان زیردسته ساخت؛ ابتدا دستهٔ کالاها را تغییر دهید."
+                });
         }
+
         try
         {
             if (current is null)
             {
-                var parentPath = parent is null ? new List<string>() : JsonSerializer.Deserialize<List<string>>(parent.PathJson) ?? throw new JsonException();
+                var parentPath = parent is null
+                    ? new List<string>()
+                    : JsonSerializer.Deserialize<List<string>>(parent.PathJson) ?? throw new JsonException();
                 parentPath.Add(nameFa);
                 string path = JsonSerializer.Serialize(parentPath);
                 db.StoreCategories.Add(new Shop.Data.Domain.Store.Entities.StoreCategory
@@ -880,42 +1217,62 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             else
             {
                 var oldPath = JsonSerializer.Deserialize<List<string>>(current.PathJson) ?? throw new JsonException();
-                if (oldPath.Count == 0 || oldPath[^1] != current.NameFa) return Conflict(new { title = "مسیر دسته ناسازگار است؛ ابتدا دادهٔ دسته اصلاح شود." });
+                if (oldPath.Count == 0 || oldPath[^1] != current.NameFa)
+                    return Conflict(new { title = "مسیر دسته ناسازگار است؛ ابتدا دادهٔ دسته اصلاح شود." });
 
                 var descendants = new List<Shop.Data.Domain.Store.Entities.StoreCategory> { current };
                 for (int i = 0; i < descendants.Count; i++)
                 {
                     foreach (var child in nodes.Where(x => x.IdParentCategory == descendants[i].Id))
                     {
-                        if (descendants.Any(x => x.Id == child.Id)) return Conflict(new { title = "ساختار دسته‌ها دارای چرخه است." });
+                        if (descendants.Any(x => x.Id == child.Id))
+                            return Conflict(new { title = "ساختار دسته‌ها دارای چرخه است." });
 
                         descendants.Add(child);
                     }
                 }
+
                 foreach (var node in descendants)
                 {
                     var path = JsonSerializer.Deserialize<List<string>>(node.PathJson) ?? throw new JsonException();
-                    if (path.Count < oldPath.Count || !path.Take(oldPath.Count).SequenceEqual(oldPath)) return Conflict(new { title = "مسیر یکی از زیردسته‌ها ناسازگار است." });
+                    if (path.Count < oldPath.Count || !path.Take(oldPath.Count).SequenceEqual(oldPath))
+                        return Conflict(new { title = "مسیر یکی از زیردسته‌ها ناسازگار است." });
 
                     path[oldPath.Count - 1] = nameFa;
                     string newPath = JsonSerializer.Serialize(path);
                     node.PathJson = newPath;
                 }
+
                 current.NameFa = nameFa;
                 current.NameEn = nameEn;
             }
+
             await db.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
         }
-        catch (JsonException) { return Conflict(new { title = "مسیر دسته ناسازگار است." }); }
-        catch (DbUpdateException error) when (error.InnerException is SqlException { Number: 2601 or 2627 }) { return Conflict(new { title = "شناسهٔ دسته قبلاً ثبت شده است." }); }
+        catch (JsonException)
+        {
+            return Conflict(new { title = "مسیر دسته ناسازگار است." });
+        }
+        catch (DbUpdateException error) when (error.InnerException is SqlException { Number: 2601 or 2627 })
+        {
+            return Conflict(new { title = "شناسهٔ دسته قبلاً ثبت شده است." });
+        }
 
         return Ok(new { message = "دسته ذخیره شد." });
     }
 
     public sealed record CategoryInput(string? Key, string? NameFa, string? NameEn, long? ParentId);
-    public sealed record CategoryOption(long Id, string CategoryKey, string NameFa, string NameEn, long? IdParentCategory, string TreePathIds, string TreePathNames);
+
+    public sealed record CategoryOption(
+        long Id,
+        string CategoryKey,
+        string NameFa,
+        string NameEn,
+        long? IdParentCategory,
+        string TreePathIds,
+        string TreePathNames);
 
     [HttpGet("attributes/manage/{key}")]
     public async Task<IActionResult> AttributeEditor(string key, CancellationToken cancellationToken)
@@ -925,7 +1282,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         string attributeKey = key.Trim();
         if (attributeKey.Length is < 1 or > 100) return NotFound();
 
-        var item = await db.StoreAttributeDefinitions.AsNoTracking().Where(x => x.AttributeKey == attributeKey).Select(x => new AttributeDefinitionRow(x.AttributeKey, x.Label, x.Icon, x.SourceKey,
+        var item = await db.StoreAttributeDefinitions.AsNoTracking().Where(x => x.AttributeKey == attributeKey)
+            .Select(x => new AttributeDefinitionRow(x.AttributeKey, x.Label, x.Icon, x.SourceKey,
                 x.FilterKey, x.IsFilterable, x.IsHighlight, x.IsActive)).SingleOrDefaultAsync(cancellationToken);
 
         return item is null ? NotFound() : Ok(item);
@@ -933,7 +1291,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
     [HttpPost("attributes/manage")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateAttribute([FromBody] AttributeDefinitionInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateAttribute([FromBody] AttributeDefinitionInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
@@ -953,16 +1312,22 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             IsHighlight = normalized.IsHighlight,
             IsActive = true
         });
-        try { await db.SaveChangesAsync(cancellationToken); }
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
         catch (DbUpdateException dbError) when (dbError.InnerException is SqlException { Number: 2601 or 2627 })
-        { return Conflict(new { title = "این کلید ویژگی قبلاً ثبت شده است." }); }
+        {
+            return Conflict(new { title = "این کلید ویژگی قبلاً ثبت شده است." });
+        }
 
         return Ok(new { message = "ویژگی ایجاد شد." });
     }
 
     [HttpPut("attributes/manage/{key}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateAttribute(string key, [FromBody] AttributeDefinitionInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateAttribute(string key, [FromBody] AttributeDefinitionInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
@@ -971,7 +1336,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
         if (!TryNormalizeAttribute(input, out var normalized, out var error)) return BadRequest(new { title = error });
 
-        var item = await db.StoreAttributeDefinitions.SingleOrDefaultAsync(x => x.AttributeKey == attributeKey, cancellationToken);
+        var item = await db.StoreAttributeDefinitions.SingleOrDefaultAsync(x => x.AttributeKey == attributeKey,
+            cancellationToken);
         if (item is null) return NotFound();
 
         item.Label = normalized.Label;
@@ -985,18 +1351,25 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         return Ok(new { message = "ویژگی ذخیره شد." });
     }
 
-    private static bool TryNormalizeAttribute(AttributeDefinitionInput input, out NormalizedAttribute value, out string error)
+    private static bool TryNormalizeAttribute(AttributeDefinitionInput input, out NormalizedAttribute value,
+        out string error)
     {
         string key = input.Key?.Trim() ?? "";
         string label = input.Label?.Trim() ?? "";
         string icon = input.Icon?.Trim() ?? "";
         string source = input.SourceKey?.Trim() ?? "";
         string filter = input.FilterKey?.Trim() ?? "";
-        if (key.Length is < 1 or > 100 || !System.Text.RegularExpressions.Regex.IsMatch(key, "^[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*$") ||
+        if (key.Length is < 1 or > 100 ||
+            !System.Text.RegularExpressions.Regex.IsMatch(key, "^[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*$") ||
             label.Length is < 1 or > 200 || label.Any(char.IsControl) ||
-            icon.Length > 100 || (icon.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(icon, "^[a-z0-9-]+$")) ||
-            source.Length > 100 || (source.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(source, "^[A-Za-z][A-Za-z0-9_:-]*$")) ||
-            filter.Length > 100 || (filter.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(filter, "^[A-Za-z][A-Za-z0-9_-]*$")) ||
+            icon.Length > 100 ||
+            (icon.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(icon, "^[a-z0-9-]+$")) ||
+            source.Length > 100 || (source.Length > 0 &&
+                                    !System.Text.RegularExpressions.Regex.IsMatch(source,
+                                        "^[A-Za-z][A-Za-z0-9_:-]*$")) ||
+            filter.Length > 100 || (filter.Length > 0 &&
+                                    !System.Text.RegularExpressions.Regex.IsMatch(filter,
+                                        "^[A-Za-z][A-Za-z0-9_-]*$")) ||
             input.IsFilterable && filter.Length == 0)
         {
             value = new NormalizedAttribute("", "", null, null, null, false, false);
@@ -1005,24 +1378,52 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             return false;
         }
 
-        value = new NormalizedAttribute(key, label, EmptyToNull(icon), EmptyToNull(source), EmptyToNull(filter), input.IsFilterable, input.IsHighlight);
+        value = new NormalizedAttribute(key, label, EmptyToNull(icon), EmptyToNull(source), EmptyToNull(filter),
+            input.IsFilterable, input.IsHighlight);
         error = "";
 
         return true;
     }
 
     private static string? EmptyToNull(string? value) => string.IsNullOrEmpty(value) ? null : value;
-    private sealed record NormalizedAttribute(string Key, string Label, string? Icon, string? SourceKey, string? FilterKey, bool IsFilterable, bool IsHighlight);
-    public sealed record AttributeDefinitionInput(string? Key, string? Label, string? Icon, string? SourceKey, string? FilterKey, bool IsFilterable, bool IsHighlight);
-    public sealed record AttributeDefinitionRow(string Key, string Label, string? Icon, string? SourceKey, string? FilterKey, bool IsFilterable, bool IsHighlight, bool IsActive);
+
+    private sealed record NormalizedAttribute(
+        string Key,
+        string Label,
+        string? Icon,
+        string? SourceKey,
+        string? FilterKey,
+        bool IsFilterable,
+        bool IsHighlight);
+
+    public sealed record AttributeDefinitionInput(
+        string? Key,
+        string? Label,
+        string? Icon,
+        string? SourceKey,
+        string? FilterKey,
+        bool IsFilterable,
+        bool IsHighlight);
+
+    public sealed record AttributeDefinitionRow(
+        string Key,
+        string Label,
+        string? Icon,
+        string? SourceKey,
+        string? FilterKey,
+        bool IsFilterable,
+        bool IsHighlight,
+        bool IsActive);
 
     [HttpPost("attributes/manage/{key}/status")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SetAttributeStatus(string key, [FromBody] CatalogStatusInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> SetAttributeStatus(string key, [FromBody] CatalogStatusInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        var item = await db.StoreAttributeDefinitions.SingleOrDefaultAsync(x => x.AttributeKey == key, cancellationToken);
+        var item = await db.StoreAttributeDefinitions.SingleOrDefaultAsync(x => x.AttributeKey == key,
+            cancellationToken);
         if (item is null) return NotFound();
 
         item.IsActive = input.IsActive;
@@ -1033,7 +1434,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
     [HttpPost("categories/manage/{key}/status")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SetCategoryStatus(string key, [FromBody] CatalogStatusInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> SetCategoryStatus(string key, [FromBody] CatalogStatusInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
@@ -1042,11 +1444,14 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
         if (!input.IsActive)
         {
-            bool hasChildren = await db.StoreCategories.AnyAsync(x => x.IsActive && x.IdParentCategory == category.Id, cancellationToken);
-            bool hasPublishedProducts = await db.Products.AnyAsync(x => x.IsStoreEnabled && x.IdCategory == category.Id, cancellationToken);
+            bool hasChildren = await db.StoreCategories.AnyAsync(x => x.IsActive && x.IdParentCategory == category.Id,
+                cancellationToken);
+            bool hasPublishedProducts = await db.Products.AnyAsync(x => x.IsStoreEnabled && x.IdCategory == category.Id,
+                cancellationToken);
             if (hasChildren || hasPublishedProducts)
                 return Conflict(new { title = "ابتدا زیردسته‌ها یا کالاهای منتشرشدهٔ این دسته را غیرفعال کنید." });
         }
+
         category.IsActive = input.IsActive;
         await db.SaveChangesAsync(cancellationToken);
 
@@ -1055,7 +1460,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
     [HttpPost("brands/manage/{key}/status")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SetBrandStatus(string key, [FromBody] CatalogStatusInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> SetBrandStatus(string key, [FromBody] CatalogStatusInput input,
+        CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
@@ -1086,11 +1492,14 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             var attributes = db.StoreAttributeDefinitions.AsNoTracking();
             string attributeQuery = paging.Search;
             if (attributeQuery.Length > 0)
-                attributes = attributes.Where(x => x.AttributeKey.Contains(attributeQuery) || x.Label.Contains(attributeQuery) ||
-                    (x.SourceKey != null && x.SourceKey.Contains(attributeQuery)) || (x.FilterKey != null && x.FilterKey.Contains(attributeQuery)));
+                attributes = attributes.Where(x =>
+                    x.AttributeKey.Contains(attributeQuery) || x.Label.Contains(attributeQuery) ||
+                    (x.SourceKey != null && x.SourceKey.Contains(attributeQuery)) ||
+                    (x.FilterKey != null && x.FilterKey.Contains(attributeQuery)));
             int total = await attributes.CountAsync(cancellationToken);
             var items = await attributes.OrderBy(x => x.Id).Skip(paging.Offset).Take(paging.PageSize)
-                .Select(x => new AttributeDefinitionRow(x.AttributeKey, x.Label, x.Icon, x.SourceKey, x.FilterKey, x.IsFilterable, x.IsHighlight, x.IsActive))
+                .Select(x => new AttributeDefinitionRow(x.AttributeKey, x.Label, x.Icon, x.SourceKey, x.FilterKey,
+                    x.IsFilterable, x.IsHighlight, x.IsActive))
                 .ToListAsync(cancellationToken);
 
             return Ok(AdminListQuery.CreateResult(items, total, paging));
@@ -1101,12 +1510,18 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             var source = db.StoreCategories.AsNoTracking();
             string categoryQuery = paging.Search;
             if (categoryQuery.Length > 0)
-                source = source.Where(x => x.CategoryKey.Contains(categoryQuery) || x.NameFa.Contains(categoryQuery) || x.NameEn.Contains(categoryQuery));
+                source = source.Where(x =>
+                    x.CategoryKey.Contains(categoryQuery) || x.NameFa.Contains(categoryQuery) ||
+                    x.NameEn.Contains(categoryQuery));
             int total = await source.CountAsync(cancellationToken);
-            var all = await source.OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
-            var parents = await db.StoreCategories.AsNoTracking().ToDictionaryAsync(x => x.Id, x => x.CategoryKey, cancellationToken);
+            var all = await source.OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Skip(paging.Offset).Take(paging.PageSize)
+                .ToListAsync(cancellationToken);
+            var parents = await db.StoreCategories.AsNoTracking()
+                .ToDictionaryAsync(x => x.Id, x => x.CategoryKey, cancellationToken);
             var rows = all.Select(x => new CategoryRow(x.CategoryKey, x.NameFa, x.NameEn, x.CategoryKey,
-                x.IdParentCategory is long parentId && parents.TryGetValue(parentId, out string? parentKey) ? parentKey : "", x.IsActive, x.TreePathIds, x.TreePathNames)).ToArray();
+                x.IdParentCategory is long parentId && parents.TryGetValue(parentId, out string? parentKey)
+                    ? parentKey
+                    : "", x.IsActive, x.TreePathIds, x.TreePathNames)).ToArray();
 
             return Ok(AdminListQuery.CreateResult(rows, total, paging));
         }
@@ -1116,14 +1531,17 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             var brands = db.StoreBrands.AsNoTracking();
             string brandQuery = paging.Search;
             if (brandQuery.Length > 0)
-                brands = brands.Where(x => x.BrandKey.Contains(brandQuery) || x.NameFa.Contains(brandQuery) || x.NameEn.Contains(brandQuery));
+                brands = brands.Where(x =>
+                    x.BrandKey.Contains(brandQuery) || x.NameFa.Contains(brandQuery) || x.NameEn.Contains(brandQuery));
             int total = await brands.CountAsync(cancellationToken);
             var rows = await (from brand in brands
-                              join country in db.GeoCountries.AsNoTracking() on brand.IdCountry equals (long?)country.Id into countries
-                              from country in countries.DefaultIfEmpty()
-                              orderby brand.NameFa, brand.BrandKey
-                              select new BrandRow(brand.BrandKey, brand.NameFa, brand.NameEn,
-                                  country == null ? "" : country.CountryCode, brand.LogoPath, brand.IsActive, brand.ShowInStore)).Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+                    join country in db.GeoCountries.AsNoTracking() on brand.IdCountry equals (long?)country.Id into
+                        countries
+                    from country in countries.DefaultIfEmpty()
+                    orderby brand.NameFa, brand.BrandKey
+                    select new BrandRow(brand.BrandKey, brand.NameFa, brand.NameEn,
+                        country == null ? "" : country.CountryCode, brand.LogoPath, brand.IsActive, brand.ShowInStore))
+                .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
             string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
             var items = rows.Select(row => row with { LogoUrl = ContentCdn.ToUrl(row.LogoPath, cdnBaseUrl) }).ToArray();
 
@@ -1135,20 +1553,23 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
         var regularPrices = RegularProductPrices();
         var productSource = from product in db.Products.AsNoTracking()
-                            join brand in db.StoreBrands.AsNoTracking().Where(x => x.IsActive)
-                                on product.IdBrand equals (long?)brand.Id
-                            join category0 in db.StoreCategories.AsNoTracking().Where(x => x.IsActive)
-                                on product.IdCategory equals (long?)category0.Id into categories
-                            from category in categories.DefaultIfEmpty()
-                            where product.IsStoreEnabled &&
-                                  (product.IdCategory == null || category != null)
-                            select new { product, brand, category };
+            join brand in db.StoreBrands.AsNoTracking().Where(x => x.IsActive)
+                on product.IdBrand equals (long?)brand.Id
+            join category0 in db.StoreCategories.AsNoTracking().Where(x => x.IsActive)
+                on product.IdCategory equals (long?)category0.Id into categories
+            from category in categories.DefaultIfEmpty()
+            where product.IsStoreEnabled &&
+                  (product.IdCategory == null || category != null)
+            select new { product, brand, category };
         if (query.Length > 0)
-            productSource = productSource.Where(x => x.product.ProductKey.Contains(query) || x.product.Name.Contains(query) ||
-                (x.product.EnglishName != null && x.product.EnglishName.Contains(query)) || x.brand.NameFa.Contains(query) ||
+            productSource = productSource.Where(x =>
+                x.product.ProductKey.Contains(query) || x.product.Name.Contains(query) ||
+                (x.product.EnglishName != null && x.product.EnglishName.Contains(query)) ||
+                x.brand.NameFa.Contains(query) ||
                 (x.category != null && x.category.NameFa.Contains(query)));
         int productTotal = await productSource.CountAsync(cancellationToken);
-        var productRows = await productSource.OrderByDescending(x => x.product.CreatedAtUtc).ThenByDescending(x => x.product.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new
+        var productRows = await productSource.OrderByDescending(x => x.product.CreatedAtUtc)
+            .ThenByDescending(x => x.product.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new
             {
                 x.product.Id,
                 Code = x.product.ProductKey,
@@ -1158,20 +1579,24 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                 CategoryName = x.category == null ? "" : x.category.NameFa,
                 PriceVersion = regularPrices.FirstOrDefault(v => v.IdProduct == x.product.Id)
             }).ToListAsync(cancellationToken);
-        long[] productIds = productRows.Select(x => x.Id).ToArray();
+        decimal[] productIds = productRows.Select(x => x.Id).ToArray();
         var productStockTotals = productIds.Length == 0
-            ? new Dictionary<long, decimal>()
+            ? new Dictionary<decimal, decimal>()
             : await (from inventory in db.InventoryItems.AsNoTracking()
-                     join balance in db.StockBalances.AsNoTracking() on inventory.Id equals balance.IdInventoryItem
-                     where productIds.Contains(inventory.IdProduct)
-                     group balance.Quantity by inventory.IdProduct into grouped
-                     select new { Id = grouped.Key, Quantity = grouped.Sum() }).ToDictionaryAsync(x => x.Id, x => x.Quantity, cancellationToken);
+                    join balance in db.StockBalances.AsNoTracking() on inventory.Id equals balance.IdInventoryItem
+                    where productIds.Contains(inventory.IdProduct)
+                    group balance.Quantity by inventory.IdProduct
+                    into grouped
+                    select new { Id = grouped.Key, Quantity = grouped.Sum() })
+                .ToDictionaryAsync(x => x.Id, x => x.Quantity, cancellationToken);
         var productItems = productRows.Select(x =>
         {
             decimal stock = productStockTotals.GetValueOrDefault(x.Id);
             int stockQuantity = stock >= int.MaxValue ? int.MaxValue : Math.Max(0, (int)Math.Floor(stock));
 
-            return new ProductRow(checked((int)x.Id), x.Code, x.Name, x.EnglishName ?? x.Name, x.BrandName, x.CategoryName, FinalPrice(x.PriceVersion) / 1_000_000m, stockQuantity, x.PriceVersion?.DiscountPercent ?? 0m);
+            return new ProductRow(checked((int)x.Id), x.Code, x.Name, x.EnglishName ?? x.Name, x.BrandName,
+                x.CategoryName, FinalPrice(x.PriceVersion) / 1_000_000m, stockQuantity,
+                x.PriceVersion?.DiscountPercent ?? 0m);
         });
 
         return Ok(AdminListQuery.CreateResult(productItems.ToArray(), productTotal, paging));
@@ -1193,9 +1618,24 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         int StockQuantity,
         decimal DiscountPercent);
 
-    private sealed record CategoryRow(string Id, string Name, string EnglishName, string Slug, string ParentId, bool IsActive, string TreePathIds, string TreePathNames);
+    private sealed record CategoryRow(
+        string Id,
+        string Name,
+        string EnglishName,
+        string Slug,
+        string ParentId,
+        bool IsActive,
+        string TreePathIds,
+        string TreePathNames);
 
-    private sealed record BrandRow(string Id, string Name, string EnglishName, string CountryCode, string? LogoPath, bool IsActive, bool ShowInStore)
+    private sealed record BrandRow(
+        string Id,
+        string Name,
+        string EnglishName,
+        string CountryCode,
+        string? LogoPath,
+        bool IsActive,
+        bool ShowInStore)
     {
         public string? LogoUrl { get; init; }
     }

@@ -45,7 +45,8 @@ public sealed class SiteIdentityRequestContext
     private SiteIdentityOptions? _value;
 
     public SiteIdentityOptions Value => _value ??
-        throw new InvalidOperationException("Site identity was not loaded for this request.");
+                                        throw new InvalidOperationException(
+                                            "Site identity was not loaded for this request.");
 
     internal void Set(SiteIdentityOptions value) => _value = value;
 }
