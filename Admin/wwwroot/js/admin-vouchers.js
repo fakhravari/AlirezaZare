@@ -12,7 +12,7 @@
     let requestSerial = 0;
     let editorSerial = 0;
 
-    const token = () => document.querySelector('[data-document-form] input[name="__RequestVerificationToken"]')?.value || "";
+    const token = () => document.querySelector('[data-voucher-form] input[name="__RequestVerificationToken"]')?.value || "";
     async function send(url, method = "GET", body) {
         const response = await ui.getJson(url, {
             method,
@@ -35,7 +35,7 @@
     const today = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
     function status(page, message, error = false) {
-        const target = page.querySelector("[data-document-status]");
+        const target = page.querySelector("[data-voucher-status]");
         target.textContent = message;
         target.classList.toggle("text-danger", error); target.classList.toggle("text-muted", !error); target.classList.add("small");
         target.classList.toggle("d-none", !message);
@@ -45,14 +45,14 @@
         const result = await send(`${page.dataset.api}/lookups`);
         if (!page.isConnected) return false;
         lookups = result;
-        const filterStatus = page.querySelector('[data-document-filter] select[name="status"]');
-        const formStatus = document.querySelector('[data-document-form] select[name="status"]');
+        const filterStatus = page.querySelector('[data-voucher-filter] select[name="status"]');
+        const formStatus = document.querySelector('[data-voucher-form] select[name="status"]');
         const selectedStatus = filterStatus.value;
         filterStatus.replaceChildren(new Option("همهٔ وضعیت‌ها", ""), ...lookups.statuses.map(item => new Option(item.nameFa, item.code)));
         filterStatus.value = selectedStatus;
         formStatus.replaceChildren(...lookups.statuses.map(item => new Option(item.nameFa, item.code)));
-        const filterWarehouse = page.querySelector("[data-document-warehouses]");
-        const formWarehouse = document.querySelector("[data-document-warehouse]");
+        const filterWarehouse = page.querySelector("[data-voucher-warehouses]");
+        const formWarehouse = document.querySelector("[data-voucher-warehouse]");
         filterWarehouse.replaceChildren();
         option(filterWarehouse, "", "همهٔ انبارهای مجاز");
         formWarehouse.replaceChildren();
@@ -63,17 +63,17 @@
             option(formWarehouse, warehouse.id, label);
         }
         const types = filteredTypes(page);
-        fillSelect(document.querySelector("[data-document-types]"), types,
+        fillSelect(document.querySelector("[data-voucher-types]"), types,
             types.length ? "انتخاب نوع سند" : "نوع سند مناسب تعریف نشده است", item => item.name, item => item.id);
-        document.querySelector("[data-document-types-help]").hidden = types.length > 0;
-        fillSelect(document.querySelector("[data-document-plans]"), [], "ابتدا انبار را انتخاب کنید", item => item.displayName, item => item.id);
-        formWarehouse.onchange = () => updateDocumentOwners(formWarehouse.form);
-        fillSelect(document.querySelector("[data-document-parties]"), lookups.parties, "انتخاب مرجع", item => `${item.name} (${partyLabel(item.partyType)})`, item => item.id);
+        document.querySelector("[data-voucher-types-help]").hidden = types.length > 0;
+        fillSelect(document.querySelector("[data-voucher-plans]"), [], "ابتدا انبار را انتخاب کنید", item => item.displayName, item => item.id);
+        formWarehouse.onchange = () => updateVoucherOwners(formWarehouse.form);
+        fillSelect(document.querySelector("[data-voucher-parties]"), lookups.parties, "انتخاب مرجع", item => `${item.name} (${partyLabel(item.partyType)})`, item => item.id);
         return true;
     }
 
     function filteredTypes(page) {
-        const feature = page.dataset.documentFeature;
+        const feature = page.dataset.voucherFeature;
         let types = lookups.types.filter(type => !type.isSystemSalesDispatch);
         if (feature === "receipts") types = types.filter(type => type.direction === "R");
         if (feature === "dispatches") types = types.filter(type => type.direction === "I");
@@ -91,32 +91,32 @@
         return ({ Person: "شخص", Organization: "سازمان", Warehouse: "انبار", Other: "سایر" })[value] || value;
     }
 
-    async function loadDocuments(page) {
+    async function loadVouchers(page) {
         const serial = ++requestSerial;
         status(page, "در حال دریافت سندها…");
-        const form = page.querySelector("[data-document-filter]");
+        const form = page.querySelector("[data-voucher-filter]");
         const query = new URLSearchParams(new FormData(form));
         query.set("page", String(pageNumber));
         query.set("pageSize", "50");
         try {
             const result = await send(`${page.dataset.api}?${query}`);
             if (serial !== requestSerial) return;
-            renderDocuments(page, result.items || []);
+            renderVouchers(page, result.items || []);
             status(page, result.items?.length ? "" : "سندی با این فیلتر پیدا نشد.");
-            const pagination = page.querySelector("[data-document-pagination]");
+            const pagination = page.querySelector("[data-voucher-pagination]");
             const hasNext = (result.items?.length || 0) >= 50;
             const pages = Number.isFinite(result.total) ? Math.ceil(result.total / (result.pageSize || 50)) : pageNumber + (hasNext ? 1 : 0);
-                ui.renderNumberedPagination(pagination, pageNumber, pages, target => { pageNumber = target; void loadDocuments(page); }, "صفحه‌بندی اسناد");
+                ui.renderNumberedPagination(pagination, pageNumber, pages, target => { pageNumber = target; void loadVouchers(page); }, "صفحه‌بندی اسناد");
         } catch (error) { if (serial === requestSerial) status(page, error.message, true); }
     }
 
-    function renderDocuments(page, items) {
-        const body = page.querySelector("[data-document-rows]");
+    function renderVouchers(page, items) {
+        const body = page.querySelector("[data-voucher-rows]");
         ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
         body.replaceChildren();
         for (const item of items) {
             const row = document.createElement("tr");
-            [format.format(item.number), ui.formatDateTime(item.date), item.type, item.warehouse, item.salesPlan, item.party].forEach(value => row.append(node("td", value)));
+            [format.format(item.voucherNumber), ui.formatDateTime(item.voucherDate), item.voucherType, item.warehouse, item.salesPlan, item.party].forEach(value => row.append(node("td", value)));
             const state = node("td");
             state.append(node("span", item.statusName || item.status, `badge ${item.status === "F" ? "bg-success" : "bg-warning"}`));
             row.append(state, node("td", item.affectsStock && item.status === "F" ? "دارد" : "ندارد"));
@@ -128,14 +128,14 @@
             remove.type = "button";
             remove.disabled = item.status !== "D";
             if (remove.disabled) remove.title = "برای حذف، ابتدا وضعیت سند را به موقت تغییر دهید.";
-            remove.dataset.adminConfirm = `سند شمارهٔ ${format.format(item.number)} حذف شود؟`;
+            remove.dataset.adminConfirm = `سند شمارهٔ ${format.format(item.voucherNumber)} حذف شود؟`;
             remove.addEventListener("click", async () => {
                 if (remove.disabled) return;
                 remove.disabled = true;
                 try {
                     await send(`${page.dataset.api}/${item.id}`, "DELETE", { delete: true });
                     ui.notify("سند حذف شد.", "success");
-                    await loadDocuments(page);
+                    await loadVouchers(page);
                 } catch (error) { ui.notify(error.message, "danger"); }
                 finally { remove.disabled = false; }
             });
@@ -152,13 +152,13 @@
 
     function setSelect(select, value) { select.value = value == null ? "" : String(value); }
 
-    function setDocumentDate(input, value) {
+    function setVoucherDate(input, value) {
         const picker = window.AdminPersianDatePicker;
         picker?.initialize(input);
         if (!picker?.setValue(input, value)) input.value = value || "";
     }
 
-    function updateDocumentOwners(form, selectedId = null) {
+    function updateVoucherOwners(form, selectedId = null) {
         const warehouseId = Number(form.elements.warehouseId.value);
         const allowed = new Set(lookups.ownerLinks.filter(link => link.idWarehouse === warehouseId).map(link => link.idStockOwner));
         const owners = lookups.plans.filter(plan => allowed.has(plan.id));
@@ -168,7 +168,7 @@
         const preferred = warehouse?.isSalesWarehouse ? owners.find(plan => plan.isRegular)?.id : warehouse?.defaultOwnerSalesPlanId;
         const selected = selectedId ?? preferred ?? (owners.length === 1 ? owners[0].id : null);
         setSelect(select, selected);
-        form.querySelectorAll("[data-document-line-plan]").forEach(lineSelect => {
+        form.querySelectorAll("[data-voucher-line-plan]").forEach(lineSelect => {
             const previous = lineSelect.value;
             fillSelect(lineSelect, owners, "انتخاب مالک کالا", item => item.displayName, item => item.id);
             setSelect(lineSelect, owners.some(owner => String(owner.id) === previous) ? previous : selected);
@@ -177,44 +177,44 @@
 
     async function openEditor(page, id = null) {
         const serial = ++editorSerial;
-        const form = document.querySelector("[data-document-form]");
+        const form = document.querySelector("[data-voucher-form]");
         form.reset();
         form.elements.id.value = "";
         form.elements.status.value = "D";
-        setDocumentDate(form.elements.documentDate, today());
-        form.elements.documentDate.max = today();
+        setVoucherDate(form.elements.voucherDate, today());
+        form.elements.voucherDate.max = today();
         form.elements.externalReference.value = "";
-        form.querySelector("[data-document-lines]").replaceChildren();
-        updateDocumentOwners(form);
+        form.querySelector("[data-voucher-lines]").replaceChildren();
+        updateVoucherOwners(form);
         if (id) {
             try {
                 const detail = await send(`${page.dataset.api}/${id}`);
                 if (!page.isConnected || serial !== editorSerial) return;
                 form.elements.id.value = String(detail.id);
                 setSelect(form.elements.warehouseId, detail.warehouseId);
-                setSelect(form.elements.documentTypeId, detail.documentTypeId);
+                setSelect(form.elements.voucherTypeId, detail.voucherTypeId);
                 setSelect(form.elements.partyId, detail.partyId);
-                updateDocumentOwners(form, detail.salesPlanId);
-                setDocumentDate(form.elements.documentDate, detail.date);
+                updateVoucherOwners(form, detail.salesPlanId);
+                setVoucherDate(form.elements.voucherDate, detail.voucherDate);
                 form.elements.status.value = detail.status;
                 form.elements.reason.value = detail.reason || "";
                 form.elements.externalReference.value = detail.externalReference || "";
                 for (const line of detail.lines) appendLine(form, line);
             } catch (error) { if (page.isConnected && serial === editorSerial) ui.notify(error.message, "danger"); return; }
         } else appendLine(form);
-        document.getElementById("admin-document-title").textContent = id ? "ویرایش سند انبار" : "ثبت سند انبار";
+        document.getElementById("admin-voucher-title").textContent = id ? "ویرایش سند انبار" : "ثبت سند انبار";
         modal.show();
     }
 
     function appendLine(form, initial = null) {
-        const body = form.querySelector("[data-document-lines]");
+        const body = form.querySelector("[data-voucher-lines]");
         if (body.rows.length >= 200) { ui.notify("هر سند حداکثر ۲۰۰ قلم دارد.", "danger"); return; }
         const row = document.createElement("tr");
         const itemCell = node("td");
         const itemSelect = node("select", null, "form-select");
         itemSelect.required = true;
         itemSelect.setAttribute("aria-label", "کالا یا تنوع قلم سند");
-        itemSelect.dataset.documentItem = "";
+        itemSelect.dataset.voucherItem = "";
         option(itemSelect, "", "انتخاب کالا / تنوع");
         for (const item of lookups.inventoryItems) {
             const attributes = (item.variantAttributes || []).map(attribute => `${attribute.label}: ${attribute.value}`).join("، ");
@@ -225,7 +225,7 @@
         const planCell = node("td");
         const planSelect = node("select", null, "form-select");
         planSelect.required = true;
-        planSelect.dataset.documentLinePlan = "";
+        planSelect.dataset.voucherLinePlan = "";
         planSelect.setAttribute("aria-label", "طرح یا مالک قلم سند");
         const warehouseId = Number(form.elements.warehouseId.value);
         const allowed = new Set(lookups.ownerLinks.filter(link => link.idWarehouse === warehouseId).map(link => link.idStockOwner));
@@ -236,7 +236,7 @@
         const unitSelect = node("select", null, "form-select");
         unitSelect.required = true;
         unitSelect.setAttribute("aria-label", "واحد قلم سند");
-        unitSelect.dataset.documentUnit = "";
+        unitSelect.dataset.voucherUnit = "";
         unitCell.append(unitSelect);
         const quantityCell = node("td");
         const quantity = node("input", null, "form-control");
@@ -246,12 +246,12 @@
         quantity.max = "999999999999999.999";
         quantity.required = true;
         quantity.setAttribute("aria-label", "مقدار قلم سند");
-        quantity.dataset.documentQuantity = "";
+        quantity.dataset.voucherQuantity = "";
         quantityCell.append(quantity);
         const factor = node("td", "—", "text-nowrap");
-        factor.dataset.documentFactor = "";
+        factor.dataset.voucherFactor = "";
         const base = node("td", "—", "text-nowrap");
-        base.dataset.documentBase = "";
+        base.dataset.voucherBase = "";
         const actionCell = node("td");
         const remove = node("button", "حذف", "btn btn-sm btn-outline-danger");
         remove.type = "button";
@@ -288,13 +288,13 @@
     }
 
     function initialize(root) {
-        const page = root.querySelector?.("[data-admin-documents]");
+        const page = root.querySelector?.("[data-admin-vouchers]");
         if (!page || initialized.has(page)) return;
         initialized.add(page);
         pageNumber = 1;
         requestSerial++;
-        modal = window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-document-modal"));
-        const createButton = page.querySelector("[data-document-create]");
+        modal = window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-voucher-modal"));
+        const createButton = page.querySelector("[data-voucher-create]");
         createButton.hidden = page.dataset.canCreate !== "true";
         createButton.disabled = true;
         void (async () => {
@@ -303,23 +303,23 @@
                 createButton.disabled = false;
                 createButton.addEventListener("click", () => void openEditor(page).catch(error => { status(page, error.message || "بازکردن فرم سند ناموفق بود.", true); ui.notify(error.message || "بازکردن فرم سند ناموفق بود.", "danger"); }));
                 const referenceLabel = document.querySelector("[data-reference-label]");
-                const referenceInput = document.querySelector("[data-document-reference]");
-                if (page.dataset.documentFeature === "returns") {
+                const referenceInput = document.querySelector("[data-voucher-reference]");
+                if (page.dataset.voucherFeature === "returns") {
                     referenceLabel.textContent = "شمارهٔ سفارش مشتری";
                     referenceInput.required = true;
                 }
-                document.querySelector("[data-document-line-add]").addEventListener("click", () => appendLine(document.querySelector("[data-document-form]")));
-                page.querySelector("[data-document-filter]").addEventListener("submit", event => { event.preventDefault(); pageNumber = 1; void loadDocuments(page); });
-                page.querySelector("[data-document-reset]").addEventListener("click", () => { page.querySelector("[data-document-filter]").reset(); pageNumber = 1; void loadDocuments(page); });
-                document.querySelector("[data-document-form]").addEventListener("submit", async event => {
+                document.querySelector("[data-voucher-line-add]").addEventListener("click", () => appendLine(document.querySelector("[data-voucher-form]")));
+                page.querySelector("[data-voucher-filter]").addEventListener("submit", event => { event.preventDefault(); pageNumber = 1; void loadVouchers(page); });
+                page.querySelector("[data-voucher-reset]").addEventListener("click", () => { page.querySelector("[data-voucher-filter]").reset(); pageNumber = 1; void loadVouchers(page); });
+                document.querySelector("[data-voucher-form]").addEventListener("submit", async event => {
                     event.preventDefault();
                     const form = event.currentTarget;
                     if (form.dataset.saving === "true") return;
-                    const lines = [...form.querySelectorAll("[data-document-lines] tr")].map(row => ({
-                        inventoryItemId: Number(row.querySelector("[data-document-item]").value),
-                        unitId: Number(row.querySelector("[data-document-unit]").value),
-                        salesPlanId: Number(row.querySelector("[data-document-line-plan]").value),
-                        quantity: Number(row.querySelector("[data-document-quantity]").value)
+                    const lines = [...form.querySelectorAll("[data-voucher-lines] tr")].map(row => ({
+                        inventoryItemId: Number(row.querySelector("[data-voucher-item]").value),
+                        unitId: Number(row.querySelector("[data-voucher-unit]").value),
+                        salesPlanId: Number(row.querySelector("[data-voucher-line-plan]").value),
+                        quantity: Number(row.querySelector("[data-voucher-quantity]").value)
                     }));
                     if (!lines.length || lines.some(line => !line.inventoryItemId || !line.unitId || !line.salesPlanId || !line.quantity)) {
                         ui.notify("برای هر قلم، کالا، واحد و مقدار را انتخاب کنید.", "danger");
@@ -332,10 +332,10 @@
                     }
                     const body = {
                         warehouseId: Number(form.elements.warehouseId.value),
-                        documentTypeId: Number(form.elements.documentTypeId.value),
+                        voucherTypeId: Number(form.elements.voucherTypeId.value),
                         partyId: Number(form.elements.partyId.value),
                         salesPlanId: Number(form.elements.salesPlanId.value),
-                        documentDate: form.elements.documentDate.value,
+                        voucherDate: form.elements.voucherDate.value,
                         status: form.elements.status.value,
                         reason: form.elements.reason.value,
                         externalReference: form.elements.externalReference.value || null,
@@ -349,14 +349,14 @@
                         const result = await send(id ? `${page.dataset.api}/${id}` : page.dataset.api, id ? "PUT" : "POST", body);
                         ui.notify(result.message, "success");
                         modal.hide();
-                        await loadDocuments(page);
+                        await loadVouchers(page);
                     } catch (error) { ui.notify(error.message, "danger"); }
                     finally { form.dataset.saving = "false"; submit.disabled = false; }
                 });
-                await loadDocuments(page);
+                await loadVouchers(page);
             } catch (error) { status(page, error.message, true); }
         })();
     }
 
-    window.AdminDocuments = Object.freeze({ initialize });
+    window.AdminVouchers = Object.freeze({ initialize });
 })();

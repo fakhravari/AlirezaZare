@@ -37,25 +37,25 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
 
         if (summary) return await GetSummaryAsync(warehouseId, productId, search, salesPlan, from, to, paging, cancellationToken);
 
-        var query = from line in db.WarehouseDocumentLines.AsNoTracking()
-                    join document in db.WarehouseDocuments.AsNoTracking() on line.IdDocument equals document.Id
+        var query = from line in db.VoucherLines.AsNoTracking()
+                    join document in db.Vouchers.AsNoTracking() on line.IdVoucher equals document.Id
                     join inventoryItem in db.InventoryItems.AsNoTracking() on line.IdInventoryItem equals inventoryItem.Id
-                    join type in db.WarehouseDocumentTypes.AsNoTracking() on document.IdDocumentType equals type.Id
+                    join type in db.VoucherTypes.AsNoTracking() on document.IdVoucherType equals type.Id
                     join warehouse in db.Warehouses.AsNoTracking() on document.IdWarehouse equals warehouse.Id
                     join plan in db.SalesPlanReferences.AsNoTracking() on (line.IdSalesPlanReference ?? document.IdSalesPlanReference) equals plan.Id
-                    join movement in db.WarehouseStockMovements.AsNoTracking() on line.Id equals movement.IdDocumentLine into
+                    join movement in db.WarehouseStockMovements.AsNoTracking() on line.Id equals movement.IdVoucherLine into
                         movements
                     from movement in movements.DefaultIfEmpty()
-                    orderby document.DocumentDate descending, document.DocumentNumber descending, line.Id descending
+                    orderby document.VoucherDate descending, document.VoucherNumber descending, line.Id descending
                     select new
                     {
                         document.Id,
-                        document.DocumentNumber,
-                        document.DocumentDate,
-                        document.Status,
+                        document.VoucherNumber,
+                        document.VoucherDate,
+                        Status = document.StatusReference.Code,
                         StatusName = document.StatusReference.NameFa,
                         ProductId = inventoryItem.IdProduct,
-                        DocumentType = type.Name,
+                        VoucherType = type.Name,
                         type.Direction,
                         type.AffectsStock,
                         WarehouseId = warehouse.Id,
@@ -70,12 +70,12 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                         line.BaseQuantity,
                         QuantityDelta = movement == null ? 0m : movement.QuantityDelta,
                         BalanceAfter = (from prior in db.WarehouseStockMovements
-                                        join priorDocument in db.WarehouseDocuments on prior.IdDocument equals priorDocument.Id
+                                        join priorDocument in db.Vouchers on prior.IdVoucher equals priorDocument.Id
                                         where prior.IdWarehouse == document.IdWarehouse && prior.IdInventoryItem == line.IdInventoryItem
                                               && prior.IdSalesPlanReference == (line.IdSalesPlanReference ?? document.IdSalesPlanReference)
-                                              && (priorDocument.DocumentDate < document.DocumentDate ||
-                                                  (priorDocument.DocumentDate == document.DocumentDate && priorDocument.DocumentNumber < document.DocumentNumber) ||
-                                                  (priorDocument.DocumentDate == document.DocumentDate && priorDocument.DocumentNumber == document.DocumentNumber && prior.IdDocumentLine <= line.Id))
+                                              && (priorDocument.VoucherDate < document.VoucherDate ||
+                                                  (priorDocument.VoucherDate == document.VoucherDate && priorDocument.VoucherNumber < document.VoucherNumber) ||
+                                                  (priorDocument.VoucherDate == document.VoucherDate && priorDocument.VoucherNumber == document.VoucherNumber && prior.IdVoucherLine <= line.Id))
                                         select (decimal?)prior.QuantityDelta).Sum() ?? 0m,
                         document.Reason,
                         document.CreatedByUserKey
@@ -99,8 +99,8 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
             query = query.Where(x => x.WarehouseId == warehouseId);
         }
 
-        if (from.HasValue) query = query.Where(x => x.DocumentDate >= from.Value);
-        if (to.HasValue) query = query.Where(x => x.DocumentDate <= to.Value);
+        if (from.HasValue) query = query.Where(x => x.VoucherDate >= from.Value);
+        if (to.HasValue) query = query.Where(x => x.VoucherDate <= to.Value);
         if (productId.HasValue) query = query.Where(x => x.ProductId == productId.Value);
         if (!string.IsNullOrEmpty(salesPlan)) query = query.Where(x => x.SalesPlan.Contains(salesPlan) || x.SalesPlanKey.Contains(salesPlan));
         if (!string.IsNullOrEmpty(direction)) query = query.Where(x => x.Direction == direction);
@@ -110,7 +110,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
             query = query.Where(x =>
                 x.ProductNameSnapshot.Contains(term) ||
                 (x.VariantNameSnapshot != null && x.VariantNameSnapshot.Contains(term)) ||
-                x.DocumentType.Contains(term) || x.Reason!.Contains(term));
+                x.VoucherType.Contains(term) || x.Reason!.Contains(term));
         }
 
         int total = await query.CountAsync(cancellationToken);
@@ -123,7 +123,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         DateOnly? from, DateOnly? to, AdminPageRequest paging, CancellationToken cancellationToken)
     {
         var query = from movement in db.WarehouseStockMovements.AsNoTracking()
-                    join document in db.WarehouseDocuments.AsNoTracking() on movement.IdDocument equals document.Id
+                    join document in db.Vouchers.AsNoTracking() on movement.IdVoucher equals document.Id
                     join warehouse in db.Warehouses.AsNoTracking() on movement.IdWarehouse equals warehouse.Id
                     join item in db.InventoryItems.AsNoTracking() on movement.IdInventoryItem equals item.Id
                     join baseUnit in db.WarehouseProductUnits.AsNoTracking().Where(x => x.IsActive && x.IsBaseUnit)
@@ -144,7 +144,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         if (!string.IsNullOrEmpty(search)) query = query.Where(x => x.item.Product.Name.Contains(search)
             || x.item.Product.ProductKey.Contains(search) || (x.item.ProductVariant != null && x.item.ProductVariant.VariantName.Name.Contains(search)));
         if (!string.IsNullOrEmpty(salesPlan)) query = query.Where(x => x.plan.DisplayName.Contains(salesPlan) || x.plan.StoreSalesPlanKey.Contains(salesPlan));
-        if (to.HasValue) query = query.Where(x => x.document.DocumentDate <= to.Value);
+        if (to.HasValue) query = query.Where(x => x.document.VoucherDate <= to.Value);
 
         DateOnly startDate = from ?? DateOnly.MinValue;
         var grouped = query.GroupBy(x => new
@@ -169,9 +169,9 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
             group.Key.PlanId,
             group.Key.SalesPlan,
             group.Key.Unit,
-            Opening = group.Sum(x => x.document.DocumentDate < startDate ? x.movement.QuantityDelta : 0m),
-            Incoming = group.Sum(x => x.document.DocumentDate >= startDate && x.movement.QuantityDelta > 0 ? x.movement.QuantityDelta : 0m),
-            Outgoing = group.Sum(x => x.document.DocumentDate >= startDate && x.movement.QuantityDelta < 0 ? -x.movement.QuantityDelta : 0m),
+            Opening = group.Sum(x => x.document.VoucherDate < startDate ? x.movement.QuantityDelta : 0m),
+            Incoming = group.Sum(x => x.document.VoucherDate >= startDate && x.movement.QuantityDelta > 0 ? x.movement.QuantityDelta : 0m),
+            Outgoing = group.Sum(x => x.document.VoucherDate >= startDate && x.movement.QuantityDelta < 0 ? -x.movement.QuantityDelta : 0m),
             Closing = group.Sum(x => x.movement.QuantityDelta)
         });
         int total = await grouped.CountAsync(cancellationToken);
@@ -187,8 +187,8 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         if (!AdminListQuery.TryCreate(page, size, search, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
 
-        var query = from line in db.WarehouseDocumentLines.AsNoTracking()
-                    join document in db.WarehouseDocuments.AsNoTracking() on line.IdDocument equals document.Id
+        var query = from line in db.VoucherLines.AsNoTracking()
+                    join document in db.Vouchers.AsNoTracking() on line.IdVoucher equals document.Id
                     join item in db.InventoryItems.AsNoTracking() on line.IdInventoryItem equals item.Id
                     select new { document.IdWarehouse, item.Product.Id, item.Product.Name, Code = item.Product.ProductKey };
         if (!User.IsInRole("system.full-access"))
@@ -207,7 +207,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
     private async Task<IActionResult> GetAuditAsync(long? warehouseId, string? search, DateOnly? from, DateOnly? to,
         AdminPageRequest paging, CancellationToken cancellationToken)
     {
-        var query = from audit in db.WarehouseDocumentAudits.AsNoTracking()
+        var query = from audit in db.VoucherAudits.AsNoTracking()
                     join warehouse in db.Warehouses.AsNoTracking() on audit.WarehouseId equals warehouse.Id
                     select new
                     {
@@ -255,8 +255,8 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         var items = await query.OrderByDescending(x => x.audit.OccurredAtUtc).ThenByDescending(x => x.audit.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new
             {
                 x.audit.Id,
-                x.audit.DocumentId,
-                x.audit.DocumentNumber,
+                x.audit.VoucherId,
+                x.audit.VoucherNumber,
                 x.audit.Action,
                 x.audit.ActorUserKey,
                 x.audit.OccurredAtUtc,

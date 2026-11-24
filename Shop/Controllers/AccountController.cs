@@ -130,7 +130,7 @@ public sealed class AccountController(
                 name = entry.DisplayName,
                 text = entry.FeedbackText,
                 entry.Rating,
-                entry.Status,
+                Status = entry.StatusReference.Code,
                 StatusName = entry.StatusReference.NameFa,
                 entry.CreatedAtUtc
             }).ToListAsync(ct);
@@ -1248,7 +1248,7 @@ public sealed class AccountController(
             DisplayName = name,
             FeedbackText = text,
             Rating = checked((byte)request.Rating.GetValueOrDefault()),
-            Status = "pending",
+            IdStatus = await db.ArticleFeedbackStatuses.Where(x => x.Code == "pending").Select(x => x.Id).SingleAsync(ct),
             CreatedAtUtc = DateTime.UtcNow
         };
         db.AccountArticleFeedback.Add(feedback);

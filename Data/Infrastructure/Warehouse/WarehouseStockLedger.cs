@@ -7,12 +7,12 @@ namespace Shop.Data.Infrastructure.Warehouse;
 
 public sealed class WarehouseStockLedger(ShopDbContext db) : IWarehouseStockLedger
 {
-    public async Task RebuildDocumentAsync(long documentId, CancellationToken ct)
+    public async Task RebuildVoucherAsync(long voucherId, CancellationToken ct)
     {
-        var document = await db.WarehouseDocuments.SingleOrDefaultAsync(x => x.Id == documentId, ct) ?? throw new InvalidOperationException("Warehouse document was not found.");
-        var type = await db.WarehouseDocumentTypes.AsNoTracking().SingleAsync(x => x.Id == document.IdDocumentType, ct);
-        var previous = await db.WarehouseStockMovements.Where(x => x.IdDocument == documentId).ToListAsync(ct);
-        var lines = await db.WarehouseDocumentLines.Where(x => x.IdDocument == documentId).ToListAsync(ct);
+        var document = await db.Vouchers.SingleOrDefaultAsync(x => x.Id == voucherId, ct) ?? throw new InvalidOperationException("Warehouse voucher was not found.");
+        var type = await db.VoucherTypes.AsNoTracking().SingleAsync(x => x.Id == document.IdVoucherType, ct);
+        var previous = await db.WarehouseStockMovements.Where(x => x.IdVoucher == voucherId).ToListAsync(ct);
+        var lines = await db.VoucherLines.Where(x => x.IdVoucher == voucherId).ToListAsync(ct);
 
         var deltas = new Dictionary<StockKey, decimal>();
         foreach (var movement in previous)
@@ -22,7 +22,7 @@ public sealed class WarehouseStockLedger(ShopDbContext db) : IWarehouseStockLedg
         }
 
         var replacement = new List<WarehouseStockMovement>();
-        if (type.AffectsStock && document.Status == "F")
+        if (type.AffectsStock && await db.VoucherStatuses.AnyAsync(x => x.Id == document.IdVoucherStatus && x.Code == "F", ct))
         {
             decimal direction = type.Direction switch { "R" => 1m, "I" => -1m, _ => 0m };
             foreach (var line in lines)
@@ -37,8 +37,8 @@ public sealed class WarehouseStockLedger(ShopDbContext db) : IWarehouseStockLedg
                     IdWarehouse = document.IdWarehouse,
                     IdInventoryItem = line.IdInventoryItem,
                     IdSalesPlanReference = planId,
-                    IdDocument = document.Id,
-                    IdDocumentLine = line.Id,
+                    IdVoucher = document.Id,
+                    IdVoucherLine = line.Id,
                     QuantityDelta = delta,
                     OccurredAtUtc = DateTime.UtcNow
                 });
@@ -51,9 +51,9 @@ public sealed class WarehouseStockLedger(ShopDbContext db) : IWarehouseStockLedg
         await db.SaveChangesAsync(ct);
     }
 
-    public async Task ReverseMovementsAsync(long documentId, CancellationToken ct)
+    public async Task ReverseMovementsAsync(long voucherId, CancellationToken ct)
     {
-        var movements = await db.WarehouseStockMovements.Where(x => x.IdDocument == documentId).ToListAsync(ct);
+        var movements = await db.WarehouseStockMovements.Where(x => x.IdVoucher == voucherId).ToListAsync(ct);
         var deltas = new Dictionary<StockKey, decimal>();
         foreach (var movement in movements)
         {

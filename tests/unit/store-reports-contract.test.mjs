@@ -38,6 +38,6 @@ test("store reports cover four views and restrict inventory to allowed warehouse
     assert.match(controller, /fullAccess \|\| allowed\.Contains\(x\.IdWarehouse\)/);
     assert.match(controller, /fullAccess \|\| allowed\.Contains\(movement\.IdWarehouse\)/);
     assert.match(controller, /SalesStatuses\.Contains\(order\.StatusReference\.Code\)/);
-    assert.match(controller, /PaidOrders\(\)[\s\S]*?SalesStatuses\.Contains\(order\.StatusReference\.Code\)[\s\S]*?payment\.Status == "verified"[\s\S]*?payment\.Amount == order\.TotalAmount/);
-    assert.match(controller, /payment\.Status == "verified"/);
+    assert.match(controller, /PaidOrders\(\)[\s\S]*?SalesStatuses\.Contains\(order\.StatusReference\.Code\)[\s\S]*?payment\.StatusReference\.Code == "verified"[\s\S]*?payment\.Amount == order\.TotalAmount/);
+    assert.match(controller, /payment\.StatusReference\.Code == "verified"/);
 });

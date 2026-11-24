@@ -2,6 +2,7 @@ using System.Net.Mail;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Email.Contracts;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Helpers.Extensions;
@@ -46,7 +47,7 @@ public sealed class StoreContactApiController(
             Email = string.IsNullOrWhiteSpace(email) ? null : email,
             SubjectKey = subject,
             Message = message,
-            Status = "new",
+            IdStatus = await db.ContactMessageStatuses.Where(x => x.Code == "new").Select(x => x.Id).SingleAsync(ct),
             CreatedAtUtc = DateTime.UtcNow
         };
         db.StoreContactMessages.Add(contactMessage);

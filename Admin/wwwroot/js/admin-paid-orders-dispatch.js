@@ -100,7 +100,7 @@
             try {
                 const result = await window.AdminUI.getJson(api, { method: "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: form.querySelector('[name="__RequestVerificationToken"]').value }, body: JSON.stringify({ orderIds }) });
                 selectedIds.clear(); await load(1);
-                status.textContent = `حواله شماره ${format.format(result.documentNumber)} صادر شد.`;
+                status.textContent = `حواله شماره ${format.format(result.voucherNumber)} صادر شد.`;
             } catch (error) { status.textContent = error.message; }
             finally { saving = false; count(); }
         });

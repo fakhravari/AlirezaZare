@@ -37,8 +37,8 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         var order = await db.StoreCustomerOrders.Include(x => x.StatusReference).SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (order is null || order.StatusReference.Code is not ("warehouse-confirmed" or "in-transit" or "shipped-to-post" or "delivered") ||
-            order.IdWarehouseDocument is null ||
-            !await db.StorePaymentAttempts.AnyAsync(p => p.IdOrder == id && p.Status == "verified" && p.Amount == order.TotalAmount, cancellationToken) ||
+            order.IdVoucher is null ||
+            !await db.StorePaymentAttempts.AnyAsync(p => p.IdOrder == id && p.StatusReference.Code == "verified" && p.Amount == order.TotalAmount, cancellationToken) ||
             order.ShippingCarrier != input.ExpectedCarrier || order.ShippingTrackingCode != input.ExpectedTrackingCode)
             return Conflict(new { title = "اطلاعات سفارش تغییر کرده یا سفارش شرایط ثبت رهگیری را ندارد." });
 
@@ -73,8 +73,8 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
 
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         var order = await db.StoreCustomerOrders.Include(x => x.StatusReference).SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (order is null || order.StatusReference.Code != input.ExpectedStatus || order.IdWarehouseDocument is null ||
-            !await db.StorePaymentAttempts.AnyAsync(p => p.IdOrder == id && p.Status == "verified" && p.Amount == order.TotalAmount, cancellationToken))
+        if (order is null || order.StatusReference.Code != input.ExpectedStatus || order.IdVoucher is null ||
+            !await db.StorePaymentAttempts.AnyAsync(p => p.IdOrder == id && p.StatusReference.Code == "verified" && p.Amount == order.TotalAmount, cancellationToken))
             return Conflict(new { title = "وضعیت سفارش تغییر کرده یا پرداخت و حوالهٔ معتبر ندارد." });
 
         var nextStatus = await db.OrderStatuses.SingleOrDefaultAsync(x => x.Code == input.Status, cancellationToken);
@@ -165,7 +165,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                                CouponDiscountAmount = o.CouponDiscountAmount,
                                OrderedAtUtc = o.OrderedAtUtc,
                                CustomerName = (p.FirstName + " " + p.LastName).Trim(),
-                               IdWarehouseDocument = o.IdWarehouseDocument,
+                               IdVoucher = o.IdVoucher,
                                ShippingCarrier = o.ShippingCarrier,
                                ShippingTrackingCode = o.ShippingTrackingCode,
                                AddressSnapshotJson = o.AddressSnapshotJson
@@ -286,7 +286,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         public decimal CouponDiscountAmount { get; set; }
         public decimal CalculatedItemSubtotal { get; set; }
         public bool HasItemSubtotalMismatch { get; set; }
-        public long? IdWarehouseDocument { get; set; }
+        public long? IdVoucher { get; set; }
         public string? ShippingCarrier { get; set; }
         public string? ShippingTrackingCode { get; set; }
         public string AddressSnapshotJson { get; set; } = "{}";

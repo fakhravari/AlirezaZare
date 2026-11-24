@@ -1,6 +1,6 @@
 # پرداخت
 
-پس از migration ۱۵۹، وضعیت سفارش و تلاش پرداخت به‌ترتیب به جدول‌های مرجع `Store.OrderStatus` و `Store.PaymentAttemptStatus` با کد انگلیسی و نام فارسی و انگلیسی متصل‌اند. وضعیت تأیید پرداخت همچنان فقط از گردش تأیید درگاه تعیین می‌شود. وضعیت اجرای migration در [راهنمای دیتابیس](../architecture/database.md) است.
+وضعیت سفارش و تلاش پرداخت با `IdStatus` به جدول‌های مرجع `Store.OrderStatus` و `Store.PaymentAttemptStatus` با کد انگلیسی و نام فارسی و انگلیسی متصل‌اند. وضعیت تأیید پرداخت همچنان فقط از گردش تأیید درگاه تعیین می‌شود. وضعیت اجرای migration در [راهنمای دیتابیس](../architecture/database.md) است.
 
 شناسهٔ هر تلاش پرداخت، کلید اصلی عددی `numeric(30,0) IDENTITY` در همان جدول `Store.PaymentAttempt` است. این شناسه هنگام ساخت تلاش از دیتابیس گرفته و به قرارداد درخواست درگاه و مسیر callback داده می‌شود؛ شناسهٔ GUID قبلی حذف شده است. migration `161-payment-attempt-numeric-identity.sql` ردیف‌های موجود را نگه می‌دارد و کلیدهای عددی جدید می‌سازد؛ callbackهای GUID قدیمی پس از این مهاجرت معتبر نیستند.
 
@@ -22,6 +22,6 @@ gateway را از قرارداد `Data/Application/Store/Contracts/IPaymentGatew
 
 بررسی قرارداد با fake/test gateway انجام شود؛ آزمون مالی واقعی فقط طبق فرایند محیط sandbox درگاه. پرداخت شبیه‌سازی‌شده را پرداخت بانکی گزارش نکنید.
 
-[سبد و checkout](cart.md) · [مرزهای backend](../architecture/backend-readiness.md) · [فهرست docs](../README.md)
+[سبد و checkout](cart.md) · [منابع داده](../architecture/data-sources.md) · [فهرست docs](../README.md)
 
 بازبینی DI، endpoint و جریان ثبت فاکتور: ۱۳ نوامبر ۲۰۲۶.

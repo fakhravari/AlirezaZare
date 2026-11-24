@@ -7,8 +7,8 @@ test('first active variant is protected from existing unvaried document, movemen
   const block = source.slice(source.indexOf('// Activating the first variant'), source.indexOf('if (!await ValidVariantAttributesAsync'));
   assert.ok(block.includes('input.IsActive && !entity.IsActive'));
   assert.ok(block.includes('x.IdProduct == productId && x.Id != (id ?? 0) && x.IsActive'));
-  for (const evidence of ['db.WarehouseDocumentLines', 'db.WarehouseStockMovements', 'db.StockBalances']) assert.ok(block.includes(evidence));
+  for (const evidence of ['db.VoucherLines', 'db.WarehouseStockMovements', 'db.StockBalances']) assert.ok(block.includes(evidence));
   assert.equal((block.match(/item.IdProductVariant == null/g) || []).length, 3);
-  assert.ok(block.includes('hasUnvariedDocuments || hasUnvariedMovements || hasUnvariedBalance'));
+  assert.ok(block.includes('hasUnvariedVouchers || hasUnvariedMovements || hasUnvariedBalance'));
   assert.ok(block.includes('return Conflict('));
 });

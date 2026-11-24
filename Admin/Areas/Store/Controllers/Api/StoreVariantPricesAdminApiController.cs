@@ -210,7 +210,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                           await db.StoreProductSalesPlanOffers.AnyAsync(x => x.IdSalesPlan == id, cancellationToken) ||
                           await db.StoreProductVariantSalesPlanOffers.AnyAsync(x => x.IdSalesPlan == id, cancellationToken) ||
                           await db.StockBalances.AnyAsync(x => x.IdSalesPlanReference == id, cancellationToken) ||
-                          await db.WarehouseDocuments.AnyAsync(x => x.IdSalesPlanReference == id, cancellationToken) ||
+                          await db.Vouchers.AnyAsync(x => x.IdSalesPlanReference == id, cancellationToken) ||
                           await db.WarehouseStockOwners.AnyAsync(x => x.IdStockOwner == id && x.IsDefault, cancellationToken);
         if (referenced) return Conflict(new { message = "این طرح سابقه یا اتصال دارد؛ برای حفظ سابقه آن را غیرفعال کنید." });
 

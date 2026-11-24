@@ -20,7 +20,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     {
         "companies" => await GetCompaniesAsync(cancellationToken),
         "warehouses" => await GetWarehousesAsync(cancellationToken),
-        "document-types" => Ok(await db.WarehouseDocumentTypes.AsNoTracking().OrderBy(x => x.Name)
+        "voucher-types" => Ok(await db.VoucherTypes.AsNoTracking().OrderBy(x => x.Name)
             .Select(x => new { x.Id, x.Name, x.Direction, x.AffectsStock, x.IsReturn, x.IsSystemSalesDispatch, x.IsActive }).ToListAsync(cancellationToken)),
         "references" => await GetReferencesAsync(cancellationToken),
         "unit-groups" => Ok(await db.WarehouseUnits.AsNoTracking().Where(x => x.IdParent == null)
@@ -31,7 +31,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             .Select(x => new { x.Id, x.NameFa, x.NameEn, x.IdParent, x.TreePathIds, x.TreePathNames, ParentName = db.WarehouseUnits.Where(parent => parent.Id == x.IdParent).Select(parent => parent.NameFa).FirstOrDefault(), x.IsActive,
                 CanDelete = !db.WarehouseUnits.Any(child => child.IdParent == x.Id) &&
                             !db.WarehouseProductUnits.Any(link => link.IdUnit == x.Id) &&
-                            !db.WarehouseDocumentLines.Any(line => line.IdUnit == x.Id) })
+                            !db.VoucherLines.Any(line => line.IdUnit == x.Id) })
             .ToListAsync(cancellationToken)),
         "product-units" => Ok(await (from link in db.WarehouseProductUnits.AsNoTracking()
                                      join product in db.Products.AsNoTracking() on link.IdProduct equals product.Id
@@ -70,7 +70,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                                   HasNonZeroStock = db.InventoryItems.Any(item => item.IdProductVariant == variant.Id &&
                                       db.StockBalances.Any(balance => balance.IdInventoryItem == item.Id && balance.Quantity != 0)),
                                   HasWarehouseHistory = db.InventoryItems.Any(item => item.IdProductVariant == variant.Id &&
-                                      (db.WarehouseDocumentLines.Any(line => line.IdInventoryItem == item.Id) ||
+                                      (db.VoucherLines.Any(line => line.IdInventoryItem == item.Id) ||
                                        db.WarehouseStockMovements.Any(movement => movement.IdInventoryItem == item.Id))),
                                   HasStoreHistory = db.StorePriceVersions.Any(price => price.IdProductVariant == variant.Id) ||
                                       db.StoreProductVariantSalesPlanOffers.Any(offer => offer.IdProductVariant == variant.Id) ||
@@ -261,7 +261,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         {
             bool inUse = await db.WarehouseUnits.AnyAsync(x => x.IdParent == id, cancellationToken) ||
                          await db.WarehouseProductUnits.AnyAsync(x => x.IdUnit == id, cancellationToken) ||
-                         await db.WarehouseDocumentLines.AnyAsync(x => x.IdUnit == id, cancellationToken);
+                         await db.VoucherLines.AnyAsync(x => x.IdUnit == id, cancellationToken);
             if (inUse) return Conflict(new { detail = "واحدی که زیرواحد، اتصال کالا یا سابقهٔ سند انبار دارد قابل حذف نیست؛ در صورت نیاز آن را غیرفعال کنید." });
         }
         else if (await db.WarehouseUnits.AnyAsync(x => x.IdParent == id, cancellationToken))
@@ -291,7 +291,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                                       select balance.Id).AnyAsync(cancellationToken);
         bool hasWarehouseHistory = await (from item in db.InventoryItems
                                           where item.IdProductVariant == id &&
-                                                (db.WarehouseDocumentLines.Any(line => line.IdInventoryItem == item.Id) ||
+                                                (db.VoucherLines.Any(line => line.IdInventoryItem == item.Id) ||
                                                  db.WarehouseStockMovements.Any(movement => movement.IdInventoryItem == item.Id))
                                           select item.Id).AnyAsync(cancellationToken);
         bool hasStoreHistory = await db.StorePriceVersions.AnyAsync(x => x.IdProductVariant == id, cancellationToken) ||
@@ -372,9 +372,9 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
         if (await db.WarehouseStockOwners.CountAsync(x => x.IdWarehouse == warehouseId, cancellationToken) <= 1
             || link.IsDefault
-            || await db.WarehouseDocuments.AnyAsync(x => x.IdWarehouse == warehouseId && x.IdSalesPlanReference == ownerId, cancellationToken)
-            || await db.WarehouseDocumentLines.AnyAsync(x => x.IdSalesPlanReference == ownerId
-                && db.WarehouseDocuments.Any(document => document.Id == x.IdDocument && document.IdWarehouse == warehouseId), cancellationToken)
+            || await db.Vouchers.AnyAsync(x => x.IdWarehouse == warehouseId && x.IdSalesPlanReference == ownerId, cancellationToken)
+            || await db.VoucherLines.AnyAsync(x => x.IdSalesPlanReference == ownerId
+                && db.Vouchers.Any(document => document.Id == x.IdVoucher && document.IdWarehouse == warehouseId), cancellationToken)
             || await db.WarehouseStockMovements.AnyAsync(x => x.IdWarehouse == warehouseId && x.IdSalesPlanReference == ownerId, cancellationToken))
             return Conflict(new { detail = "آخرین اتصال، مالک پیش‌فرض یا مالکی که سند یا گردش انبار دارد قابل حذف نیست." });
 
@@ -437,8 +437,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     return Conflict(new { detail = "شرکت فعال باید یک انبار فروش داشته باشد؛ ابتدا انبار فروش دیگری برای همین شرکت تعیین کنید." });
                 warehouse.IsActive = false;
                 break;
-            case "document-types":
-                WarehouseDocumentType? type = await db.WarehouseDocumentTypes.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+            case "voucher-types":
+                VoucherType? type = await db.VoucherTypes.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
                 if (type is null) return NotFound();
                 type.IsActive = false;
                 type.UpdatedAtUtc = DateTime.UtcNow;
@@ -538,13 +538,13 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         bool hasOtherActive = await db.ProductVariants.AnyAsync(x => x.IdProduct == variant.IdProduct && x.Id != id && x.IsActive, cancellationToken);
         if (!hasOtherActive)
         {
-            bool hasUnvariedDocuments = await (from line in db.WarehouseDocumentLines join item in db.InventoryItems on line.IdInventoryItem equals item.Id
+            bool hasUnvariedVouchers = await (from line in db.VoucherLines join item in db.InventoryItems on line.IdInventoryItem equals item.Id
                 where item.IdProduct == variant.IdProduct && item.IdProductVariant == null select line.Id).AnyAsync(cancellationToken);
             bool hasUnvariedMovements = await (from movement in db.WarehouseStockMovements join item in db.InventoryItems on movement.IdInventoryItem equals item.Id
                 where item.IdProduct == variant.IdProduct && item.IdProductVariant == null select movement.IdInventoryItem).AnyAsync(cancellationToken);
             bool hasUnvariedBalance = await (from balance in db.StockBalances join item in db.InventoryItems on balance.IdInventoryItem equals item.Id
                 where item.IdProduct == variant.IdProduct && item.IdProductVariant == null && balance.Quantity != 0 select balance.IdInventoryItem).AnyAsync(cancellationToken);
-            if (hasUnvariedDocuments || hasUnvariedMovements || hasUnvariedBalance)
+            if (hasUnvariedVouchers || hasUnvariedMovements || hasUnvariedBalance)
                 return Conflict(new { detail = "برای این کالا سند انبار یا موجودی بدون تنوع ثبت شده است؛ ابتدا اتصال موجودی را بررسی کنید." });
         }
         variant.IsActive = true;
@@ -719,19 +719,19 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
                     return Ok(new { entity.Id, message = "انبار ذخیره شد." });
                 }
-            case "document-types":
+            case "voucher-types":
                 {
-                    DocumentTypeInput? input = Parse<DocumentTypeInput>(payload);
+                    VoucherTypeInput? input = Parse<VoucherTypeInput>(payload);
                     if (input is null || string.IsNullOrWhiteSpace(input.Name) || input.Name.Trim().Length > 150 ||
                         input.Direction is not ("R" or "I"))
                         return ValidationProblem(detail: "نام و جهت سند را درست وارد کنید.", statusCode: 400);
 
-                    WarehouseDocumentType entity = id.HasValue
-                        ? await db.WarehouseDocumentTypes.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null!
-                        : new WarehouseDocumentType();
+                    VoucherType entity = id.HasValue
+                        ? await db.VoucherTypes.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null!
+                        : new VoucherType();
                     if (id.HasValue && entity is null) return NotFound();
 
-                    if (id.HasValue && await db.WarehouseDocuments.AnyAsync(x => x.IdDocumentType == id)
+                    if (id.HasValue && await db.Vouchers.AnyAsync(x => x.IdVoucherType == id)
                                     && (entity.Direction != input.Direction || entity.AffectsStock != input.AffectsStock || entity.IsReturn != input.IsReturn))
                         return Conflict(new { detail = "جهت، اثر موجودی و نوع مرجوعی سندی که سابقه دارد قابل تغییر نیست؛ آن را غیرفعال و نوع تازه تعریف کنید." });
 
@@ -745,7 +745,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     entity.IsActive = input.IsActive;
                     entity.UpdatedAtUtc = DateTime.UtcNow;
 
-                    if (!id.HasValue) db.WarehouseDocumentTypes.Add(entity);
+                    if (!id.HasValue) db.VoucherTypes.Add(entity);
                     await db.SaveChangesAsync(cancellationToken);
 
                     return Ok(new { entity.Id, message = "نوع سند ذخیره شد." });
@@ -925,7 +925,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     if (input.IsActive && !entity.IsActive &&
                         !await db.ProductVariants.AnyAsync(x => x.IdProduct == productId && x.Id != (id ?? 0) && x.IsActive, cancellationToken))
                     {
-                        bool hasUnvariedDocuments = await (from line in db.WarehouseDocumentLines
+                        bool hasUnvariedVouchers = await (from line in db.VoucherLines
                             join item in db.InventoryItems on line.IdInventoryItem equals item.Id
                             where item.IdProduct == productId && item.IdProductVariant == null
                             select line.Id).AnyAsync(cancellationToken);
@@ -937,7 +937,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                             join item in db.InventoryItems on balance.IdInventoryItem equals item.Id
                             where item.IdProduct == productId && item.IdProductVariant == null && balance.Quantity != 0
                             select balance.IdInventoryItem).AnyAsync(cancellationToken);
-                        if (hasUnvariedDocuments || hasUnvariedMovements || hasUnvariedBalance)
+                        if (hasUnvariedVouchers || hasUnvariedMovements || hasUnvariedBalance)
                             return Conflict(new { detail = "برای این کالا سند انبار یا موجودی بدون تنوع ثبت شده است؛ امکان فعال‌سازی نخستین تنوع وجود ندارد." });
                     }
                     if (!await db.VariantNames.AnyAsync(x => x.Id == input.VariantNameId && x.IsActive, cancellationToken))
@@ -1265,7 +1265,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         bool IsActive,
         bool IsSiteWarehouse);
 
-    private sealed record DocumentTypeInput(
+    private sealed record VoucherTypeInput(
         string Name,
         string Direction,
         bool AffectsStock,

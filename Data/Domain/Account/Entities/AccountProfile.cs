@@ -107,7 +107,7 @@ public sealed class AccountArticleFeedback
     public string DisplayName { get; set; } = "";
     public string FeedbackText { get; set; } = "";
     public byte? Rating { get; set; }
-    public string Status { get; set; } = "";
+    public int IdStatus { get; set; }
     public ArticleFeedbackStatusReference StatusReference { get; set; } = null!;
     public DateTime CreatedAtUtc { get; set; }
 }
@@ -139,7 +139,7 @@ public sealed class StoreCustomerOrderReference
     public DateTime OrderedAtUtc { get; set; }
     public int ItemCount { get; set; }
     public string AddressSnapshotJson { get; set; } = "{}";
-    public long? IdWarehouseDocument { get; set; }
+    public long? IdVoucher { get; set; }
     public ICollection<StoreCustomerOrderItem> Items { get; set; } = new List<StoreCustomerOrderItem>();
 }
 
@@ -172,7 +172,7 @@ public sealed class StorePaymentAttempt
     public decimal Id { get; set; }
     public long IdOrder { get; set; }
     public decimal Amount { get; set; }
-    public string Status { get; set; } = "";
+    public int IdStatus { get; set; }
     public PaymentAttemptStatusReference StatusReference { get; set; } = null!;
     public string? GatewayReference { get; set; }
     public string? ReceiptReference { get; set; }

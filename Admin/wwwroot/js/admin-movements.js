@@ -13,7 +13,7 @@
             const product = item.variantNameSnapshot ? `${item.productNameSnapshot} — ${item.variantNameSnapshot}` : item.productNameSnapshot;
             const quantity = `${number.format(item.quantity)} ${item.unitNameSnapshot} × ${factor.format(item.conversionFactor)} = ${number.format(item.baseQuantity)}`;
             const delta = item.affectsStock ? number.format(item.quantityDelta) : "بدون اثر بر موجودی";
-            [ui.formatDateTime(item.documentDate), number.format(item.documentNumber), item.documentType, item.warehouse, item.salesPlan, product, quantity, delta, number.format(item.balanceAfter), item.statusName || item.status, item.reason].forEach(value => row.append(el("td", value || "—")));
+            [ui.formatDateTime(item.voucherDate), number.format(item.voucherNumber), item.voucherType, item.warehouse, item.salesPlan, product, quantity, delta, number.format(item.balanceAfter), item.statusName || item.status, item.reason].forEach(value => row.append(el("td", value || "—")));
             body.append(row);
         }
         ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
@@ -22,7 +22,7 @@
         const body = page.querySelector("[data-movement-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
         for (const item of rows) {
             const row = document.createElement("tr");
-            [ui.formatDateTime(item.occurredAtUtc), number.format(item.documentNumber),
+            [ui.formatDateTime(item.occurredAtUtc), number.format(item.voucherNumber),
                 auditLabels[item.action] || item.action, item.warehouse, item.actorUserKey, item.reason || "—"].forEach(value => row.append(el("td", value)));
             const detailsCell = el("td"), details = document.createElement("details"), summary = el("summary", "نمایش قبل و بعد");
             details.append(summary);

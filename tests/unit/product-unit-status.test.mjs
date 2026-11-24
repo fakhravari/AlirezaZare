@@ -74,8 +74,8 @@ test('product editor limits base-unit changes to products without warehouse docu
   const api = await read('Admin/Areas/Store/Controllers/Api/StoreCatalogAdminApiController.cs', 'utf8');
   const markup = await read('Admin/Areas/Store/Views/Catalog/Index.cshtml', 'utf8');
   assert.match(api, /x\.Id == input\.UnitId && x\.IdParent != null && x\.IsActive/);
-  assert.match(api, /from line in db\.WarehouseDocumentLines[\s\S]*join item in db\.InventoryItems[\s\S]*item\.IdProduct == productId/);
-  assert.match(api, /if \(await HasWarehouseDocuments\(id, cancellationToken\)\)/);
+  assert.match(api, /from line in db\.VoucherLines[\s\S]*join item in db\.InventoryItems[\s\S]*item\.IdProduct == productId/);
+  assert.match(api, /if \(await HasVouchers\(id, cancellationToken\)\)/);
   assert.match(api, /baseLink\.ConversionFactor = 1m/);
   assert.match(markup, /id="product-edit-unit"[^>]*name="unitId"/);
   assert.doesNotMatch(markup, /data-product-badge-create/);
@@ -116,7 +116,7 @@ test('warehouse units expose Persian and English names without a code field', as
   assert.match(api, /entity\.NameFa = input\.NameFa\.Trim\(\)/);
   assert.match(script, /\["nameFa", "نام فارسی"/);
   assert.match(script, /\["nameEn", "نام انگلیسی"/);
-  assert.doesNotMatch(script.slice(script.indexOf('units: {'), script.indexOf('"document-types"')), /\["code"/);
+  assert.doesNotMatch(script.slice(script.indexOf('units: {'), script.indexOf('"voucher-types"')), /\["code"/);
   assert.match(schemaMigration, /sp_rename N'Warehouse\.Unit\.Name', N'NameFa'/);
   assert.match(schemaMigration, /DROP COLUMN \[Code\]/);
   assert.match(translationMigration, /WHEN 73 THEN N'Milliliter'/);
@@ -145,7 +145,7 @@ test('unused units and empty unit groups can be deleted only by full-access admi
   const view = await read('Admin/Areas/Warehouse/Views/Features/Definitions.cshtml', 'utf8');
   assert.match(api, /\[HttpDelete\("\{section\}\/\{id:long\}"\)\][\s\S]*?User\.IsInRole\("system\.full-access"\)/);
   assert.match(api, /!db\.WarehouseProductUnits\.Any\(link => link\.IdUnit == x\.Id\)/);
-  assert.match(api, /!db\.WarehouseDocumentLines\.Any\(line => line\.IdUnit == x\.Id\)/);
+  assert.match(api, /!db\.VoucherLines\.Any\(line => line\.IdUnit == x\.Id\)/);
   assert.match(api, /else if \(await db\.WarehouseUnits\.AnyAsync\(x => x\.IdParent == id/);
   assert.match(view, /data-can-delete="@\(User\.IsInRole\("system\.full-access"\)/);
 });
@@ -174,7 +174,7 @@ test('editor locks a documented product unit, sends it on save, and unlocks the 
     window.AdminUI = {setPriceValue: (input, value) => { input.value = value; }, priceValue: input => Number(input.value), notify() {}, getJson: async (url, options) => {
       if (options) { window.saved = JSON.parse(options.body); return {message: 'ok'}; }
       const id = Number(url.split('/').at(-1));
-      return {product: {id, code: 'p', name: 'Product', englishName: 'Product', idBrand: 1, idCategory: 2, idBaseUnit: 3, priceAmount: 100, discountPercent: 0, maxPurchaseQuantity: 5}, brands: [{id: 1, name: 'Brand'}], categories: [{id: 2, name: 'Category'}], units: [{id: 3, name: 'Unit'}, {id: 4, name: 'Pack'}, {id: 5, name: 'Carton'}], unitConversions: [{idUnit: 4, unitName: 'Pack', conversionFactor: 12}], unavailableUnitIds: [], hasWarehouseDocuments: id === 1};
+      return {product: {id, code: 'p', name: 'Product', englishName: 'Product', idBrand: 1, idCategory: 2, idBaseUnit: 3, priceAmount: 100, discountPercent: 0, maxPurchaseQuantity: 5}, brands: [{id: 1, name: 'Brand'}], categories: [{id: 2, name: 'Category'}], units: [{id: 3, name: 'Unit'}, {id: 4, name: 'Pack'}, {id: 5, name: 'Carton'}], unitConversions: [{idUnit: 4, unitName: 'Pack', conversionFactor: 12}], unavailableUnitIds: [], hasVouchers: id === 1};
     }};
   });
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-data.js'});

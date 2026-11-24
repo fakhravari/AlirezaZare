@@ -15,14 +15,14 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<AdminUserRole> AdminUserRoles => Set<AdminUserRole>();
     public DbSet<AdminRolePermission> AdminRolePermissions => Set<AdminRolePermission>();
     public DbSet<AdminUserWarehouseAccess> AdminUserWarehouseAccesses => Set<AdminUserWarehouseAccess>();
-    public DbSet<WarehouseDocumentType> WarehouseDocumentTypes => Set<WarehouseDocumentType>();
+    public DbSet<VoucherType> VoucherTypes => Set<VoucherType>();
     public DbSet<WarehouseUnit> WarehouseUnits => Set<WarehouseUnit>();
     public DbSet<WarehouseParty> WarehouseParties => Set<WarehouseParty>();
     public DbSet<WarehouseProductUnit> WarehouseProductUnits => Set<WarehouseProductUnit>();
-    public DbSet<WarehouseDocumentRecord> WarehouseDocuments => Set<WarehouseDocumentRecord>();
-    public DbSet<WarehouseDocumentLineRecord> WarehouseDocumentLines => Set<WarehouseDocumentLineRecord>();
+    public DbSet<Voucher> Vouchers => Set<Voucher>();
+    public DbSet<VoucherLine> VoucherLines => Set<VoucherLine>();
     public DbSet<WarehouseStockMovement> WarehouseStockMovements => Set<WarehouseStockMovement>();
-    public DbSet<WarehouseDocumentAudit> WarehouseDocumentAudits => Set<WarehouseDocumentAudit>();
+    public DbSet<VoucherAudit> VoucherAudits => Set<VoucherAudit>();
     public DbSet<WarehouseEntity> Warehouses => Set<WarehouseEntity>();
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<SalesPlanReference> SalesPlanReferences => Set<SalesPlanReference>();
@@ -111,7 +111,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<PaymentAttemptStatusReference> PaymentAttemptStatuses => Set<PaymentAttemptStatusReference>();
     public DbSet<ContactMessageStatusReference> ContactMessageStatuses => Set<ContactMessageStatusReference>();
     public DbSet<ArticleFeedbackStatusReference> ArticleFeedbackStatuses => Set<ArticleFeedbackStatusReference>();
-    public DbSet<WarehouseDocumentStatusReference> WarehouseDocumentStatuses => Set<WarehouseDocumentStatusReference>();
+    public DbSet<VoucherStatus> VoucherStatuses => Set<VoucherStatus>();
     public DbSet<StoreOrderPreviousNumber> StoreOrderPreviousNumbers => Set<StoreOrderPreviousNumber>();
     public DbSet<StoreNewsletterSubscriber> StoreNewsletterSubscribers => Set<StoreNewsletterSubscriber>();
     public DbSet<StoreContactMessage> StoreContactMessages => Set<StoreContactMessage>();
@@ -121,7 +121,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     {
         // Keep CLR/API names stable while using concise foreign-key names in SQL.
         modelBuilder.Entity<AccountCartItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
-        modelBuilder.Entity<StoreCustomerOrderReference>().Property(x => x.IdWarehouseDocument).HasColumnName("IdDocument");
+        modelBuilder.Entity<StoreCustomerOrderReference>().Property(x => x.IdVoucher).HasColumnName("IdVoucher");
         modelBuilder.Entity<StoreCustomerOrderItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
         modelBuilder.Entity<StorePriceVersion>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
         modelBuilder.Entity<InventoryItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
@@ -187,8 +187,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.DisplayName).HasMaxLength(80).IsRequired();
             entity.Property(x => x.FeedbackText).HasMaxLength(1000).IsRequired();
-            entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
-            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.Status).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
         });
         modelBuilder.Entity<AccountCart>(entity =>
@@ -345,9 +344,9 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.Address).HasMaxLength(500);
             entity.Property(x => x.Description).HasMaxLength(2000);
         });
-        modelBuilder.Entity<WarehouseDocumentType>(entity =>
+        modelBuilder.Entity<VoucherType>(entity =>
         {
-            entity.ToTable("DocumentType", "Warehouse");
+            entity.ToTable("VoucherType", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).HasMaxLength(150).IsRequired();
             entity.Property(x => x.Direction).HasColumnType("char(1)").IsRequired();
@@ -386,13 +385,12 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct);
             entity.HasOne<WarehouseUnit>().WithMany().HasForeignKey(x => x.IdUnit);
         });
-        modelBuilder.Entity<WarehouseDocumentRecord>(entity =>
+        modelBuilder.Entity<Voucher>(entity =>
         {
-            entity.ToTable("WarehouseDocument", "Warehouse");
+            entity.ToTable("Voucher", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.DocumentNumber).HasDefaultValueSql("NEXT VALUE FOR [Warehouse].[DocumentNumberSequence]");
-            entity.Property(x => x.Status).HasColumnType("char(1)").IsRequired();
-            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.Status).OnDelete(DeleteBehavior.Restrict);
+            entity.Property(x => x.VoucherNumber).HasDefaultValueSql("NEXT VALUE FOR [Warehouse].[VoucherNumberSequence]");
+            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdVoucherStatus).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.CustomerOrderKey).HasMaxLength(128);
             entity.Property(x => x.ExternalReference).HasMaxLength(128);
             entity.Property(x => x.Reason).HasMaxLength(1000);
@@ -401,11 +399,11 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasIndex(x => new { x.CustomerOrderKey, x.IdSalesPlanReference }).IsUnique().HasFilter("[CustomerOrderKey] IS NOT NULL");
-            entity.HasMany(x => x.Lines).WithOne().HasForeignKey(x => x.IdDocument);
+            entity.HasMany(x => x.Lines).WithOne().HasForeignKey(x => x.IdVoucher);
         });
-        modelBuilder.Entity<WarehouseDocumentLineRecord>(entity =>
+        modelBuilder.Entity<VoucherLine>(entity =>
         {
-            entity.ToTable("WarehouseDocumentLine", "Warehouse");
+            entity.ToTable("VoucherLine", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Quantity).HasPrecision(18, 3);
             entity.Property(x => x.ConversionFactor).HasPrecision(18, 9);
@@ -421,9 +419,9 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.QuantityDelta).HasPrecision(18, 3);
             entity.Property(x => x.OccurredAtUtc).HasPrecision(3);
         });
-        modelBuilder.Entity<WarehouseDocumentAudit>(entity =>
+        modelBuilder.Entity<VoucherAudit>(entity =>
         {
-            entity.ToTable("DocumentAudit", "Warehouse");
+            entity.ToTable("VoucherAudit", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Action).HasMaxLength(20).IsRequired();
             entity.Property(x => x.ActorUserKey).HasMaxLength(128).IsRequired();
@@ -431,7 +429,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.Reason).HasMaxLength(1000);
             entity.Property(x => x.BeforeJson).HasColumnType("nvarchar(max)");
             entity.Property(x => x.AfterJson).HasColumnType("nvarchar(max)");
-            entity.HasIndex(x => new { x.DocumentId, x.OccurredAtUtc, x.Id });
+            entity.HasIndex(x => new { x.VoucherId, x.OccurredAtUtc, x.Id });
             entity.HasIndex(x => new { x.WarehouseId, x.OccurredAtUtc, x.Id });
         });
         modelBuilder.Entity<SalesPlanReference>(entity => { entity.ToTable("SalesPlanReference", "Warehouse"); entity.HasKey(x => x.Id); entity.Property(x => x.StoreSalesPlanKey).HasMaxLength(128).IsRequired(); entity.Property(x => x.DisplayName).HasMaxLength(200).IsRequired(); entity.Property(x => x.Code).HasMaxLength(64).IsRequired(); entity.Property(x => x.PlanType).HasMaxLength(30).IsRequired(); entity.Property(x => x.Label).HasMaxLength(100); });
@@ -658,11 +656,10 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.AdminReply).HasMaxLength(4000);
             entity.Property(x => x.RepliedAtUtc).HasPrecision(3);
             entity.Property(x => x.ReplyEmailSentAtUtc).HasPrecision(3);
-            entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
-            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.Status).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasIndex(x => new { x.Status, x.CreatedAtUtc });
+            entity.HasIndex(x => new { x.IdStatus, x.CreatedAtUtc });
         });
         modelBuilder.Entity<StoreCustomerOrderItem>(entity =>
         {
@@ -721,8 +718,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnType("numeric(30,0)").UseIdentityColumn();
             entity.Property(x => x.Amount).HasPrecision(19, 0);
-            entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
-            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.Status).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.GatewayReference).HasMaxLength(200);
             entity.Property(x => x.ReceiptReference).HasMaxLength(200);
             entity.Property(x => x.PaidAtUtc).HasPrecision(3);
@@ -773,22 +769,22 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         });
         modelBuilder.Entity<PaymentAttemptStatusReference>(entity =>
         {
-            entity.ToTable("PaymentAttemptStatus", "Store"); entity.HasKey(x => x.Code);
+            entity.ToTable("PaymentAttemptStatus", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => x.Code).IsUnique();
             entity.Property(x => x.Code).HasMaxLength(20); entity.Property(x => x.NameFa).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(80).IsRequired();
         });
         modelBuilder.Entity<ContactMessageStatusReference>(entity =>
         {
-            entity.ToTable("ContactMessageStatus", "Store"); entity.HasKey(x => x.Code);
+            entity.ToTable("ContactMessageStatus", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => x.Code).IsUnique();
             entity.Property(x => x.Code).HasMaxLength(20); entity.Property(x => x.NameFa).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(80).IsRequired();
         });
         modelBuilder.Entity<ArticleFeedbackStatusReference>(entity =>
         {
-            entity.ToTable("ArticleFeedbackStatus", "Account"); entity.HasKey(x => x.Code);
+            entity.ToTable("ArticleFeedbackStatus", "Account"); entity.HasKey(x => x.Id); entity.HasIndex(x => x.Code).IsUnique();
             entity.Property(x => x.Code).HasMaxLength(20); entity.Property(x => x.NameFa).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(80).IsRequired();
         });
-        modelBuilder.Entity<WarehouseDocumentStatusReference>(entity =>
+        modelBuilder.Entity<VoucherStatus>(entity =>
         {
-            entity.ToTable("DocumentStatus", "Warehouse"); entity.HasKey(x => x.Code);
+            entity.ToTable("VoucherStatus", "Warehouse"); entity.HasKey(x => x.Id); entity.HasIndex(x => x.Code).IsUnique();
             entity.Property(x => x.Code).HasColumnType("char(1)"); entity.Property(x => x.NameFa).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(80).IsRequired();
         });
         modelBuilder.Entity<StoreHomeTestimonial>(entity =>

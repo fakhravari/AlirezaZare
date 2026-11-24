@@ -130,12 +130,12 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                                      where link.IdProduct == id && link.IsActive && !link.IsBaseUnit
                                      orderby unit.NameFa
                                      select new { link.IdUnit, UnitName = unit.NameFa, link.ConversionFactor }).ToListAsync(cancellationToken);
-        bool hasWarehouseDocuments = await HasWarehouseDocuments(id, cancellationToken);
-        return Ok(new { product = new { product.Id, product.code, product.Name, product.EnglishName, product.IdBrand, product.IdCategory, IdBaseUnit = baseUnitId.Value, PriceAmount = price?.PriceBeforeDiscountAmount ?? 0m, DiscountPercent = price?.DiscountPercent ?? 0m, FinalPriceAmount = price?.FinalPriceAmount ?? 0m, product.MaxPurchaseQuantity }, brands, categories, units, unitConversions, unavailableUnitIds = historicalUnitIds, hasWarehouseDocuments });
+        bool hasVouchers = await HasVouchers(id, cancellationToken);
+        return Ok(new { product = new { product.Id, product.code, product.Name, product.EnglishName, product.IdBrand, product.IdCategory, IdBaseUnit = baseUnitId.Value, PriceAmount = price?.PriceBeforeDiscountAmount ?? 0m, DiscountPercent = price?.DiscountPercent ?? 0m, FinalPriceAmount = price?.FinalPriceAmount ?? 0m, product.MaxPurchaseQuantity }, brands, categories, units, unitConversions, unavailableUnitIds = historicalUnitIds, hasVouchers });
     }
 
-    private Task<bool> HasWarehouseDocuments(long productId, CancellationToken cancellationToken) =>
-        (from line in db.WarehouseDocumentLines.AsNoTracking()
+    private Task<bool> HasVouchers(long productId, CancellationToken cancellationToken) =>
+        (from line in db.VoucherLines.AsNoTracking()
          join item in db.InventoryItems.AsNoTracking() on line.IdInventoryItem equals item.Id
          where item.IdProduct == productId select line.Id).AnyAsync(cancellationToken);
 
@@ -348,7 +348,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         {
             if (!await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IdParent != null && x.IsActive, cancellationToken))
                 return BadRequest(new { title = "واحد پایهٔ انتخاب‌شده فعال نیست." });
-            if (await HasWarehouseDocuments(id, cancellationToken))
+            if (await HasVouchers(id, cancellationToken))
                 return Conflict(new { title = "برای این کالا سند انبار ثبت شده است؛ تغییر واحد پایه مجاز نیست." });
         }
         var baseLink = unitLinks.SingleOrDefault(x => x.IdUnit == input.UnitId);

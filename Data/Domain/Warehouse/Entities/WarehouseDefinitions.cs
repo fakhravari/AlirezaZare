@@ -1,6 +1,6 @@
 namespace Shop.Data.Domain.Warehouse.Entities;
 
-public sealed class WarehouseDocumentType
+public sealed class VoucherType
 {
     public long Id { get; set; }
     public string Name { get; set; } = string.Empty;

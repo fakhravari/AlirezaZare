@@ -1923,10 +1923,10 @@
                 form.elements.unitId.replaceChildren(new Option("انتخاب واحد", ""), ...data.units.map(unit => new Option(unit.name, String(unit.id))));
                 form.elements.unitId.value = String(product.idBaseUnit || "");
                 setProductUnitConversions(form, "edit", data.units, data.unitConversions || [], product.idBaseUnit, data.unavailableUnitIds || []);
-                form.elements.unitId.disabled = data.hasWarehouseDocuments !== false;
-                form.querySelector("[data-product-unit-help]").textContent = data.hasWarehouseDocuments === true
+                form.elements.unitId.disabled = data.hasVouchers !== false;
+                form.querySelector("[data-product-unit-help]").textContent = data.hasVouchers === true
                     ? "برای این کالا سند انبار ثبت شده است و واحد پایه قابل تغییر نیست."
-                    : data.hasWarehouseDocuments === false
+                    : data.hasVouchers === false
                         ? "پس از تغییر واحد پایه، واحدهای فرعی باید دوباره تنظیم شوند."
                         : "وضعیت اسناد مشخص نیست؛ تغییر واحد پایه ممکن نیست.";
                 ui.setPriceValue(form.elements.priceAmount, product.priceAmount ?? ""); form.elements.discountPercent.value = product.discountPercent ?? 0;
@@ -2192,7 +2192,7 @@
                         "اختلاف مبلغ نهایی (تومان)": componentsTotalAfterCoupon - Number(order.totalAmount),
                         "جمع محاسبه‌شده از نسخه‌های قیمت": order.calculatedItemSubtotal,
                         ...(order.hasItemSubtotalMismatch ? { "هشدار مبلغ": "جمع اقلام با مبلغ ثبت‌شده سفارش یکسان نیست؛ قبل از اقدام، سوابق سفارش را بررسی کنید." } : {}),
-                        "شناسه حواله": order.idWarehouseDocument || "ثبت نشده",
+                        "شناسه حواله": order.idVoucher || "ثبت نشده",
                         "شرکت حمل": order.shippingCarrier || "ثبت نشده", "کد رهگیری": order.shippingTrackingCode || "ثبت نشده",
                         "نشانی ثبت‌شده": Object.values(address).filter(value => typeof value === "string" && value).join("، "),
                         "اجزای قیمت‌گذاری": components.map(component => ({

@@ -8,7 +8,7 @@ public sealed class StoreContactMessage
     public string? Email { get; set; }
     public string SubjectKey { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
-    public string Status { get; set; } = "new";
+    public int IdStatus { get; set; }
     public ContactMessageStatusReference StatusReference { get; set; } = null!;
     public string? AdminReply { get; set; }
     public DateTime? RepliedAtUtc { get; set; }

@@ -15,7 +15,7 @@ test('management menus progress from base definitions to operational pages', asy
     'asp-controller="Warehouses"',
     'asp-route-feature="units"',
     'asp-route-feature="references"',
-    'asp-route-feature="document-types"',
+    'asp-route-feature="voucher-types"',
     'asp-route-feature="stock-owners"',
     'asp-route-feature="sales-plan-mapping"',
     'asp-route-feature="variants"',

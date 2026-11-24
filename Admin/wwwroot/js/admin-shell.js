@@ -83,7 +83,7 @@
             window.AdminProductBadges?.initialize(content);
             window.AdminPaidOrdersDispatch?.initialize(content);
             window.AdminUsers?.initialize(content);
-            window.AdminDocuments?.initialize(content);
+            window.AdminVouchers?.initialize(content);
             window.AdminDefinitions?.initialize(content);
             window.AdminMovements?.initialize(content);
             window.AdminFeedback?.initialize(content);
@@ -139,7 +139,7 @@
             window.AdminProductBadges?.initialize(content);
             window.AdminPaidOrdersDispatch?.initialize(content);
             window.AdminUsers?.initialize(content);
-            window.AdminDocuments?.initialize(content);
+            window.AdminVouchers?.initialize(content);
             window.AdminDefinitions?.initialize(content);
             window.AdminMovements?.initialize(content);
             window.AdminFeedback?.initialize(content);
@@ -156,7 +156,7 @@
         window.AdminProductBadges?.initialize(content);
         window.AdminPaidOrdersDispatch?.initialize(content);
         window.AdminUsers?.initialize(content);
-        window.AdminDocuments?.initialize(content);
+        window.AdminVouchers?.initialize(content);
         window.AdminDefinitions?.initialize(content);
         window.AdminMovements?.initialize(content);
         window.AdminFeedback?.initialize(content);

@@ -150,7 +150,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         int ordersWithoutVerifiedPayment = await db.StoreCustomerOrders.CountAsync(order =>
             order.OrderedAtUtc >= start && order.OrderedAtUtc < end && SalesStatuses.Contains(order.StatusReference.Code)
             && !db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id
-                && payment.Status == "verified" && payment.Amount == order.TotalAmount), cancellationToken);
+                && payment.StatusReference.Code == "verified" && payment.Amount == order.TotalAmount), cancellationToken);
 
         var daily = await orders.GroupBy(x => x.OrderedAtUtc.Date).Select(group => new
             {
@@ -433,15 +433,15 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                         && (!warehouseId.HasValue || movement.IdWarehouse == warehouseId.Value)
                         && (!salesPlanReferenceId.HasValue || movement.IdSalesPlanReference == salesPlanReferenceId.Value)
                     orderby movement.OccurredAtUtc descending
-                    select new { movement.OccurredAtUtc, movement.QuantityDelta, warehouse.Name, warehouse.Code, Company = company.Name, movement.IdDocument };
+                    select new { movement.OccurredAtUtc, movement.QuantityDelta, warehouse.Name, warehouse.Code, Company = company.Name, movement.IdVoucher };
         int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
         return new
         {
             title = "گردش موجودی کالا",
-            columns = DetailColumns(("date", "تاریخ"), ("warehouse", "شرکت / انبار"), ("change", "تغییر موجودی"), ("document", "سند")),
-            items = rows.Select(x => new { date = x.OccurredAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), warehouse = x.Company + " / " + x.Name + " (" + x.Code + ")", change = x.QuantityDelta, document = x.IdDocument }),
+            columns = DetailColumns(("date", "تاریخ"), ("warehouse", "شرکت / انبار"), ("change", "تغییر موجودی"), ("voucherId", "شناسهٔ حواله")),
+            items = rows.Select(x => new { date = x.OccurredAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), warehouse = x.Company + " / " + x.Name + " (" + x.Code + ")", change = x.QuantityDelta, voucherId = x.IdVoucher }),
             total,
             page,
             pageSize,
@@ -450,7 +450,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     }
 
     private IQueryable<StoreCustomerOrderReference> PaidOrders() => db.StoreCustomerOrders.AsNoTracking().Where(order => SalesStatuses.Contains(order.StatusReference.Code)
-            && db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.Status == "verified" && payment.Amount == order.TotalAmount));
+            && db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.StatusReference.Code == "verified" && payment.Amount == order.TotalAmount));
 
     private HashSet<long> AllowedWarehouseIds() => User.FindAll("admin_warehouse").Select(claim => long.TryParse(claim.Value, out long id) ? id : 0).Where(id => id > 0).ToHashSet();
 

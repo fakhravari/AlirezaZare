@@ -40,8 +40,8 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
 
         var eligible = from order in db.StoreCustomerOrders.AsNoTracking()
                        join profile in db.AccountProfiles.AsNoTracking() on order.IdProfile equals profile.Id
-                       where order.StatusReference.Code == "payment-confirmed" && order.IdWarehouseDocument == null &&
-                             db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.Status == "verified" &&
+                       where order.StatusReference.Code == "payment-confirmed" && order.IdVoucher == null &&
+                             db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.StatusReference.Code == "verified" &&
                                    payment.Amount == order.TotalAmount && payment.PaidAtUtc != null) &&
                              db.StoreCustomerOrderItems.Any(item => item.IdOrder == order.Id)
                        select new { order, profile };
@@ -52,7 +52,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             {
                 x.order,
                 x.profile,
-                PaidAtUtc = db.StorePaymentAttempts.AsNoTracking().Where(payment => payment.IdOrder == x.order.Id && payment.Status == "verified" &&
+                PaidAtUtc = db.StorePaymentAttempts.AsNoTracking().Where(payment => payment.IdOrder == x.order.Id && payment.StatusReference.Code == "verified" &&
                         payment.Amount == x.order.TotalAmount && payment.PaidAtUtc != null)
                     .OrderBy(payment => payment.PaidAtUtc).Select(payment => payment.PaidAtUtc).FirstOrDefault() ?? x.order.OrderedAtUtc
             }).OrderBy(x => x.PaidAtUtc).ThenBy(x => x.order.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new PaidOrderRow
@@ -88,10 +88,10 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             if (orders.Count != ids.Length) return Conflict(new { detail = "وضعیت یکی از سفارش‌ها تغییر کرده است." });
 
             var orderIds = orders.Select(x => x.Id).ToArray();
-            var payments = await db.StorePaymentAttempts.Where(x => orderIds.Contains(x.IdOrder) && x.Status == "verified" && x.PaidAtUtc != null) .ToListAsync(cancellationToken);
+            var payments = await db.StorePaymentAttempts.Where(x => orderIds.Contains(x.IdOrder) && x.StatusReference.Code == "verified" && x.PaidAtUtc != null) .ToListAsync(cancellationToken);
             var orderItems = await db.StoreCustomerOrderItems.AsNoTracking().Where(x => orderIds.Contains(x.IdOrder)).ToListAsync(cancellationToken);
             if (orders.Any(order => order.StatusReference.Code != "payment-confirmed" ||
-                    order.IdWarehouseDocument is not null ||
+                    order.IdVoucher is not null ||
                     !payments.Any(payment => payment.IdOrder == order.Id && payment.Amount == order.TotalAmount) ||
                     !orderItems.Any(item => item.IdOrder == order.Id)))
                 return Conflict(new { detail = "وضعیت یکی از سفارش‌ها تغییر کرده است؛ فهرست را دوباره بارگذاری کنید." });
@@ -99,7 +99,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             long[] planIds = orderItems.Select(x => x.IdSalesPlan).Distinct().ToArray();
             var settings = await db.StoreSiteIdentities.AsNoTracking().SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
             var warehouse = settings?.IdWarehouse is long warehouseId ? await db.Warehouses.SingleOrDefaultAsync(x => x.Id == warehouseId && x.IsActive, cancellationToken) : null;
-            var type = await db.WarehouseDocumentTypes.SingleOrDefaultAsync(x => x.IsSystemSalesDispatch && x.IsActive && x.Direction == "I", cancellationToken);
+            var type = await db.VoucherTypes.SingleOrDefaultAsync(x => x.IsSystemSalesDispatch && x.IsActive && x.Direction == "I", cancellationToken);
             var party = await db.WarehouseParties.SingleOrDefaultAsync(x => x.ExternalPartyKey == "STORE-SALES" && x.IsActive, cancellationToken);
             if (warehouse is null || type is null || party is null)
                 return Conflict(new { detail = "انبار فروش، نوع حواله یا مرجع آن تنظیم نشده است." });
@@ -150,27 +150,27 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             }
 
             var headerPlanId = lineDetails.Min(x => x.IdSalesPlanReference);
-            var document = new WarehouseDocumentRecord
+            var document = new Voucher
             {
                 IdWarehouse = warehouse.Id,
-                IdDocumentType = type.Id,
+                IdVoucherType = type.Id,
                 IdParty = party.Id,
                 IdSalesPlanReference = headerPlanId,
-                DocumentDate = DateOnly.FromDateTime(DateTime.Today),
-                Status = "F",
+                VoucherDate = DateOnly.FromDateTime(DateTime.Today),
+                IdVoucherStatus = await db.VoucherStatuses.Where(x => x.Code == "F").Select(x => x.Id).SingleAsync(cancellationToken),
                 Reason = "حوالهٔ تجمیعی سفارش‌های فروشگاه",
                 CreatedByUserKey = actor,
                 CreatedAtUtc = DateTime.UtcNow
             };
-            db.WarehouseDocuments.Add(document);
+            db.Vouchers.Add(document);
             await db.SaveChangesAsync(cancellationToken);
 
             foreach (var group in lineDetails.GroupBy(x => new
             { x.IdInventoryItem, x.IdUnit, x.IdSalesPlanReference, x.ConversionFactor, x.ProductName, x.VariantName, x.UnitName }))
             {
-                db.WarehouseDocumentLines.Add(new WarehouseDocumentLineRecord
+                db.VoucherLines.Add(new VoucherLine
                 {
-                    IdDocument = document.Id,
+                    IdVoucher = document.Id,
                     IdInventoryItem = group.Key.IdInventoryItem,
                     IdUnit = group.Key.IdUnit,
                     IdSalesPlanReference = group.Key.IdSalesPlanReference,
@@ -184,18 +184,18 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             }
             await db.SaveChangesAsync(cancellationToken);
 
-            await stockLedger.RebuildDocumentAsync(document.Id, cancellationToken);
+            await stockLedger.RebuildVoucherAsync(document.Id, cancellationToken);
 
             int warehouseConfirmedStatusId = await db.OrderStatuses.Where(x => x.Code == "warehouse-confirmed").Select(x => x.Id).SingleAsync(cancellationToken);
             foreach (var order in orders)
             {
-                order.IdWarehouseDocument = document.Id;
+                order.IdVoucher = document.Id;
                 order.IdStatus = warehouseConfirmedStatusId;
             }
-            db.WarehouseDocumentAudits.Add(new WarehouseDocumentAudit
+            db.VoucherAudits.Add(new VoucherAudit
             {
-                DocumentId = document.Id,
-                DocumentNumber = document.DocumentNumber,
+                VoucherId = document.Id,
+                VoucherNumber = document.VoucherNumber,
                 WarehouseId = warehouse.Id,
                 Action = "Created",
                 ActorUserKey = actor,
@@ -207,7 +207,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
 
             await transaction.CommitAsync(cancellationToken);
 
-            return Ok(new { document.Id, document.DocumentNumber });
+            return Ok(new { document.Id, document.VoucherNumber });
         }
         catch (InsufficientWarehouseStockException)
         {

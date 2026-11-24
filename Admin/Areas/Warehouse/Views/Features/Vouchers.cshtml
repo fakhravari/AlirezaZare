@@ -1,0 +1,109 @@
+@model Shop.Admin.Models.FeaturePageViewModel
+<div class="admin-page" data-admin-vouchers data-api="@ViewData["ApiUrl"]" data-voucher-feature="@Model.FeatureId" data-can-create="@(User.HasClaim("admin_permission", "Warehouse:VouchersApi:Create") ? "true" : "false")" data-can-edit="@(User.HasClaim("admin_permission", "Warehouse:VouchersApi:Update") ? "true" : "false")" data-can-delete="@(User.HasClaim("admin_permission", "Warehouse:VouchersApi:Delete") ? "true" : "false")">
+    @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
+    <p class="alert alert-info" role="note">این فهرست همهٔ سندهای انبار را نشان می‌دهد. برای محدودکردن نتایج از فیلترهای انبار و وضعیت استفاده کنید.</p>
+    @if (Model.FeatureId == "transfers")
+    {
+        <p class="alert alert-warning" role="note">هر سند فقط یک انبار را تغییر می‌دهد. انتقال خودکار میان دو انبار در این فرم انجام نمی‌شود؛ برای انتقال باید سند خروج و سند ورود جداگانه ثبت شوند.</p>
+    }
+    @if (Model.FeatureId == "stocktake")
+    {
+        <p class="alert alert-info" role="note">این فرم سند دستی ثبت می‌کند و اختلاف شمارش با موجودی را به‌صورت خودکار محاسبه نمی‌کند.</p>
+    }
+    <section class="panel panel-inverse">
+        <div class="panel-heading">
+            <h2 class="panel-title">سندهای انبار</h2>
+            <div class="panel-heading-btn">
+                <button class="btn btn-primary btn-sm" type="button" data-voucher-create><i class="fa fa-plus me-1" aria-hidden="true"></i>ثبت سند</button>
+            </div>
+        </div>
+        <div class="panel-body">
+            <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-voucher-filter>
+                <label class="visually-hidden" for="voucher-warehouse-filter">انبار</label>
+                <select id="voucher-warehouse-filter" class="form-select" name="warehouseId" data-voucher-warehouses>
+                    <option value="">همهٔ انبارهای مجاز</option>
+                </select>
+                <label class="visually-hidden" for="voucher-status-filter">وضعیت سند</label>
+                <select id="voucher-status-filter" class="form-select" name="status">
+                    <option value="">همهٔ وضعیت‌ها</option>
+                </select>
+                <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="button" data-voucher-reset>پاک‌کردن</button>
+            </form>
+            <div class="admin-data-status small text-muted" data-voucher-status role="status" aria-live="polite">در حال بارگذاری سندها…</div>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle" data-admin-datatable data-admin-table-mode="server">
+                    <thead>
+                    <tr>
+                        <th>شماره</th><th>تاریخ</th><th>نوع سند</th><th>انبار</th><th>طرح فروش</th><th>مرجع</th><th>وضعیت</th><th>اثر بر موجودی</th>
+                        <th>
+                            <span class="visually-hidden">عملیات</span>
+                        </th>
+                    </tr>
+                    </thead><tbody data-voucher-rows></tbody>
+                </table>
+            </div>
+            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-voucher-pagination hidden>
+                <button class="btn btn-default btn-sm" type="button" data-voucher-page="-1">قبلی</button><span data-voucher-page-label></span><button class="btn btn-default btn-sm" type="button" data-voucher-page="1">بعدی</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade" id="admin-voucher-modal" tabindex="-1" aria-labelledby="admin-voucher-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <form class="modal-content" data-voucher-form data-admin-confirm="سند و گردش موجودی ثبت شوند؟">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id"/>
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="admin-voucher-title">ثبت سند انبار</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6 col-xl-4">
+                        <label class="form-label" for="voucher-type">نوع سند</label><select id="voucher-type" name="voucherTypeId" class="form-select" required data-voucher-types></select>
+                        <small class="form-text" data-voucher-types-help hidden>ابتدا نوع سند مناسب را در <a href="/Warehouse/Features?feature=voucher-types">تعریف انواع اسناد</a> اضافه یا فعال کنید.@if (Model.FeatureId == "returns") { <text> گزینهٔ «سند مرجوعی است» را برای آن فعال کنید.</text> }</small>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <label class="form-label" for="voucher-warehouse">انبار</label><select id="voucher-warehouse" name="warehouseId" class="form-select" required data-voucher-warehouse></select>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <label class="form-label" for="voucher-plan">طرح پیش‌فرض اقلام</label><select id="voucher-plan" name="salesPlanId" class="form-select" required data-voucher-plans></select>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <label class="form-label" for="voucher-party">مرجع</label><select id="voucher-party" name="partyId" class="form-select" required data-voucher-parties></select>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <label class="form-label" for="voucher-date">تاریخ سند</label><input id="voucher-date" name="voucherDate" class="form-control" type="date" required/>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <label class="form-label" for="voucher-state">وضعیت</label>
+                        <select id="voucher-state" name="status" class="form-select">
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="voucher-reference" data-reference-label>شماره سفارش / مرجع بیرونی</label><input id="voucher-reference" name="externalReference" class="form-control" maxlength="128" data-voucher-reference/>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="voucher-reason">دلیل / توضیح</label><textarea id="voucher-reason" name="reason" class="form-control" maxlength="1000" rows="2" required></textarea>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+                    <h3 class="h6 mb-0">اقلام سند</h3><button class="btn btn-outline-primary btn-sm" type="button" data-voucher-line-add><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن قلم</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle admin-document-lines">
+                        <thead>
+                        <tr>
+                            <th>کالا / تنوع</th><th>طرح / مالک</th><th>واحد</th><th>مقدار</th><th>ضریب تبدیل</th><th>مقدار واحد اصلی</th><th></th>
+                        </tr>
+                        </thead><tbody data-voucher-lines></tbody>
+                    </table>
+                </div>
+                <p class="text-muted small mb-0">مقدار در واحد اصلی تا سه رقم اعشار بریده می‌شود. تغییر وضعیت موقت/قطعی و گردش موجودی در یک تراکنش ثبت می‌شوند.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیرهٔ سند</button>
+            </div>
+        </form>
+    </div>
+</div>

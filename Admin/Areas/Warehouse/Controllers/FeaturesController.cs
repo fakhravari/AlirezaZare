@@ -17,14 +17,14 @@ public sealed class FeaturesController : Controller
         if (new[] { "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments" }.Contains(
                 page.FeatureId, StringComparer.OrdinalIgnoreCase))
         {
-            ViewData["ApiUrl"] = "/api/admin/warehouse/documents";
+            ViewData["ApiUrl"] = "/api/admin/warehouse/vouchers";
 
-            return View("~/Areas/Warehouse/Views/Features/Documents.cshtml", page);
+            return View("~/Areas/Warehouse/Views/Features/Vouchers.cshtml", page);
         }
 
         if (new[]
             {
-                "companies", "warehouses", "references", "units", "product-units", "variant-names", "variants", "document-types",
+                "companies", "warehouses", "references", "units", "product-units", "variant-names", "variants", "voucher-types",
                 "sales-plan-mapping", "stock-owners"
             }.Contains(page.FeatureId, StringComparer.OrdinalIgnoreCase))
         {
