@@ -38,6 +38,7 @@ public sealed class StoreProductCatalogFeatureValue
 
 public sealed class StoreVariantCatalogFeatureValue
 {
+    public decimal Id { get; set; }
     public long IdProductVariant { get; set; }
     public long IdFeature { get; set; }
     public long IdFeatureValue { get; set; }

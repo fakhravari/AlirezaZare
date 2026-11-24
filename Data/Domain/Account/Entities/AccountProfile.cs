@@ -194,6 +194,7 @@ public sealed class AccountCoupon
 
 public sealed class StoreCouponUsage
 {
+    public decimal Id { get; set; }
     public long IdCoupon { get; set; }
     public long IdCustomerOrder { get; set; }
 }

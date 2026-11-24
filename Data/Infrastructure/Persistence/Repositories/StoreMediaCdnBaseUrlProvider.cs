@@ -8,11 +8,11 @@ namespace Shop.Data.Infrastructure.Persistence.Repositories;
 
 public sealed class StoreMediaCdnBaseUrlProvider(ShopDbContext dbContext, IOptions<MediaCdnOptions> options) : IMediaCdnBaseUrlProvider
 {
-    private string? requestBaseUrl;
+    private string? _requestBaseUrl;
 
     public async Task<string> GetBaseUrlAsync(CancellationToken cancellationToken = default)
     {
-        if (requestBaseUrl is not null) return requestBaseUrl;
+        if (_requestBaseUrl is not null) return _requestBaseUrl;
 
         string configuredFallback = MediaCdnOptions.NormalizeBaseUrl(options.Value.BaseUrl);
         string? databaseValue;
@@ -24,9 +24,9 @@ public sealed class StoreMediaCdnBaseUrlProvider(ShopDbContext dbContext, IOptio
         {
             return configuredFallback;
         }
-        if (string.IsNullOrWhiteSpace(databaseValue)) return requestBaseUrl = configuredFallback;
+        if (string.IsNullOrWhiteSpace(databaseValue)) return _requestBaseUrl = configuredFallback;
 
-        try { return requestBaseUrl = MediaCdnOptions.NormalizeBaseUrl(databaseValue); }
-        catch (InvalidOperationException) { return requestBaseUrl = configuredFallback; }
+        try { return _requestBaseUrl = MediaCdnOptions.NormalizeBaseUrl(databaseValue); }
+        catch (InvalidOperationException) { return _requestBaseUrl = configuredFallback; }
     }
 }

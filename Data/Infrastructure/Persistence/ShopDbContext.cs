@@ -433,7 +433,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasIndex(x => new { x.WarehouseId, x.OccurredAtUtc, x.Id });
         });
         modelBuilder.Entity<SalesPlanReference>(entity => { entity.ToTable("SalesPlanReference", "Warehouse"); entity.HasKey(x => x.Id); entity.Property(x => x.StoreSalesPlanKey).HasMaxLength(128).IsRequired(); entity.Property(x => x.DisplayName).HasMaxLength(200).IsRequired(); entity.Property(x => x.Code).HasMaxLength(64).IsRequired(); entity.Property(x => x.PlanType).HasMaxLength(30).IsRequired(); entity.Property(x => x.Label).HasMaxLength(100); });
-        modelBuilder.Entity<WarehouseStockOwner>(entity => { entity.ToTable("WarehouseStockOwner", "Warehouse"); entity.HasKey(x => new { x.IdWarehouse, x.IdStockOwner }); entity.Property(x => x.IsDefault).HasDefaultValue(false); entity.HasIndex(x => x.IdWarehouse).IsUnique().HasFilter("[IsDefault] = 1").HasDatabaseName("UX_WarehouseStockOwner_OneDefaultPerWarehouse"); });
+        modelBuilder.Entity<WarehouseStockOwner>(entity => { entity.ToTable("WarehouseStockOwner", "Warehouse"); entity.HasKey(x => x.Id); entity.Property(x => x.Id).HasColumnType("numeric(30,0)").UseIdentityColumn(); entity.Property(x => x.IsDefault).HasDefaultValue(false); entity.HasAlternateKey(x => new { x.IdWarehouse, x.IdStockOwner }).HasName("UQ_WarehouseStockOwner_Warehouse_StockOwner"); entity.HasIndex(x => x.IdWarehouse).IsUnique().HasFilter("[IsDefault] = 1").HasDatabaseName("UX_WarehouseStockOwner_OneDefaultPerWarehouse"); });
         modelBuilder.Entity<StockBalance>(entity =>
         {
             entity.ToTable("StockBalance", "Warehouse", table => table.UseSqlOutputClause(false));
@@ -572,7 +572,9 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         modelBuilder.Entity<StoreCouponUsage>(entity =>
         {
             entity.ToTable("CouponUsage", "Store");
-            entity.HasKey(x => new { x.IdCoupon, x.IdCustomerOrder });
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).HasColumnType("numeric(30,0)").UseIdentityColumn();
+            entity.HasAlternateKey(x => new { x.IdCoupon, x.IdCustomerOrder }).HasName("UQ_CouponUsage_Coupon_Order");
             entity.HasOne<AccountCoupon>().WithMany().HasForeignKey(x => x.IdCoupon).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdCustomerOrder).OnDelete(DeleteBehavior.Cascade);
         });
@@ -905,7 +907,9 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         });
         modelBuilder.Entity<StoreVariantCatalogFeatureValue>(entity =>
         {
-            entity.ToTable("VariantCatalogFeatureValue", "Store"); entity.HasKey(x => new { x.IdProductVariant, x.IdFeature });
+            entity.ToTable("VariantCatalogFeatureValue", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).HasColumnType("numeric(30,0)").UseIdentityColumn();
+            entity.HasAlternateKey(x => new { x.IdProductVariant, x.IdFeature }).HasName("UQ_VariantCatalogFeatureValue_Variant_Feature");
             entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => x.IdProductVariant).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => new { x.IdFeature, x.Kind }).HasPrincipalKey(x => new { x.Id, x.Kind }).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<StoreCatalogFeatureValue>().WithMany().HasForeignKey(x => new { x.IdFeatureValue, x.IdFeature }).HasPrincipalKey(x => new { x.Id, x.IdFeature }).OnDelete(DeleteBehavior.Restrict);

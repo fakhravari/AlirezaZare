@@ -19,6 +19,7 @@ public sealed class SalesPlanReference
 
 public sealed class WarehouseStockOwner
 {
+    public decimal Id { get; set; }
     public long IdWarehouse { get; set; }
     public long IdStockOwner { get; set; }
     public bool IsDefault { get; set; }
