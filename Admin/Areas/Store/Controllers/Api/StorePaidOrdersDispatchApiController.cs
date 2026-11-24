@@ -132,9 +132,10 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             if (warehouse is null || type is null || party is null)
                 return Conflict(new { detail = "انبار فروش، نوع حواله یا مرجع آن تنظیم نشده است." });
 
-            var assignedPlanIds = await db.WarehouseStockOwners.AsNoTracking()
+            long[] assignedPlanIds = (await db.WarehouseStockOwners.AsNoTracking()
                 .Where(x => x.IdWarehouse == warehouse.Id && planIds.Contains(x.IdStockOwner))
-                .Select(x => x.IdStockOwner).ToArrayAsync(cancellationToken);
+                .Select(x => x.IdStockOwner).ToListAsync(cancellationToken))
+                .ToArray();
             if (assignedPlanIds.Length != planIds.Length)
                 return Conflict(new { detail = "طرح یکی از اقلام به انبار فروش متصل نیست." });
 

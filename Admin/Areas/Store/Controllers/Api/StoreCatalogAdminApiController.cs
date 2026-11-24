@@ -20,12 +20,19 @@ public sealed class StoreCatalogAdminApiController(
     IStorePriceVersionService priceVersions) : ControllerBase
 {
     private IQueryable<StorePriceVersion> RegularProductPrices() =>
-        from version in db.StorePriceVersions.AsNoTracking()
-        join plan in db.SalesPlanReferences.AsNoTracking() on version.IdSalesPlan equals (long?)plan.Id
-        where version.IsActive && plan.IsRegular && plan.IdStockOwnerType == 1 &&
-              version.IdProductVariant == null && version.IdAccessory == null
-        orderby plan.Id, version.Id descending
-        select version;
+        db.StorePriceVersions
+            .AsNoTracking()
+            .Join(
+                db.SalesPlanReferences.AsNoTracking(),
+                version => version.IdSalesPlan,
+                plan => (long?)plan.Id,
+                (version, plan) => new { version, plan })
+            .Where(pricePlan => pricePlan.version.IsActive && pricePlan.plan.IsRegular &&
+                                pricePlan.plan.IdStockOwnerType == 1 &&
+                                pricePlan.version.IdProductVariant == null && pricePlan.version.IdAccessory == null)
+            .OrderBy(pricePlan => pricePlan.plan.Id)
+            .ThenByDescending(pricePlan => pricePlan.version.Id)
+            .Select(pricePlan => pricePlan.version);
 
     private static decimal FinalPrice(StorePriceVersion? price) => price?.FinalPriceAmount ?? 0m;
 
@@ -34,20 +41,40 @@ public sealed class StoreCatalogAdminApiController(
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
         if (!await db.Products.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
-        var items = await (from link in db.StoreProductAccessories.AsNoTracking()
-                join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
-                where link.IdProduct == id
-                orderby link.SortOrder, link.Id
-                select new
+        var items = await db.StoreProductAccessories
+            .AsNoTracking()
+            .Join(
+                db.StoreAccessories.AsNoTracking(),
+                link => link.IdAccessory,
+                accessory => accessory.Id,
+                (link, accessory) => new { link, accessory })
+            .Where(linkAccessory => linkAccessory.link.IdProduct == id)
+            .OrderBy(linkAccessory => linkAccessory.link.SortOrder)
+            .ThenBy(linkAccessory => linkAccessory.link.Id)
+            .Select(linkAccessory => new
                 {
-                    link.Id, accessory.Name, accessory.Description, accessory.IsActive, link.IsRequired, link.SortOrder,
-                    link.DisplayDiscountPercent,
-                    PriceAmount = (from version in db.StorePriceVersions
-                        join plan in db.SalesPlanReferences on version.IdSalesPlan equals (long?)plan.Id
-                        where version.IdProduct == id && version.IdAccessory == link.IdAccessory && version.IsActive &&
-                              plan.IsRegular && plan.IdStockOwnerType == 1
-                        orderby plan.Id
-                        select (decimal?)version.FinalPriceAmount).FirstOrDefault()
+                    linkAccessory.link.Id,
+                    linkAccessory.accessory.Name,
+                    linkAccessory.accessory.Description,
+                    linkAccessory.accessory.IsActive,
+                    linkAccessory.link.IsRequired,
+                    linkAccessory.link.SortOrder,
+                    linkAccessory.link.DisplayDiscountPercent,
+                    PriceAmount = db.StorePriceVersions
+                        .AsNoTracking()
+                        .Join(
+                            db.SalesPlanReferences.AsNoTracking(),
+                            version => version.IdSalesPlan,
+                            plan => (long?)plan.Id,
+                            (version, plan) => new { version, plan })
+                        .Where(pricePlan =>
+                            pricePlan.version.IdProduct == id &&
+                            pricePlan.version.IdAccessory == linkAccessory.link.IdAccessory &&
+                            pricePlan.version.IsActive && pricePlan.plan.IsRegular &&
+                            pricePlan.plan.IdStockOwnerType == 1)
+                        .OrderBy(pricePlan => pricePlan.plan.Id)
+                        .Select(pricePlan => (decimal?)pricePlan.version.FinalPriceAmount)
+                        .FirstOrDefault()
                 })
             .ToListAsync(cancellationToken);
         return Ok(items);
@@ -115,10 +142,15 @@ public sealed class StoreCatalogAdminApiController(
         link.DisplayDiscountPercent = input.DisplayDiscountPercent;
         if (input.IsRequired)
         {
-            var overrides = await (from row in db.StoreProductSalesPlanOfferAccessories
-                join offer in db.StoreProductSalesPlanOffers on row.IdProductSalesPlanOffer equals offer.Id
-                where offer.IdProduct == id && row.IdAccessory == accessory.Id
-                select row).ToListAsync(cancellationToken);
+            var overrides = await db.StoreProductSalesPlanOfferAccessories
+                .Join(
+                    db.StoreProductSalesPlanOffers,
+                    row => row.IdProductSalesPlanOffer,
+                    offer => offer.Id,
+                    (row, offer) => new { row, offer })
+                .Where(rowOffer => rowOffer.offer.IdProduct == id && rowOffer.row.IdAccessory == accessory.Id)
+                .Select(rowOffer => rowOffer.row)
+                .ToListAsync(cancellationToken);
             foreach (var row in overrides)
             {
                 row.IsAllowed = true;
@@ -211,11 +243,22 @@ public sealed class StoreCatalogAdminApiController(
             .Where(x => x.Id == baseUnitId.Value || !historicalUnitIds.Contains(x.Id))
             .Select(x => new { x.Id, Name = x.IsActive ? x.NameFa : x.NameFa + " (غیرفعال)", x.IsActive })
             .ToListAsync(cancellationToken);
-        var unitConversions = await (from link in db.WarehouseProductUnits.AsNoTracking()
-            join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
-            where link.IdProduct == id && link.IsActive && !link.IsBaseUnit
-            orderby unit.NameFa
-            select new { link.IdUnit, UnitName = unit.NameFa, link.ConversionFactor }).ToListAsync(cancellationToken);
+        var unitConversions = await db.WarehouseProductUnits
+            .AsNoTracking()
+            .Join(
+                db.WarehouseUnits.AsNoTracking(),
+                link => link.IdUnit,
+                unit => unit.Id,
+                (link, unit) => new { link, unit })
+            .Where(linkUnit => linkUnit.link.IdProduct == id && linkUnit.link.IsActive && !linkUnit.link.IsBaseUnit)
+            .OrderBy(linkUnit => linkUnit.unit.NameFa)
+            .Select(linkUnit => new
+            {
+                linkUnit.link.IdUnit,
+                UnitName = linkUnit.unit.NameFa,
+                linkUnit.link.ConversionFactor
+            })
+            .ToListAsync(cancellationToken);
         bool hasVouchers = await HasVouchers(id, cancellationToken);
         return Ok(new
         {
@@ -231,10 +274,14 @@ public sealed class StoreCatalogAdminApiController(
     }
 
     private Task<bool> HasVouchers(long productId, CancellationToken cancellationToken) =>
-        (from line in db.VoucherLines.AsNoTracking()
-            join item in db.InventoryItems.AsNoTracking() on line.IdInventoryItem equals item.Id
-            where item.IdProduct == productId
-            select line.Id).AnyAsync(cancellationToken);
+        db.VoucherLines
+            .AsNoTracking()
+            .Join(
+                db.InventoryItems.AsNoTracking(),
+                line => line.IdInventoryItem,
+                item => item.Id,
+                (line, item) => new { line, item })
+            .AnyAsync(lineItem => lineItem.item.IdProduct == productId, cancellationToken);
 
     [HttpGet("products/{id:long}/details")]
     public async Task<IActionResult> ProductDetails(long id, CancellationToken cancellationToken)
@@ -259,11 +306,21 @@ public sealed class StoreCatalogAdminApiController(
             : null;
         string? unitName = await db.WarehouseUnits.AsNoTracking().Where(x => x.Id == baseUnitId.Value)
             .Select(x => x.NameFa).SingleOrDefaultAsync(cancellationToken);
-        var secondaryUnits = await (from link in db.WarehouseProductUnits.AsNoTracking()
-                join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
-                where link.IdProduct == id && link.IsActive && !link.IsBaseUnit
-                orderby unit.NameFa
-                select new { link.IdUnit, UnitName = unit.NameFa, link.ConversionFactor })
+        var secondaryUnits = await db.WarehouseProductUnits
+            .AsNoTracking()
+            .Join(
+                db.WarehouseUnits.AsNoTracking(),
+                link => link.IdUnit,
+                unit => unit.Id,
+                (link, unit) => new { link, unit })
+            .Where(linkUnit => linkUnit.link.IdProduct == id && linkUnit.link.IsActive && !linkUnit.link.IsBaseUnit)
+            .OrderBy(linkUnit => linkUnit.unit.NameFa)
+            .Select(linkUnit => new
+            {
+                linkUnit.link.IdUnit,
+                UnitName = linkUnit.unit.NameFa,
+                linkUnit.link.ConversionFactor
+            })
             .ToListAsync(cancellationToken);
 
         string? categoryPath = null;
@@ -279,15 +336,29 @@ public sealed class StoreCatalogAdminApiController(
                 { x.Id, Name = x.VariantName.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc, x.UpdatedAtUtc })
             .ToListAsync(cancellationToken);
         long[] variantIds = variantRows.Select(x => x.Id).ToArray();
-        var variantAttributes = await (from link in db.ProductVariantAttributeValues.AsNoTracking()
-                join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
-                join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
-                where variantIds.Contains(link.IdProductVariant)
-                orderby attribute.SortOrder, attribute.Id
-                select new
+        var variantAttributes = await db.ProductVariantAttributeValues
+            .AsNoTracking()
+            .Join(
+                db.ProductAttributeValues.AsNoTracking(),
+                link => link.IdProductAttributeValue,
+                value => value.Id,
+                (link, value) => new { link, value })
+            .Join(
+                db.ProductAttributes.AsNoTracking(),
+                linkValue => linkValue.value.IdProductAttribute,
+                attribute => attribute.Id,
+                (linkValue, attribute) => new { linkValue.link, linkValue.value, attribute })
+            .Where(linkValueAttribute => variantIds.Contains(linkValueAttribute.link.IdProductVariant))
+            .OrderBy(linkValueAttribute => linkValueAttribute.attribute.SortOrder)
+            .ThenBy(linkValueAttribute => linkValueAttribute.attribute.Id)
+            .Select(linkValueAttribute => new
                 {
-                    link.IdProductVariant, attribute.Key, attribute.Label, value.ValueKey, value.DisplayValue,
-                    value.Swatch
+                    linkValueAttribute.link.IdProductVariant,
+                    linkValueAttribute.attribute.Key,
+                    linkValueAttribute.attribute.Label,
+                    linkValueAttribute.value.ValueKey,
+                    linkValueAttribute.value.DisplayValue,
+                    linkValueAttribute.value.Swatch
                 })
             .ToListAsync(cancellationToken);
         var attributesByVariant = variantAttributes.GroupBy(x => x.IdProductVariant).ToDictionary(x => x.Key,
@@ -303,33 +374,86 @@ public sealed class StoreCatalogAdminApiController(
         long[] allowedWarehouseIds = User.FindAll("admin_warehouse")
             .Select(claim => long.TryParse(claim.Value, out long warehouseId) ? warehouseId : 0)
             .Where(warehouseId => warehouseId > 0).ToArray();
-        var inventory = await (from balance in db.StockBalances.AsNoTracking()
-            join item in db.InventoryItems.AsNoTracking() on balance.IdInventoryItem equals item.Id
-            join warehouse in db.Warehouses.AsNoTracking() on balance.IdWarehouse equals warehouse.Id
-            join company in db.Companies.AsNoTracking() on warehouse.IdCompany equals company.Id
-            join plan in db.SalesPlanReferences.AsNoTracking() on balance.IdSalesPlanReference equals plan.Id
-            where item.IdProduct == id && (fullAccess || allowedWarehouseIds.Contains(balance.IdWarehouse))
-            orderby company.Name, warehouse.Name, plan.DisplayName
-            select new
+        var inventory = await db.StockBalances
+            .AsNoTracking()
+            .Join(
+                db.InventoryItems.AsNoTracking(),
+                balance => balance.IdInventoryItem,
+                item => item.Id,
+                (balance, item) => new { balance, item })
+            .Join(
+                db.Warehouses.AsNoTracking(),
+                balanceItem => balanceItem.balance.IdWarehouse,
+                warehouse => warehouse.Id,
+                (balanceItem, warehouse) => new { balanceItem.balance, balanceItem.item, warehouse })
+            .Join(
+                db.Companies.AsNoTracking(),
+                balanceItemWarehouse => balanceItemWarehouse.warehouse.IdCompany,
+                company => company.Id,
+                (balanceItemWarehouse, company) => new
+                {
+                    balanceItemWarehouse.balance,
+                    balanceItemWarehouse.item,
+                    balanceItemWarehouse.warehouse,
+                    company
+                })
+            .Join(
+                db.SalesPlanReferences.AsNoTracking(),
+                balanceDetails => balanceDetails.balance.IdSalesPlanReference,
+                plan => plan.Id,
+                (balanceDetails, plan) => new
+                {
+                    balanceDetails.balance,
+                    balanceDetails.item,
+                    balanceDetails.warehouse,
+                    balanceDetails.company,
+                    plan
+                })
+            .Where(balanceDetails => balanceDetails.item.IdProduct == id &&
+                                     (fullAccess || allowedWarehouseIds.Contains(balanceDetails.balance.IdWarehouse)))
+            .OrderBy(balanceDetails => balanceDetails.company.Name)
+            .ThenBy(balanceDetails => balanceDetails.warehouse.Name)
+            .ThenBy(balanceDetails => balanceDetails.plan.DisplayName)
+            .Select(balanceDetails => new
             {
-                CompanyName = company.Name,
-                WarehouseName = warehouse.Name,
-                WarehouseCode = warehouse.Code,
-                SalesPlanName = plan.DisplayName,
-                VariantName = item.ProductVariant == null ? null : item.ProductVariant!.VariantName.Name,
-                balance.Quantity,
-                balance.MinimumQuantity,
-                balance.UpdatedAtUtc
-            }).ToListAsync(cancellationToken);
+                CompanyName = balanceDetails.company.Name,
+                WarehouseName = balanceDetails.warehouse.Name,
+                WarehouseCode = balanceDetails.warehouse.Code,
+                SalesPlanName = balanceDetails.plan.DisplayName,
+                VariantName = balanceDetails.item.ProductVariant == null
+                    ? null
+                    : balanceDetails.item.ProductVariant.VariantName.Name,
+                balanceDetails.balance.Quantity,
+                balanceDetails.balance.MinimumQuantity,
+                balanceDetails.balance.UpdatedAtUtc
+            })
+            .ToListAsync(cancellationToken);
         var benefits = await db.StoreProductBenefits.AsNoTracking().Where(x => x.IdProduct == id)
             .OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
             .Select(x => new { x.Title, x.Detail, x.Icon, x.SortOrder, x.IsActive }).ToListAsync(cancellationToken);
-        var specifications = await (from selected in db.StoreProductCatalogFeatureValues.AsNoTracking()
-            join feature in db.StoreCatalogFeatures.AsNoTracking() on selected.IdFeature equals feature.Id
-            join value in db.StoreCatalogFeatureValues.AsNoTracking() on selected.IdFeatureValue equals value.Id
-            where selected.IdProduct == id && feature.IsActive && value.IsActive
-            orderby feature.Name, value.Name
-            select new { Feature = feature.Name, Value = value.Name }).ToListAsync(cancellationToken);
+        var specifications = await db.StoreProductCatalogFeatureValues
+            .AsNoTracking()
+            .Join(
+                db.StoreCatalogFeatures.AsNoTracking(),
+                selected => selected.IdFeature,
+                feature => feature.Id,
+                (selected, feature) => new { selected, feature })
+            .Join(
+                db.StoreCatalogFeatureValues.AsNoTracking(),
+                selectedFeature => selectedFeature.selected.IdFeatureValue,
+                value => value.Id,
+                (selectedFeature, value) => new { selectedFeature.selected, selectedFeature.feature, value })
+            .Where(selectedFeatureValue => selectedFeatureValue.selected.IdProduct == id &&
+                                          selectedFeatureValue.feature.IsActive &&
+                                          selectedFeatureValue.value.IsActive)
+            .OrderBy(selectedFeatureValue => selectedFeatureValue.feature.Name)
+            .ThenBy(selectedFeatureValue => selectedFeatureValue.value.Name)
+            .Select(selectedFeatureValue => new
+            {
+                Feature = selectedFeatureValue.feature.Name,
+                Value = selectedFeatureValue.value.Name
+            })
+            .ToListAsync(cancellationToken);
         var assets = await db.StoreProductAssets.AsNoTracking().Where(x => x.IdProduct == id).OrderBy(x => x.SortOrder)
             .ThenBy(x => x.Id).ToListAsync(cancellationToken);
         var documents = assets.Where(x => x.IdMediaType == ProductMediaTypes.Document)
@@ -347,20 +471,41 @@ public sealed class StoreCatalogAdminApiController(
             salesOffers = null;
         if (fullAccess)
         {
-            accessories = await (from link in db.StoreProductAccessories.AsNoTracking()
-                join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
-                where link.IdProduct == id
-                orderby link.SortOrder, link.Id
-                select new
+            accessories = await db.StoreProductAccessories
+                .AsNoTracking()
+                .Join(
+                    db.StoreAccessories.AsNoTracking(),
+                    link => link.IdAccessory,
+                    accessory => accessory.Id,
+                    (link, accessory) => new { link, accessory })
+                .Where(linkAccessory => linkAccessory.link.IdProduct == id)
+                .OrderBy(linkAccessory => linkAccessory.link.SortOrder)
+                .ThenBy(linkAccessory => linkAccessory.link.Id)
+                .Select(linkAccessory => new
                 {
-                    accessory.Name, accessory.Description, accessory.IsActive, link.IsRequired,
-                    link.DisplayDiscountPercent, link.SortOrder
-                }).ToListAsync(cancellationToken);
-            unitHistory = await (from link in db.WarehouseProductUnits.AsNoTracking()
-                    join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
-                    where link.IdProduct == id && !link.IsActive
-                    orderby unit.NameFa
-                    select new { UnitName = unit.NameFa, link.ConversionFactor, link.IsBaseUnit })
+                    linkAccessory.accessory.Name,
+                    linkAccessory.accessory.Description,
+                    linkAccessory.accessory.IsActive,
+                    linkAccessory.link.IsRequired,
+                    linkAccessory.link.DisplayDiscountPercent,
+                    linkAccessory.link.SortOrder
+                })
+                .ToListAsync(cancellationToken);
+            unitHistory = await db.WarehouseProductUnits
+                .AsNoTracking()
+                .Join(
+                    db.WarehouseUnits.AsNoTracking(),
+                    link => link.IdUnit,
+                    unit => unit.Id,
+                    (link, unit) => new { link, unit })
+                .Where(linkUnit => linkUnit.link.IdProduct == id && !linkUnit.link.IsActive)
+                .OrderBy(linkUnit => linkUnit.unit.NameFa)
+                .Select(linkUnit => new
+                {
+                    UnitName = linkUnit.unit.NameFa,
+                    linkUnit.link.ConversionFactor,
+                    linkUnit.link.IsBaseUnit
+                })
                 .ToListAsync(cancellationToken);
             var attributeRows = await db.ProductAttributes.AsNoTracking().Where(x => x.IdProduct == id)
                 .OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Select(x => new { x.Id, x.Label, x.Key, x.IsActive })
@@ -375,30 +520,66 @@ public sealed class StoreCatalogAdminApiController(
                 Values = attributeValues.Where(v => v.IdProductAttribute == x.Id)
                     .Select(v => new { v.Label, v.DisplayValue, v.ValueKey, v.IsActive }).ToArray()
             }).ToArray();
-            salesOffers = await (from offer in db.StoreProductSalesPlanOffers.AsNoTracking()
-                    join plan in db.SalesPlanReferences.AsNoTracking() on offer.IdSalesPlan equals plan.Id
-                    where offer.IdProduct == id
-                    orderby plan.DisplayName
-                    select new { SalesPlanName = plan.DisplayName, offer.IsEnabled, offer.MaxPurchaseQuantity })
-                .ToListAsync(cancellationToken);
-            var prices = from version in db.StorePriceVersions.AsNoTracking()
-                join plan in db.SalesPlanReferences.AsNoTracking() on version.IdSalesPlan equals plan.Id
-                join variant in db.ProductVariants.AsNoTracking() on version.IdProductVariant equals (long?)variant.Id
-                    into variantGroup
-                from variant in variantGroup.DefaultIfEmpty()
-                join accessory in db.StoreAccessories.AsNoTracking() on version.IdAccessory equals (long?)accessory.Id
-                    into accessoryGroup
-                from accessory in accessoryGroup.DefaultIfEmpty()
-                where version.IdProduct == id
-                select new
+            salesOffers = await db.StoreProductSalesPlanOffers
+                .AsNoTracking()
+                .Join(
+                    db.SalesPlanReferences.AsNoTracking(),
+                    offer => offer.IdSalesPlan,
+                    plan => plan.Id,
+                    (offer, plan) => new { offer, plan })
+                .Where(offerPlan => offerPlan.offer.IdProduct == id)
+                .OrderBy(offerPlan => offerPlan.plan.DisplayName)
+                .Select(offerPlan => new
                 {
-                    version.Id, SalesPlanName = plan.DisplayName,
-                    VariantName = variant == null ? null : variant.VariantName.Name,
-                    AccessoryName = accessory == null ? null : accessory.Name,
-                    PriceVersionAmount = version.PriceBeforeDiscountAmount, version.DiscountPercent,
-                    version.FinalPriceAmount, version.IsActive, version.CreatedAtUtc, version.IdChangedBy,
-                    version.ChangeReason
-                };
+                    SalesPlanName = offerPlan.plan.DisplayName,
+                    offerPlan.offer.IsEnabled,
+                    offerPlan.offer.MaxPurchaseQuantity
+                })
+                .ToListAsync(cancellationToken);
+            var prices = db.StorePriceVersions
+                .AsNoTracking()
+                .Join(
+                    db.SalesPlanReferences.AsNoTracking(),
+                    version => version.IdSalesPlan,
+                    plan => (long?)plan.Id,
+                    (version, plan) => new { version, plan })
+                .GroupJoin(
+                    db.ProductVariants.AsNoTracking(),
+                    versionPlan => versionPlan.version.IdProductVariant,
+                    variant => (long?)variant.Id,
+                    (versionPlan, variants) => new { versionPlan, variants })
+                .SelectMany(
+                    versionPlanVariants => versionPlanVariants.variants.DefaultIfEmpty(),
+                    (versionPlanVariants, variant) => new { versionPlanVariants.versionPlan, variant })
+                .GroupJoin(
+                    db.StoreAccessories.AsNoTracking(),
+                    versionPlanVariant => versionPlanVariant.versionPlan.version.IdAccessory,
+                    accessory => (long?)accessory.Id,
+                    (versionPlanVariant, accessories) => new { versionPlanVariant, accessories })
+                .SelectMany(
+                    versionPlanAccessories => versionPlanAccessories.accessories.DefaultIfEmpty(),
+                    (versionPlanAccessories, accessory) => new
+                    {
+                        versionPlanAccessories.versionPlanVariant.versionPlan.version,
+                        versionPlanAccessories.versionPlanVariant.versionPlan.plan,
+                        versionPlanAccessories.versionPlanVariant.variant,
+                        accessory
+                    })
+                .Where(priceDetails => priceDetails.version.IdProduct == id)
+                .Select(priceDetails => new
+                {
+                    priceDetails.version.Id,
+                    SalesPlanName = priceDetails.plan.DisplayName,
+                    VariantName = priceDetails.variant == null ? null : priceDetails.variant.VariantName.Name,
+                    AccessoryName = priceDetails.accessory == null ? null : priceDetails.accessory.Name,
+                    PriceVersionAmount = priceDetails.version.PriceBeforeDiscountAmount,
+                    priceDetails.version.DiscountPercent,
+                    priceDetails.version.FinalPriceAmount,
+                    priceDetails.version.IsActive,
+                    priceDetails.version.CreatedAtUtc,
+                    priceDetails.version.IdChangedBy,
+                    priceDetails.version.ChangeReason
+                });
             currentPlanPrices = await prices.Where(x => x.IsActive).OrderBy(x => x.SalesPlanName)
                 .ToListAsync(cancellationToken);
             priceHistory = await prices.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Take(200)
@@ -501,11 +682,16 @@ public sealed class StoreCatalogAdminApiController(
                 .Select(x => x.IdFeature).Distinct().ToListAsync(cancellationToken)).ToHashSet();
             var displayFeatures = await db.StoreProductCatalogFeatureValues.Where(x => x.IdProduct == id)
                 .Select(x => x.IdFeature).ToListAsync(cancellationToken);
-            var variantFeatures =
-                await (from selection in db.StoreVariantCatalogFeatureValues
-                    join variant in db.ProductVariants on selection.IdProductVariant equals variant.Id
-                    where variant.IdProduct == id
-                    select selection.IdFeature).ToListAsync(cancellationToken);
+            var variantFeatures = await db.StoreVariantCatalogFeatureValues
+                .AsNoTracking()
+                .Join(
+                    db.ProductVariants.AsNoTracking(),
+                    selection => selection.IdProductVariant,
+                    variant => variant.Id,
+                    (selection, variant) => new { selection, variant })
+                .Where(selectionVariant => selectionVariant.variant.IdProduct == id)
+                .Select(selectionVariant => selectionVariant.selection.IdFeature)
+                .ToListAsync(cancellationToken);
             if (displayFeatures.Concat(variantFeatures).Any(featureId => !allowed.Contains(featureId)))
                 return Conflict(new
                     { title = "دستهٔ جدید باید همهٔ ویژگی‌های ثبت‌شدهٔ کالا و تنوع‌های آن را داشته باشد." });
@@ -814,25 +1000,44 @@ public sealed class StoreCatalogAdminApiController(
             return ValidationProblem(detail: "شماره صفحه، اندازهٔ صفحه یا عبارت جست‌وجو معتبر نیست.", statusCode: 400);
 
         var regularPrices = RegularProductPrices();
-        var drafts = from product in db.Products.AsNoTracking()
-            where !product.IsStoreEnabled
-            join brand in db.StoreBrands.AsNoTracking() on product.IdBrand equals brand.Id into brands
-            from brand in brands.DefaultIfEmpty()
-            join category in db.StoreCategories.AsNoTracking() on product.IdCategory equals category.Id into categories
-            from category in categories.DefaultIfEmpty()
-            select new DraftProduct
+        var drafts = db.Products
+            .AsNoTracking()
+            .Where(product => !product.IsStoreEnabled)
+            .GroupJoin(
+                db.StoreBrands.AsNoTracking(),
+                product => product.IdBrand,
+                brand => (long?)brand.Id,
+                (product, brands) => new { product, brands })
+            .SelectMany(
+                productBrands => productBrands.brands.DefaultIfEmpty(),
+                (productBrands, brand) => new { productBrands.product, brand })
+            .GroupJoin(
+                db.StoreCategories.AsNoTracking(),
+                productBrand => productBrand.product.IdCategory,
+                category => (long?)category.Id,
+                (productBrand, categories) => new { productBrand, categories })
+            .SelectMany(
+                productBrandCategories => productBrandCategories.categories.DefaultIfEmpty(),
+                (productBrandCategories, category) => new
+                {
+                    productBrandCategories.productBrand.product,
+                    productBrandCategories.productBrand.brand,
+                    category
+                })
+            .Select(productBrandCategory => new DraftProduct
             {
-                Id = product.Id,
-                CreatedAtUtc = product.CreatedAtUtc,
-                Code = product.ProductKey,
-                Name = product.Name,
-                BrandName = brand == null ? null : brand.NameFa,
-                CategoryName = category == null ? null : category.NameFa,
-                PriceAmount = regularPrices.Where(x => x.IdProduct == product.Id)
+                Id = productBrandCategory.product.Id,
+                CreatedAtUtc = productBrandCategory.product.CreatedAtUtc,
+                Code = productBrandCategory.product.ProductKey,
+                Name = productBrandCategory.product.Name,
+                BrandName = productBrandCategory.brand == null ? null : productBrandCategory.brand.NameFa,
+                CategoryName = productBrandCategory.category == null ? null : productBrandCategory.category.NameFa,
+                PriceAmount = regularPrices.Where(price => price.IdProduct == productBrandCategory.product.Id)
                     .Select(x => (decimal?)x.FinalPriceAmount).FirstOrDefault(),
                 HasImage = db.StoreProductAssets.Any(media =>
-                    media.IdProduct == product.Id && media.IdMediaType == ProductMediaTypes.Image && media.IsDefault)
-            };
+                    media.IdProduct == productBrandCategory.product.Id &&
+                    media.IdMediaType == ProductMediaTypes.Image && media.IsDefault)
+            });
         string query = paging.Search;
         if (query.Length > 0)
             drafts = drafts.Where(x => x.Code.Contains(query) || x.Name.Contains(query) ||
@@ -1534,14 +1739,28 @@ public sealed class StoreCatalogAdminApiController(
                 brands = brands.Where(x =>
                     x.BrandKey.Contains(brandQuery) || x.NameFa.Contains(brandQuery) || x.NameEn.Contains(brandQuery));
             int total = await brands.CountAsync(cancellationToken);
-            var rows = await (from brand in brands
-                    join country in db.GeoCountries.AsNoTracking() on brand.IdCountry equals (long?)country.Id into
-                        countries
-                    from country in countries.DefaultIfEmpty()
-                    orderby brand.NameFa, brand.BrandKey
-                    select new BrandRow(brand.BrandKey, brand.NameFa, brand.NameEn,
-                        country == null ? "" : country.CountryCode, brand.LogoPath, brand.IsActive, brand.ShowInStore))
-                .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+            var rows = await brands
+                .GroupJoin(
+                    db.GeoCountries.AsNoTracking(),
+                    brand => brand.IdCountry,
+                    country => (long?)country.Id,
+                    (brand, countries) => new { brand, countries })
+                .SelectMany(
+                    brandCountries => brandCountries.countries.DefaultIfEmpty(),
+                    (brandCountries, country) => new { brandCountries.brand, country })
+                .OrderBy(brandCountry => brandCountry.brand.NameFa)
+                .ThenBy(brandCountry => brandCountry.brand.BrandKey)
+                .Select(brandCountry => new BrandRow(
+                    brandCountry.brand.BrandKey,
+                    brandCountry.brand.NameFa,
+                    brandCountry.brand.NameEn,
+                    brandCountry.country == null ? "" : brandCountry.country.CountryCode,
+                    brandCountry.brand.LogoPath,
+                    brandCountry.brand.IsActive,
+                    brandCountry.brand.ShowInStore))
+                .Skip(paging.Offset)
+                .Take(paging.PageSize)
+                .ToListAsync(cancellationToken);
             string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
             var items = rows.Select(row => row with { LogoUrl = ContentCdn.ToUrl(row.LogoPath, cdnBaseUrl) }).ToArray();
 
@@ -1552,15 +1771,29 @@ public sealed class StoreCatalogAdminApiController(
         if (!string.Equals(section, "products", StringComparison.OrdinalIgnoreCase)) return NotFound();
 
         var regularPrices = RegularProductPrices();
-        var productSource = from product in db.Products.AsNoTracking()
-            join brand in db.StoreBrands.AsNoTracking().Where(x => x.IsActive)
-                on product.IdBrand equals (long?)brand.Id
-            join category0 in db.StoreCategories.AsNoTracking().Where(x => x.IsActive)
-                on product.IdCategory equals (long?)category0.Id into categories
-            from category in categories.DefaultIfEmpty()
-            where product.IsStoreEnabled &&
-                  (product.IdCategory == null || category != null)
-            select new { product, brand, category };
+        var productSource = db.Products
+            .AsNoTracking()
+            .Join(
+                db.StoreBrands.AsNoTracking().Where(brand => brand.IsActive),
+                product => product.IdBrand,
+                brand => (long?)brand.Id,
+                (product, brand) => new { product, brand })
+            .GroupJoin(
+                db.StoreCategories.AsNoTracking().Where(category => category.IsActive),
+                productBrand => productBrand.product.IdCategory,
+                category => (long?)category.Id,
+                (productBrand, categories) => new { productBrand, categories })
+            .SelectMany(
+                productBrandCategories => productBrandCategories.categories.DefaultIfEmpty(),
+                (productBrandCategories, category) => new
+                {
+                    productBrandCategories.productBrand.product,
+                    productBrandCategories.productBrand.brand,
+                    category
+                })
+            .Where(productBrandCategory => productBrandCategory.product.IsStoreEnabled &&
+                                           (productBrandCategory.product.IdCategory == null ||
+                                            productBrandCategory.category != null));
         if (query.Length > 0)
             productSource = productSource.Where(x =>
                 x.product.ProductKey.Contains(query) || x.product.Name.Contains(query) ||
@@ -1582,13 +1815,21 @@ public sealed class StoreCatalogAdminApiController(
         decimal[] productIds = productRows.Select(x => x.Id).ToArray();
         var productStockTotals = productIds.Length == 0
             ? new Dictionary<decimal, decimal>()
-            : await (from inventory in db.InventoryItems.AsNoTracking()
-                    join balance in db.StockBalances.AsNoTracking() on inventory.Id equals balance.IdInventoryItem
-                    where productIds.Contains(inventory.IdProduct)
-                    group balance.Quantity by inventory.IdProduct
-                    into grouped
-                    select new { Id = grouped.Key, Quantity = grouped.Sum() })
-                .ToDictionaryAsync(x => x.Id, x => x.Quantity, cancellationToken);
+            : await db.InventoryItems
+                .AsNoTracking()
+                .Join(
+                    db.StockBalances.AsNoTracking(),
+                    inventory => inventory.Id,
+                    balance => balance.IdInventoryItem,
+                    (inventory, balance) => new { inventory, balance })
+                .Where(inventoryBalance => productIds.Contains(inventoryBalance.inventory.IdProduct))
+                .GroupBy(inventoryBalance => inventoryBalance.inventory.IdProduct)
+                .Select(productGroup => new
+                {
+                    Id = productGroup.Key,
+                    Quantity = productGroup.Sum(inventoryBalance => inventoryBalance.balance.Quantity)
+                })
+                .ToDictionaryAsync(stock => stock.Id, stock => stock.Quantity, cancellationToken);
         var productItems = productRows.Select(x =>
         {
             decimal stock = productStockTotals.GetValueOrDefault(x.Id);

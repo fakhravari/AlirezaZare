@@ -29,8 +29,11 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         user.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
-        AdminPermission[] allPermissions =
-            await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToArrayAsync(cancellationToken);
+        AdminPermission[] allPermissions = (await db.AdminPermissions
+            .AsNoTracking()
+            .Where(permission => permission.IsActive)
+            .ToListAsync(cancellationToken))
+            .ToArray();
 
         return CreatePrincipal(user, allPermissions);
     }
@@ -195,8 +198,11 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
             return;
         }
 
-        AdminPermission[] permissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive)
-            .ToArrayAsync(context.HttpContext.RequestAborted);
+        AdminPermission[] permissions = (await db.AdminPermissions
+            .AsNoTracking()
+            .Where(permission => permission.IsActive)
+            .ToListAsync(context.HttpContext.RequestAborted))
+            .ToArray();
         ClaimsPrincipal current = context.Principal!;
         ClaimsPrincipal refreshed = AdminAuthentication.CreatePrincipal(user, permissions);
         if (!ClaimsMatch(current, refreshed))

@@ -44,22 +44,34 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                             !db.VoucherLines.Any(line => line.IdUnit == x.Id)
             })
             .ToListAsync(cancellationToken)),
-        "product-units" => Ok(await (from link in db.WarehouseProductUnits.AsNoTracking()
-            join product in db.Products.AsNoTracking() on link.IdProduct equals product.Id
-            join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
-            where !link.IsActive
-            orderby product.Name, link.IsBaseUnit descending, unit.NameFa
-            select new
+        "product-units" => Ok(await db.WarehouseProductUnits
+            .AsNoTracking()
+            .Join(
+                db.Products.AsNoTracking(),
+                link => link.IdProduct,
+                product => product.Id,
+                (link, product) => new { link, product })
+            .Join(
+                db.WarehouseUnits.AsNoTracking(),
+                linkProduct => linkProduct.link.IdUnit,
+                unit => unit.Id,
+                (linkProduct, unit) => new { linkProduct.link, linkProduct.product, unit })
+            .Where(linkDetails => !linkDetails.link.IsActive)
+            .OrderBy(linkDetails => linkDetails.product.Name)
+            .ThenByDescending(linkDetails => linkDetails.link.IsBaseUnit)
+            .ThenBy(linkDetails => linkDetails.unit.NameFa)
+            .Select(linkDetails => new
             {
-                link.Id,
-                link.IdProduct,
-                ProductName = product.Name,
-                link.IdUnit,
-                UnitName = unit.NameFa,
-                link.ConversionFactor,
-                link.IsBaseUnit,
-                link.IsActive
-            }).ToListAsync(cancellationToken)),
+                linkDetails.link.Id,
+                linkDetails.link.IdProduct,
+                ProductName = linkDetails.product.Name,
+                linkDetails.link.IdUnit,
+                UnitName = linkDetails.unit.NameFa,
+                linkDetails.link.ConversionFactor,
+                linkDetails.link.IsBaseUnit,
+                linkDetails.link.IsActive
+            })
+            .ToListAsync(cancellationToken)),
         "variants" => await GetVariantsAsync(cancellationToken),
         "lookups" => await GetLookupsAsync(cancellationToken),
         "stock-owners" => Ok(await db.SalesPlanReferences.AsNoTracking().OrderBy(x => x.DisplayName)
@@ -73,42 +85,67 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     private async Task<IActionResult> GetVariantsAsync(CancellationToken cancellationToken)
     {
         if (!CanAccessVariants("variants")) return Forbid();
-        var variants = await (from variant in db.ProductVariants.AsNoTracking()
-                join product in db.Products.AsNoTracking() on variant.IdProduct equals product.Id
-                orderby variant.CreatedAtUtc descending, variant.Id descending
-                select new
+        var variants = await db.ProductVariants
+            .AsNoTracking()
+            .Join(
+                db.Products.AsNoTracking(),
+                variant => variant.IdProduct,
+                product => product.Id,
+                (variant, product) => new { variant, product })
+            .OrderByDescending(variantProduct => variantProduct.variant.CreatedAtUtc)
+            .ThenByDescending(variantProduct => variantProduct.variant.Id)
+            .Select(variantProduct => new
                 {
-                    variant.Id, variant.IdProduct, ProductName = product.Name, ProductCode = product.ProductKey,
-                    variant.IdVariantName,
-                    Name = variant.VariantName.Name, variant.IsDefault, variant.IsActive, variant.CreatedAtUtc,
-                    HasNonZeroStock = db.InventoryItems.Any(item => item.IdProductVariant == variant.Id &&
+                    variantProduct.variant.Id,
+                    variantProduct.variant.IdProduct,
+                    ProductName = variantProduct.product.Name,
+                    ProductCode = variantProduct.product.ProductKey,
+                    variantProduct.variant.IdVariantName,
+                    Name = variantProduct.variant.VariantName.Name,
+                    variantProduct.variant.IsDefault,
+                    variantProduct.variant.IsActive,
+                    variantProduct.variant.CreatedAtUtc,
+                    HasNonZeroStock = db.InventoryItems.Any(item => item.IdProductVariant == variantProduct.variant.Id &&
                                                                     db.StockBalances.Any(balance =>
                                                                         balance.IdInventoryItem == item.Id &&
                                                                         balance.Quantity != 0)),
-                    HasWarehouseHistory = db.InventoryItems.Any(item => item.IdProductVariant == variant.Id &&
+                    HasWarehouseHistory = db.InventoryItems.Any(item => item.IdProductVariant == variantProduct.variant.Id &&
                                                                         (db.VoucherLines.Any(line =>
                                                                              line.IdInventoryItem == item.Id) ||
                                                                          db.WarehouseStockMovements.Any(movement =>
                                                                              movement.IdInventoryItem == item.Id))),
-                    HasStoreHistory = db.StorePriceVersions.Any(price => price.IdProductVariant == variant.Id) ||
+                    HasStoreHistory = db.StorePriceVersions.Any(price => price.IdProductVariant == variantProduct.variant.Id) ||
                                       db.StoreProductVariantSalesPlanOffers.Any(offer =>
-                                          offer.IdProductVariant == variant.Id) ||
-                                      db.AccountCartItems.Any(cart => cart.IdProductVariant == variant.Id) ||
-                                      db.StoreCustomerOrderItems.Any(order => order.IdProductVariant == variant.Id),
+                                          offer.IdProductVariant == variantProduct.variant.Id) ||
+                                      db.AccountCartItems.Any(cart =>
+                                          cart.IdProductVariant == variantProduct.variant.Id) ||
+                                      db.StoreCustomerOrderItems.Any(order => order.IdProductVariant == variantProduct.variant.Id),
                     HasOtherActiveVariant = db.ProductVariants.Any(other =>
-                        other.IdProduct == variant.IdProduct && other.Id != variant.Id && other.IsActive)
+                        other.IdProduct == variantProduct.variant.IdProduct && other.Id != variantProduct.variant.Id && other.IsActive)
                 })
             .ToListAsync(cancellationToken);
         long[] ids = variants.Select(x => x.Id).ToArray();
-        var attributes = await (from link in db.StoreVariantCatalogFeatureValues.AsNoTracking()
-                join value in db.StoreCatalogFeatureValues.AsNoTracking() on link.IdFeatureValue equals value.Id
-                join attribute in db.StoreCatalogFeatures.AsNoTracking() on link.IdFeature equals attribute.Id
-                where ids.Contains(link.IdProductVariant)
-                orderby attribute.Id
-                select new
+        var attributes = await db.StoreVariantCatalogFeatureValues
+            .AsNoTracking()
+            .Join(
+                db.StoreCatalogFeatureValues.AsNoTracking(),
+                link => link.IdFeatureValue,
+                value => value.Id,
+                (link, value) => new { link, value })
+            .Join(
+                db.StoreCatalogFeatures.AsNoTracking(),
+                linkValue => linkValue.link.IdFeature,
+                attribute => attribute.Id,
+                (linkValue, attribute) => new { linkValue.link, linkValue.value, attribute })
+            .Where(linkValueAttribute => ids.Contains(linkValueAttribute.link.IdProductVariant))
+            .OrderBy(linkValueAttribute => linkValueAttribute.attribute.Id)
+            .Select(linkValueAttribute => new
                 {
-                    link.IdProductVariant, attribute.Id, AttributeLabel = attribute.Name, ValueId = value.Id,
-                    DisplayValue = value.Name
+                    linkValueAttribute.link.IdProductVariant,
+                    linkValueAttribute.attribute.Id,
+                    AttributeLabel = linkValueAttribute.attribute.Name,
+                    ValueId = linkValueAttribute.value.Id,
+                    DisplayValue = linkValueAttribute.value.Name
                 })
             .ToListAsync(cancellationToken);
         var byVariant = attributes.GroupBy(x => x.IdProductVariant).ToDictionary(x => x.Key,
@@ -144,10 +181,19 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         var nodes = await db.VariantNames.AsNoTracking().OrderBy(x => x.Name).ThenBy(x => x.Id)
             .Select(x => new { x.Id, x.IdParent, x.Name, x.TreePathIds, x.TreePathNames, x.IsActive })
             .ToListAsync(cancellationToken);
-        long[] referencedNames = await db.ProductVariants.AsNoTracking().Select(x => x.IdVariantName).Distinct()
-            .ToArrayAsync(cancellationToken);
-        long[] activeVariantNames = await db.ProductVariants.AsNoTracking().Where(x => x.IsActive)
-            .Select(x => x.IdVariantName).Distinct().ToArrayAsync(cancellationToken);
+        long[] referencedNames = (await db.ProductVariants
+            .AsNoTracking()
+            .Select(variant => variant.IdVariantName)
+            .Distinct()
+            .ToListAsync(cancellationToken))
+            .ToArray();
+        long[] activeVariantNames = (await db.ProductVariants
+            .AsNoTracking()
+            .Where(variant => variant.IsActive)
+            .Select(variant => variant.IdVariantName)
+            .Distinct()
+            .ToListAsync(cancellationToken))
+            .ToArray();
         return Ok(nodes.Select(node => new
         {
             node.Id, node.IdParent, node.Name, node.TreePathIds, node.TreePathNames, node.IsActive,
@@ -287,13 +333,27 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             categoryId = category.IdParentCategory;
         }
 
-        var rows = await (from attribute in db.StoreCatalogFeatures.AsNoTracking()
-                join value in db.StoreCatalogFeatureValues.AsNoTracking() on attribute.Id equals value.IdFeature
-                where attribute.Kind == StoreCatalogFeatureKinds.PriceVariant && attribute.IsActive && value.IsActive &&
-                      db.StoreCategoryCatalogFeatures.Any(link =>
-                          categoryIds.Contains(link.IdCategory) && link.IdFeature == attribute.Id)
-                orderby attribute.Name, value.Name
-                select new { attribute.Id, Label = attribute.Name, ValueId = value.Id, ValueLabel = value.Name })
+        var rows = await db.StoreCatalogFeatures
+            .AsNoTracking()
+            .Join(
+                db.StoreCatalogFeatureValues.AsNoTracking(),
+                attribute => attribute.Id,
+                value => value.IdFeature,
+                (attribute, value) => new { attribute, value })
+            .Where(attributeValue =>
+                attributeValue.attribute.Kind == StoreCatalogFeatureKinds.PriceVariant &&
+                attributeValue.attribute.IsActive && attributeValue.value.IsActive &&
+                db.StoreCategoryCatalogFeatures.Any(link =>
+                    categoryIds.Contains(link.IdCategory) && link.IdFeature == attributeValue.attribute.Id))
+            .OrderBy(attributeValue => attributeValue.attribute.Name)
+            .ThenBy(attributeValue => attributeValue.value.Name)
+            .Select(attributeValue => new
+            {
+                attributeValue.attribute.Id,
+                Label = attributeValue.attribute.Name,
+                ValueId = attributeValue.value.Id,
+                ValueLabel = attributeValue.value.Name
+            })
             .ToListAsync(cancellationToken);
         return Ok(rows.GroupBy(x => new { x.Id, x.Label }).Select(group => new
         {
@@ -363,15 +423,15 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         bool hasOtherActiveVariant =
             await db.ProductVariants.AnyAsync(x => x.IdProduct == variant.IdProduct && x.Id != id && x.IsActive,
                 cancellationToken);
-        bool hasNonZeroStock = await (from item in db.InventoryItems
-            join balance in db.StockBalances on item.Id equals balance.IdInventoryItem
-            where item.IdProductVariant == id && balance.Quantity != 0
-            select balance.Id).AnyAsync(cancellationToken);
-        bool hasWarehouseHistory = await (from item in db.InventoryItems
-            where item.IdProductVariant == id &&
-                  (db.VoucherLines.Any(line => line.IdInventoryItem == item.Id) ||
-                   db.WarehouseStockMovements.Any(movement => movement.IdInventoryItem == item.Id))
-            select item.Id).AnyAsync(cancellationToken);
+        bool hasNonZeroStock = await db.InventoryItems
+            .Where(item => item.IdProductVariant == id)
+            .AnyAsync(item => db.StockBalances.Any(balance =>
+                balance.IdInventoryItem == item.Id && balance.Quantity != 0), cancellationToken);
+        bool hasWarehouseHistory = await db.InventoryItems
+            .Where(item => item.IdProductVariant == id)
+            .AnyAsync(item =>
+                db.VoucherLines.Any(line => line.IdInventoryItem == item.Id) ||
+                db.WarehouseStockMovements.Any(movement => movement.IdInventoryItem == item.Id), cancellationToken);
         bool hasStoreHistory = await db.StorePriceVersions.AnyAsync(x => x.IdProductVariant == id, cancellationToken) ||
                                await db.StoreProductVariantSalesPlanOffers.AnyAsync(x => x.IdProductVariant == id,
                                    cancellationToken) ||
@@ -634,10 +694,10 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     if (variant.IsDefault)
                         return Conflict(new
                             { detail = "تنوع پیش‌فرض قابل غیرفعال‌سازی نیست؛ ابتدا تنوع فعال دیگری را پیش‌فرض کنید." });
-                    bool hasStock = await (from balance in db.StockBalances
-                        join item in db.InventoryItems on balance.IdInventoryItem equals item.Id
-                        where item.IdProductVariant == id && balance.Quantity != 0
-                        select balance.Id).AnyAsync(cancellationToken);
+                    bool hasStock = await db.InventoryItems
+                        .Where(item => item.IdProductVariant == id)
+                        .AnyAsync(item => db.StockBalances.Any(balance =>
+                            balance.IdInventoryItem == item.Id && balance.Quantity != 0), cancellationToken);
                     if (hasStock)
                         return Conflict(new
                         {
@@ -683,18 +743,18 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 cancellationToken);
         if (!hasOtherActive)
         {
-            bool hasUnvariedVouchers = await (from line in db.VoucherLines
-                join item in db.InventoryItems on line.IdInventoryItem equals item.Id
-                where item.IdProduct == variant.IdProduct && item.IdProductVariant == null
-                select line.Id).AnyAsync(cancellationToken);
-            bool hasUnvariedMovements = await (from movement in db.WarehouseStockMovements
-                join item in db.InventoryItems on movement.IdInventoryItem equals item.Id
-                where item.IdProduct == variant.IdProduct && item.IdProductVariant == null
-                select movement.IdInventoryItem).AnyAsync(cancellationToken);
-            bool hasUnvariedBalance = await (from balance in db.StockBalances
-                join item in db.InventoryItems on balance.IdInventoryItem equals item.Id
-                where item.IdProduct == variant.IdProduct && item.IdProductVariant == null && balance.Quantity != 0
-                select balance.IdInventoryItem).AnyAsync(cancellationToken);
+            bool hasUnvariedVouchers = await db.VoucherLines
+                .AnyAsync(line => db.InventoryItems.Any(item =>
+                    item.Id == line.IdInventoryItem && item.IdProduct == variant.IdProduct &&
+                    item.IdProductVariant == null), cancellationToken);
+            bool hasUnvariedMovements = await db.WarehouseStockMovements
+                .AnyAsync(movement => db.InventoryItems.Any(item =>
+                    item.Id == movement.IdInventoryItem && item.IdProduct == variant.IdProduct &&
+                    item.IdProductVariant == null), cancellationToken);
+            bool hasUnvariedBalance = await db.StockBalances
+                .AnyAsync(balance => db.InventoryItems.Any(item =>
+                    item.Id == balance.IdInventoryItem && item.IdProduct == variant.IdProduct &&
+                    item.IdProductVariant == null) && balance.Quantity != 0, cancellationToken);
             if (hasUnvariedVouchers || hasUnvariedMovements || hasUnvariedBalance)
                 return Conflict(new
                 {
@@ -1156,18 +1216,18 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     !await db.ProductVariants.AnyAsync(x => x.IdProduct == productId && x.Id != (id ?? 0) && x.IsActive,
                         cancellationToken))
                 {
-                    bool hasUnvariedVouchers = await (from line in db.VoucherLines
-                        join item in db.InventoryItems on line.IdInventoryItem equals item.Id
-                        where item.IdProduct == productId && item.IdProductVariant == null
-                        select line.Id).AnyAsync(cancellationToken);
-                    bool hasUnvariedMovements = await (from movement in db.WarehouseStockMovements
-                        join item in db.InventoryItems on movement.IdInventoryItem equals item.Id
-                        where item.IdProduct == productId && item.IdProductVariant == null
-                        select movement.IdInventoryItem).AnyAsync(cancellationToken);
-                    bool hasUnvariedBalance = await (from balance in db.StockBalances
-                        join item in db.InventoryItems on balance.IdInventoryItem equals item.Id
-                        where item.IdProduct == productId && item.IdProductVariant == null && balance.Quantity != 0
-                        select balance.IdInventoryItem).AnyAsync(cancellationToken);
+                    bool hasUnvariedVouchers = await db.VoucherLines
+                        .AnyAsync(line => db.InventoryItems.Any(item =>
+                            item.Id == line.IdInventoryItem && item.IdProduct == productId &&
+                            item.IdProductVariant == null), cancellationToken);
+                    bool hasUnvariedMovements = await db.WarehouseStockMovements
+                        .AnyAsync(movement => db.InventoryItems.Any(item =>
+                            item.Id == movement.IdInventoryItem && item.IdProduct == productId &&
+                            item.IdProductVariant == null), cancellationToken);
+                    bool hasUnvariedBalance = await db.StockBalances
+                        .AnyAsync(balance => db.InventoryItems.Any(item =>
+                            item.Id == balance.IdInventoryItem && item.IdProduct == productId &&
+                            item.IdProductVariant == null) && balance.Quantity != 0, cancellationToken);
                     if (hasUnvariedVouchers || hasUnvariedMovements || hasUnvariedBalance)
                         return Conflict(new
                         {
@@ -1269,13 +1329,20 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         }
 
         foreach (VariantAttributeInput item in attributes)
-            if (!await (from value in db.StoreCatalogFeatureValues
-                    join feature in db.StoreCatalogFeatures on value.IdFeature equals feature.Id
-                    where value.Id == item.ValueId && feature.Id == item.AttributeId &&
-                          feature.Kind == StoreCatalogFeatureKinds.PriceVariant &&
-                          feature.IsActive && value.IsActive && db.StoreCategoryCatalogFeatures.Any(link =>
-                              categoryIds.Contains(link.IdCategory) && link.IdFeature == feature.Id)
-                    select value.Id).AnyAsync(cancellationToken))
+            if (!await db.StoreCatalogFeatureValues
+                    .AsNoTracking()
+                    .Join(
+                        db.StoreCatalogFeatures.AsNoTracking(),
+                        value => value.IdFeature,
+                        feature => feature.Id,
+                        (value, feature) => new { value, feature })
+                    .AnyAsync(valueFeature =>
+                            valueFeature.value.Id == item.ValueId && valueFeature.feature.Id == item.AttributeId &&
+                            valueFeature.feature.Kind == StoreCatalogFeatureKinds.PriceVariant &&
+                            valueFeature.feature.IsActive && valueFeature.value.IsActive &&
+                            db.StoreCategoryCatalogFeatures.Any(link =>
+                                categoryIds.Contains(link.IdCategory) && link.IdFeature == valueFeature.feature.Id),
+                        cancellationToken))
                 return false;
         return true;
     }
@@ -1294,11 +1361,26 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     {
         var currentLinks = await db.ProductVariantAttributeValues.Where(x => x.IdProductVariant == variant.Id)
             .ToListAsync(cancellationToken);
-        var oldValues = await (from link in db.ProductVariantAttributeValues.AsNoTracking()
-            join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
-            join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
-            where link.IdProductVariant == variant.Id
-            select new { attribute.Label, value.DisplayValue, ValueId = value.Id }).ToListAsync(cancellationToken);
+        var oldValues = await db.ProductVariantAttributeValues
+            .AsNoTracking()
+            .Join(
+                db.ProductAttributeValues.AsNoTracking(),
+                link => link.IdProductAttributeValue,
+                value => value.Id,
+                (link, value) => new { link, value })
+            .Join(
+                db.ProductAttributes.AsNoTracking(),
+                linkValue => linkValue.value.IdProductAttribute,
+                attribute => attribute.Id,
+                (linkValue, attribute) => new { linkValue.link, linkValue.value, attribute })
+            .Where(linkValueAttribute => linkValueAttribute.link.IdProductVariant == variant.Id)
+            .Select(linkValueAttribute => new
+            {
+                linkValueAttribute.attribute.Label,
+                linkValueAttribute.value.DisplayValue,
+                ValueId = linkValueAttribute.value.Id
+            })
+            .ToListAsync(cancellationToken);
         db.ProductVariantAttributeValues.RemoveRange(currentLinks);
         var catalogLinks = await db.StoreVariantCatalogFeatureValues.Where(x => x.IdProductVariant == variant.Id)
             .ToListAsync(cancellationToken);
@@ -1361,35 +1443,66 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     {
         long? siteWarehouseId = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1)
             .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
-        var query = from warehouse in db.Warehouses.AsNoTracking()
-            join company in db.Companies.AsNoTracking() on warehouse.IdCompany equals company.Id
-            join ownerLink in db.WarehouseStockOwners.AsNoTracking().Where(x => x.IsDefault) on warehouse.Id equals
-                ownerLink.IdWarehouse into defaultLinks
-            from ownerLink in defaultLinks.DefaultIfEmpty()
-            join plan in db.SalesPlanReferences.AsNoTracking() on ownerLink.IdStockOwner equals plan.Id into plans
-            from plan in plans.DefaultIfEmpty()
-            orderby company.Name, warehouse.Name
-            select new
+        var query = db.Warehouses
+            .AsNoTracking()
+            .Join(
+                db.Companies.AsNoTracking(),
+                warehouse => warehouse.IdCompany,
+                company => company.Id,
+                (warehouse, company) => new { warehouse, company })
+            .GroupJoin(
+                db.WarehouseStockOwners.AsNoTracking().Where(owner => owner.IsDefault),
+                warehouseCompany => warehouseCompany.warehouse.Id,
+                ownerLink => ownerLink.IdWarehouse,
+                (warehouseCompany, ownerLinks) => new { warehouseCompany, ownerLinks })
+            .SelectMany(
+                warehouseOwnerLinks => warehouseOwnerLinks.ownerLinks.DefaultIfEmpty(),
+                (warehouseOwnerLinks, ownerLink) => new { warehouseOwnerLinks.warehouseCompany, ownerLink })
+            .GroupJoin(
+                db.SalesPlanReferences.AsNoTracking(),
+                warehouseOwner => warehouseOwner.ownerLink == null
+                    ? (long?)null
+                    : warehouseOwner.ownerLink.IdStockOwner,
+                plan => (long?)plan.Id,
+                (warehouseOwner, plans) => new { warehouseOwner, plans })
+            .SelectMany(
+                warehouseOwnerPlans => warehouseOwnerPlans.plans.DefaultIfEmpty(),
+                (warehouseOwnerPlans, plan) => new
+                {
+                    warehouse = warehouseOwnerPlans.warehouseOwner.warehouseCompany.warehouse,
+                    company = warehouseOwnerPlans.warehouseOwner.warehouseCompany.company,
+                    warehouseOwnerPlans.warehouseOwner.ownerLink,
+                    plan
+                })
+            .OrderBy(warehouseDetails => warehouseDetails.company.Name)
+            .ThenBy(warehouseDetails => warehouseDetails.warehouse.Name)
+            .Select(warehouseDetails => new
             {
-                warehouse.Id,
-                warehouse.IdCompany,
-                CompanyName = company.Name,
-                warehouse.Code,
-                warehouse.Name,
-                warehouse.IsSalesWarehouse,
-                OwnerSalesPlanId = ownerLink == null ? (long?)null : ownerLink.IdStockOwner,
-                OwnerSalesPlan = plan == null ? null : plan.DisplayName,
-                warehouse.IsActive,
-                IsSiteWarehouse = warehouse.Id == siteWarehouseId
-            };
+                warehouseDetails.warehouse.Id,
+                warehouseDetails.warehouse.IdCompany,
+                CompanyName = warehouseDetails.company.Name,
+                warehouseDetails.warehouse.Code,
+                warehouseDetails.warehouse.Name,
+                warehouseDetails.warehouse.IsSalesWarehouse,
+                OwnerSalesPlanId = warehouseDetails.ownerLink == null
+                    ? (long?)null
+                    : warehouseDetails.ownerLink.IdStockOwner,
+                OwnerSalesPlan = warehouseDetails.plan == null ? null : warehouseDetails.plan.DisplayName,
+                warehouseDetails.warehouse.IsActive,
+                IsSiteWarehouse = warehouseDetails.warehouse.Id == siteWarehouseId
+            });
         if (!User.IsInRole("system.full-access"))
         {
             long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
                 out long parsed)
                 ? parsed
                 : 0;
-            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId)
-                .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+            long[] allowed = (await db.AdminUserWarehouseAccesses
+                .AsNoTracking()
+                .Where(access => access.IdUser == userId)
+                .Select(access => access.IdWarehouse)
+                .ToListAsync(cancellationToken))
+                .ToArray();
             query = query.Where(x => allowed.Contains(x.Id));
         }
 
@@ -1405,10 +1518,18 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 out long parsed)
                 ? parsed
                 : 0;
-            long[] companyIds = await (from access in db.AdminUserWarehouseAccesses.AsNoTracking()
-                join warehouse in db.Warehouses.AsNoTracking() on access.IdWarehouse equals warehouse.Id
-                where access.IdUser == userId
-                select warehouse.IdCompany).Distinct().ToArrayAsync(cancellationToken);
+            long[] companyIds = (await db.AdminUserWarehouseAccesses
+                .AsNoTracking()
+                .Join(
+                    db.Warehouses.AsNoTracking(),
+                    access => access.IdWarehouse,
+                    warehouse => warehouse.Id,
+                    (access, warehouse) => new { access, warehouse })
+                .Where(accessWarehouse => accessWarehouse.access.IdUser == userId)
+                .Select(accessWarehouse => accessWarehouse.warehouse.IdCompany)
+                .Distinct()
+                .ToListAsync(cancellationToken))
+                .ToArray();
             query = query.Where(x => companyIds.Contains(x.Id));
         }
 
@@ -1426,8 +1547,12 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 out long parsed)
                 ? parsed
                 : 0;
-            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId)
-                .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+            long[] allowed = (await db.AdminUserWarehouseAccesses
+                .AsNoTracking()
+                .Where(access => access.IdUser == userId)
+                .Select(access => access.IdWarehouse)
+                .ToListAsync(cancellationToken))
+                .ToArray();
             query = query.Where(x => x.IdWarehouse == null || allowed.Contains(x.IdWarehouse.Value));
         }
 
@@ -1468,39 +1593,58 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 out long parsed)
                 ? parsed
                 : 0;
-            long[] allowedCompanyIds = await (from access in db.AdminUserWarehouseAccesses.AsNoTracking()
-                join warehouse in db.Warehouses.AsNoTracking() on access.IdWarehouse equals warehouse.Id
-                where access.IdUser == userId
-                select warehouse.IdCompany).Distinct().ToArrayAsync(cancellationToken);
+            long[] allowedCompanyIds = (await db.AdminUserWarehouseAccesses
+                .AsNoTracking()
+                .Join(
+                    db.Warehouses.AsNoTracking(),
+                    access => access.IdWarehouse,
+                    warehouse => warehouse.Id,
+                    (access, warehouse) => new { access, warehouse })
+                .Where(accessWarehouse => accessWarehouse.access.IdUser == userId)
+                .Select(accessWarehouse => accessWarehouse.warehouse.IdCompany)
+                .Distinct()
+                .ToListAsync(cancellationToken))
+                .ToArray();
             companyQuery = companyQuery.Where(x => allowedCompanyIds.Contains(x.Id));
         }
 
         var companies = await companyQuery.OrderBy(x => x.Name).Select(x => new { x.Id, x.Name, x.Code })
             .ToListAsync(cancellationToken);
-        var warehouseQuery = from warehouse in db.Warehouses.AsNoTracking()
-            join company in db.Companies.AsNoTracking() on warehouse.IdCompany equals company.Id
-            orderby company.Name, warehouse.Name
-            select new
+        var warehouseQuery = db.Warehouses
+            .AsNoTracking()
+            .Join(
+                db.Companies.AsNoTracking(),
+                warehouse => warehouse.IdCompany,
+                company => company.Id,
+                (warehouse, company) => new { warehouse, company })
+            .OrderBy(warehouseCompany => warehouseCompany.company.Name)
+            .ThenBy(warehouseCompany => warehouseCompany.warehouse.Name)
+            .Select(warehouseCompany => new
             {
-                warehouse.Id,
-                warehouse.IdCompany,
-                CompanyName = company.Name,
-                warehouse.Code,
-                warehouse.Name,
-                warehouse.IsSalesWarehouse,
+                warehouseCompany.warehouse.Id,
+                warehouseCompany.warehouse.IdCompany,
+                CompanyName = warehouseCompany.company.Name,
+                warehouseCompany.warehouse.Code,
+                warehouseCompany.warehouse.Name,
+                warehouseCompany.warehouse.IsSalesWarehouse,
                 DefaultOwnerSalesPlanId = db.WarehouseStockOwners
-                    .Where(link => link.IdWarehouse == warehouse.Id && link.IsDefault)
-                    .Select(link => (long?)link.IdStockOwner).FirstOrDefault(),
-                warehouse.IsActive
-            };
+                    .Where(link => link.IdWarehouse == warehouseCompany.warehouse.Id && link.IsDefault)
+                    .Select(link => (long?)link.IdStockOwner)
+                    .FirstOrDefault(),
+                warehouseCompany.warehouse.IsActive
+            });
         if (!User.IsInRole("system.full-access"))
         {
             long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
                 out long parsed)
                 ? parsed
                 : 0;
-            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId)
-                .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+            long[] allowed = (await db.AdminUserWarehouseAccesses
+                .AsNoTracking()
+                .Where(access => access.IdUser == userId)
+                .Select(access => access.IdWarehouse)
+                .ToListAsync(cancellationToken))
+                .ToArray();
             warehouseQuery = warehouseQuery.Where(x => allowed.Contains(x.Id));
         }
 
@@ -1510,14 +1654,21 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive && x.IdParent != null)
             .OrderBy(x => x.NameFa).Select(x => new { x.Id, name = x.NameFa, x.NameFa, x.NameEn })
             .ToListAsync(cancellationToken);
-        var products = await (from product in db.Products.AsNoTracking()
-                join baseUnit in db.WarehouseProductUnits.AsNoTracking().Where(x => x.IsBaseUnit && x.IsActive)
-                    on product.Id equals baseUnit.IdProduct
-                where product.IsWarehouseEnabled
-                orderby product.Name
-                select new
+        var products = await db.Products
+            .AsNoTracking()
+            .Join(
+                db.WarehouseProductUnits.AsNoTracking().Where(unitLink => unitLink.IsBaseUnit && unitLink.IsActive),
+                product => product.Id,
+                baseUnit => baseUnit.IdProduct,
+                (product, baseUnit) => new { product, baseUnit })
+            .Where(productUnit => productUnit.product.IsWarehouseEnabled)
+            .OrderBy(productUnit => productUnit.product.Name)
+            .Select(productUnit => new
                 {
-                    product.Id, product.Name, StoreProductKey = product.ProductKey, IdBaseUnit = baseUnit.IdUnit
+                    productUnit.product.Id,
+                    productUnit.product.Name,
+                    StoreProductKey = productUnit.product.ProductKey,
+                    IdBaseUnit = productUnit.baseUnit.IdUnit
                 })
             .ToListAsync(cancellationToken);
 
@@ -1562,10 +1713,16 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 ? parsed
                 : 0;
 
-        return await (from access in db.AdminUserWarehouseAccesses.AsNoTracking()
-            join warehouse in db.Warehouses.AsNoTracking() on access.IdWarehouse equals warehouse.Id
-            where access.IdUser == userId && warehouse.IdCompany == companyId
-            select access.IdUser).AnyAsync(cancellationToken);
+        return await db.AdminUserWarehouseAccesses
+            .AsNoTracking()
+            .Join(
+                db.Warehouses.AsNoTracking(),
+                access => access.IdWarehouse,
+                warehouse => warehouse.Id,
+                (access, warehouse) => new { access, warehouse })
+            .AnyAsync(accessWarehouse =>
+                    accessWarehouse.access.IdUser == userId && accessWarehouse.warehouse.IdCompany == companyId,
+                cancellationToken);
     }
 
     private static T? Parse<T>(JsonElement payload)

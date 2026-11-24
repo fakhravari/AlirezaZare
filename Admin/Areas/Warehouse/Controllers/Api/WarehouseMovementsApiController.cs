@@ -141,18 +141,19 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                     .Sum() ?? 0m,
                 lineDetailsMovements.lineDetails.document.Reason,
                 lineDetailsMovements.lineDetails.document.CreatedByUserKey
-            })
-            .OrderByDescending(row => row.VoucherDate)
-            .ThenByDescending(row => row.VoucherNumber)
-            .ThenByDescending(row => row.Id);
+            });
         if (!User.IsInRole("system.full-access"))
         {
             long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
                 out long parsed)
                 ? parsed
                 : 0;
-            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId)
-                .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+            long[] allowed = (await db.AdminUserWarehouseAccesses
+                .AsNoTracking()
+                .Where(access => access.IdUser == userId)
+                .Select(access => access.IdWarehouse)
+                .ToListAsync(cancellationToken))
+                .ToArray();
             query = query.Where(x => allowed.Contains(x.WarehouseId));
         }
 
@@ -186,6 +187,10 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                 x.VoucherType.Contains(term) || x.Reason!.Contains(term));
         }
 
+        query = query
+            .OrderByDescending(row => row.VoucherDate)
+            .ThenByDescending(row => row.VoucherNumber)
+            .ThenByDescending(row => row.Id);
         int total = await query.CountAsync(cancellationToken);
         var items = await query.Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
 
@@ -238,8 +243,12 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                 out long parsed)
                 ? parsed
                 : 0;
-            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId)
-                .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+            long[] allowed = (await db.AdminUserWarehouseAccesses
+                .AsNoTracking()
+                .Where(access => access.IdUser == userId)
+                .Select(access => access.IdWarehouse)
+                .ToListAsync(cancellationToken))
+                .ToArray();
             if (warehouseId.HasValue && !allowed.Contains(warehouseId.Value)) return Forbid();
 
             query = query.Where(x => allowed.Contains(x.movement.IdWarehouse));
@@ -324,8 +333,12 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                 out long parsed)
                 ? parsed
                 : 0;
-            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId)
-                .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+            long[] allowed = (await db.AdminUserWarehouseAccesses
+                .AsNoTracking()
+                .Where(access => access.IdUser == userId)
+                .Select(access => access.IdWarehouse)
+                .ToListAsync(cancellationToken))
+                .ToArray();
             query = query.Where(x => allowed.Contains(x.IdWarehouse));
         }
 
@@ -356,8 +369,12 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                 out long parsed)
                 ? parsed
                 : 0;
-            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId)
-                .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+            long[] allowed = (await db.AdminUserWarehouseAccesses
+                .AsNoTracking()
+                .Where(access => access.IdUser == userId)
+                .Select(access => access.IdWarehouse)
+                .ToListAsync(cancellationToken))
+                .ToArray();
             query = query.Where(x => allowed.Contains(x.audit.WarehouseId));
         }
 

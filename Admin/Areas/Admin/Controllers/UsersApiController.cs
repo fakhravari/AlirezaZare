@@ -121,10 +121,18 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
         long[] warehouseIds = input.WarehouseIds.Distinct().ToArray();
         long[] existingRoleIds = user?.Roles.Select(x => x.IdRole).ToArray() ?? [];
         long[] existingWarehouseIds = user?.WarehouseAccess.Select(x => x.IdWarehouse).ToArray() ?? [];
-        long[] inactiveRoleIds = await db.AdminRoles.Where(x => existingRoleIds.Contains(x.Id) && !x.IsActive)
-            .Select(x => x.Id).ToArrayAsync(cancellationToken);
-        long[] inactiveWarehouseIds = await db.Warehouses.Where(x => existingWarehouseIds.Contains(x.Id) && !x.IsActive)
-            .Select(x => x.Id).ToArrayAsync(cancellationToken);
+        long[] inactiveRoleIds = (await db.AdminRoles
+            .AsNoTracking()
+            .Where(role => existingRoleIds.Contains(role.Id) && !role.IsActive)
+            .Select(role => role.Id)
+            .ToListAsync(cancellationToken))
+            .ToArray();
+        long[] inactiveWarehouseIds = (await db.Warehouses
+            .AsNoTracking()
+            .Where(warehouse => existingWarehouseIds.Contains(warehouse.Id) && !warehouse.IsActive)
+            .Select(warehouse => warehouse.Id)
+            .ToListAsync(cancellationToken))
+            .ToArray();
         roleIds = roleIds.Union(inactiveRoleIds).ToArray();
         warehouseIds = warehouseIds.Union(inactiveWarehouseIds).ToArray();
         if (await db.AdminRoles.CountAsync(

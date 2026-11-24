@@ -621,11 +621,22 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
     private Task<bool> IsPaidOrderLinkedAsync(decimal voucherId, CancellationToken cancellationToken) =>
         db.StoreCustomerOrders.AnyAsync(x => x.IdVoucher == voucherId, cancellationToken);
 
-    private async Task<long[]> AllowedWarehouseIdsAsync(CancellationToken cancellationToken) =>
-        User.IsInRole("system.full-access")
-            ? await db.Warehouses.AsNoTracking().Select(x => x.Id).ToArrayAsync(cancellationToken)
-            : await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == CurrentUserId())
-                .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+    private async Task<long[]> AllowedWarehouseIdsAsync(CancellationToken cancellationToken)
+    {
+        if (User.IsInRole("system.full-access"))
+            return (await db.Warehouses
+                .AsNoTracking()
+                .Select(warehouse => warehouse.Id)
+                .ToListAsync(cancellationToken))
+                .ToArray();
+
+        return (await db.AdminUserWarehouseAccesses
+            .AsNoTracking()
+            .Where(access => access.IdUser == CurrentUserId())
+            .Select(access => access.IdWarehouse)
+            .ToListAsync(cancellationToken))
+            .ToArray();
+    }
 
     private long CurrentUserId() => long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out long id) ? id : 0;
 
