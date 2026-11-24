@@ -76,7 +76,7 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
                 feedbackProduct.feedback.Id,
                 feedbackProduct.feedback.IdProduct,
                 StoreProductKey = feedbackProduct.product.ProductKey,
-                ProductName = feedbackProduct.product.Name,
+                ProductName = feedbackProduct.product.NameFa,
                 feedbackProduct.feedback.DisplayName,
                 feedbackProduct.feedback.FeedbackText,
                 feedbackProduct.feedback.Rating,

@@ -51,7 +51,7 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         foreach (long warehouseId in user.WarehouseAccess.Select(x => x.IdWarehouse))
             claims.Add(new Claim("admin_warehouse", warehouseId.ToString()));
 
-        var children = allPermissions.GroupBy(x => x.ParentKey ?? "")
+        var children = allPermissions.GroupBy(x => x.ParentPermissionKey ?? "")
             .ToDictionary(x => x.Key, x => x.ToArray(), StringComparer.OrdinalIgnoreCase);
         var granted = new Dictionary<string, AdminPermission>(StringComparer.OrdinalIgnoreCase);
 

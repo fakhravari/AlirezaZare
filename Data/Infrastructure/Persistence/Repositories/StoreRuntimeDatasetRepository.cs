@@ -39,7 +39,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 (version, plan) => new { version, plan })
             .Where(pricePlan =>
                 productIds.Contains(pricePlan.version.IdProduct) && pricePlan.version.IsActive && pricePlan.plan.IsRegular &&
-                pricePlan.plan.IdStockOwnerType == 1 && pricePlan.version.IdProductVariant == null &&
+                pricePlan.plan.IdStockOwnerType == 1 && pricePlan.version.IdVariant == null &&
                 pricePlan.version.IdAccessory == null)
             .OrderBy(pricePlan => pricePlan.plan.Id)
             .ThenByDescending(pricePlan => pricePlan.version.Id)
@@ -209,11 +209,11 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 item => item.IdProduct,
                 product => product.Id,
                 (item, product) => new { item, product })
-            .Where(itemProduct => collectionIds.Contains(itemProduct.item.IdProductCollection) &&
+            .Where(itemProduct => collectionIds.Contains(itemProduct.item.IdCollection) &&
                                   itemProduct.product.IsStoreEnabled)
             .OrderBy(itemProduct => itemProduct.item.SortOrder)
             .ThenBy(itemProduct => itemProduct.item.Id)
-            .Select(itemProduct => new { itemProduct.item.IdProductCollection, itemProduct.item.IdProduct })
+            .Select(itemProduct => new { IdProductCollection = itemProduct.item.IdCollection, itemProduct.item.IdProduct })
             .ToListAsync(cancellationToken);
         var countryCodeById = countries.ToDictionary(x => x.Id, x => x.CountryCode);
         var brandKeyById = brands.ToDictionary(x => x.Id, x => x.BrandKey);
@@ -309,14 +309,14 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
             var regularPrice = regularPriceByProduct.GetValueOrDefault(product.Id);
             var o = new JsonObject
             {
-                ["id"] = checked((int)product.Id), ["name"] = product.Name,
-                ["englishName"] = product.EnglishName ?? product.Name, ["code"] = product.ProductKey,
+                ["id"] = checked((int)product.Id), ["name"] = product.NameFa,
+                ["englishName"] = product.NameEn ?? product.NameFa, ["code"] = product.ProductKey,
                 ["slug"] = product.Slug, ["brandId"] = brandKey, ["categoryId"] = categoryKey,
                 ["detailId"] = categoryKey, ["mediaId"] = "product-" + product.ProductKey,
                 ["priceBeforeDiscountAmount"] = regularPrice?.PriceBeforeDiscountAmount ?? 0m,
                 ["price"] = regularPrice is null ? 0m : regularPrice.FinalPriceAmount / 1_000_000m,
                 ["finalPriceAmount"] = regularPrice?.FinalPriceAmount ?? 0m, ["stockQuantity"] = stockQty,
-                ["maxCartQuantity"] = product.MaxPurchaseQuantity ?? 99,
+                ["maxCartQuantity"] = product.MaxPurchaseQuantity,
                 ["discountPercent"] = regularPrice?.DiscountPercent ?? 0m, ["badge"] = badge?.Title,
                 ["badgeColor"] = badge?.BackgroundColor, ["badgeTextColor"] = badge?.TextColor,
                 ["badgeBorderColor"] = badge?.BorderColor

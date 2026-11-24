@@ -114,7 +114,7 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
                 .OrderByDescending(f => f.Id)
                 .Take(50).Select(f => new
                 {
-                    f.FeedbackType, f.FeedbackText, Status = f.Status.Name, f.CreatedAtUtc, ProductName = f.Product.Name
+                    f.FeedbackType, f.FeedbackText, Status = f.Status.Name, f.CreatedAtUtc, ProductName = f.Product.NameFa
                 })
                 .ToListAsync(cancellationToken);
             var cartItems = await db.AccountCarts
@@ -140,10 +140,10 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
                 .Select(cartItemDetails => new
                 {
                     cartItemDetails.item.Id,
-                    ProductName = cartItemDetails.product.Name,
-                    cartItemDetails.item.IdProductVariant,
+                    ProductName = cartItemDetails.product.NameFa,
+                    IdProductVariant = cartItemDetails.item.IdVariant,
                     VariantPath = db.ProductVariants
-                        .Where(variant => variant.Id == cartItemDetails.item.IdProductVariant)
+                        .Where(variant => variant.Id == cartItemDetails.item.IdVariant)
                         .Select(variant => variant.VariantName.TreePathNames)
                         .FirstOrDefault(),
                     SalesPlanName = cartItemDetails.plan.DisplayName,

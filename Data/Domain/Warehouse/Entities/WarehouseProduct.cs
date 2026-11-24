@@ -4,11 +4,11 @@ public sealed class WarehouseProduct
 {
     public decimal Id { get; set; }
     public string ProductKey { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string? EnglishName { get; set; }
+    public string NameFa { get; set; } = string.Empty;
+    public string NameEn { get; set; } = string.Empty;
     public long? IdBrand { get; set; }
     public long? IdCategory { get; set; }
-    public int? MaxPurchaseQuantity { get; set; }
+    public int MaxPurchaseQuantity { get; set; }
     public string? Slug { get; set; }
     public decimal? IdBadge { get; set; }
     public Shop.Data.Domain.Store.Entities.StoreProductBadge? ProductBadge { get; set; }

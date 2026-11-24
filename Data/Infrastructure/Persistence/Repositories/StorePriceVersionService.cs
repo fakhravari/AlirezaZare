@@ -16,7 +16,7 @@ public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVers
         {
             IdProduct = productId,
             IdSalesPlan = salesPlanId,
-            IdProductVariant = productVariantId,
+            IdVariant = productVariantId,
             IdAccessory = accessoryId,
             PriceBeforeDiscountAmount = amount,
             DiscountPercent = discountPercent,
@@ -48,7 +48,7 @@ public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVers
     private Task<StorePriceVersion?> FindActiveAsync(decimal productId, long salesPlanId, long? productVariantId,
         decimal? accessoryId, CancellationToken cancellationToken) =>
         db.StorePriceVersions.SingleOrDefaultAsync(
-            x => x.IdProduct == productId && x.IdSalesPlan == salesPlanId && x.IdProductVariant == productVariantId &&
+            x => x.IdProduct == productId && x.IdSalesPlan == salesPlanId && x.IdVariant == productVariantId &&
                  x.IdAccessory == accessoryId && x.IsActive, cancellationToken);
 
     private static void Validate(decimal amount, decimal discountPercent)

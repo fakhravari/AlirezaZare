@@ -81,11 +81,11 @@ public sealed class SalesPlansController(
 
         var productVersions = await db.StorePriceVersions.AsNoTracking()
             .Where(item => item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value &&
-                           item.IdProductVariant == pricedVariantId && item.IdAccessory == null)
+                           item.IdVariant == pricedVariantId && item.IdAccessory == null)
             .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
             .Select(item => new
             {
-                item.Id, item.IdProductVariant, item.IdAccessory, PriceAmount = item.PriceBeforeDiscountAmount,
+                item.Id, item.IdVariant, item.IdAccessory, PriceAmount = item.PriceBeforeDiscountAmount,
                 item.DiscountPercent, item.FinalPriceAmount, item.IsActive, item.CreatedAtUtc
             })
             .ToListAsync(cancellationToken);
@@ -94,7 +94,7 @@ public sealed class SalesPlansController(
         var versions = productVersions.Select(item => new
         {
             item.Id,
-            item.IdProductVariant,
+            item.IdVariant,
             item.IdAccessory,
             item.PriceAmount,
             item.DiscountPercent,
@@ -111,8 +111,8 @@ public sealed class SalesPlansController(
             history = versions.Select(item => new
             {
                 priceVersionId = item.Id,
-                component = StorePriceVersionReference.GetComponent(item.IdProductVariant, item.IdAccessory),
-                targetId = item.IdProductVariant ?? item.IdAccessory,
+                component = StorePriceVersionReference.GetComponent(item.IdVariant, item.IdAccessory),
+                targetId = item.IdVariant ?? item.IdAccessory,
                 item.PriceAmount,
                 item.DiscountPercent,
                 priceBeforeDiscountAmount = item.PriceAmount,

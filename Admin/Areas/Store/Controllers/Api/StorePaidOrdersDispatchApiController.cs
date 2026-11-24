@@ -141,16 +141,16 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
 
             decimal[] productIds = orderItems.Select(x => x.IdProduct).Distinct().ToArray();
             var productNames = await db.Products.AsNoTracking().Where(x => productIds.Contains(x.Id))
-                .ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
-            long[] variantIds = orderItems.Where(x => x.IdProductVariant.HasValue)
-                .Select(x => x.IdProductVariant!.Value).Distinct().ToArray();
+                .ToDictionaryAsync(x => x.Id, x => x.NameFa, cancellationToken);
+            long[] variantIds = orderItems.Where(x => x.IdVariant.HasValue)
+                .Select(x => x.IdVariant!.Value).Distinct().ToArray();
             var baseUnits = await db.WarehouseProductUnits.AsNoTracking()
                 .Where(x => productIds.Contains(x.IdProduct) && x.IsBaseUnit && x.IsActive)
                 .Select(x => new { x.IdProduct, x.IdUnit }).ToListAsync(cancellationToken);
             var baseUnitByProduct = baseUnits.GroupBy(x => x.IdProduct).Where(group => group.Count() == 1)
                 .ToDictionary(group => group.Key, group => group.Single().IdUnit);
             var inventoryItems = await db.InventoryItems.AsNoTracking().Where(x => productIds.Contains(x.IdProduct))
-                .Select(x => new { x.Id, x.IdProduct, x.IdProductVariant }).ToListAsync(cancellationToken);
+                .Select(x => new { x.Id, x.IdProduct, x.IdVariant }).ToListAsync(cancellationToken);
             long[] unitIds = baseUnitByProduct.Values.Distinct().ToArray();
             var unitNames = await db.WarehouseUnits.AsNoTracking().Where(x => unitIds.Contains(x.Id))
                 .Select(x => new { x.Id, Name = x.NameFa })
@@ -158,12 +158,12 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             var variantNames = await db.ProductVariants.AsNoTracking().Where(x => variantIds.Contains(x.Id))
                 .Select(x => new { x.Id, Name = x.VariantName.Name })
                 .ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
-            var inventoryByProductVariant = inventoryItems.GroupBy(x => (x.IdProduct, x.IdProductVariant))
+            var inventoryByProductVariant = inventoryItems.GroupBy(x => (x.IdProduct, x.IdVariant))
                 .ToDictionary(x => x.Key, x => x.ToArray());
             var lineDetails = new List<DispatchLineDetail>(orderItems.Count);
             foreach (var line in orderItems)
             {
-                var key = (line.IdProduct, line.IdProductVariant);
+                var key = (line.IdProduct, line.IdVariant);
                 if (!productNames.TryGetValue(line.IdProduct, out string? productName) ||
                     !baseUnitByProduct.TryGetValue(line.IdProduct, out long baseUnitId) ||
                     !unitNames.TryGetValue(baseUnitId, out string? unitName) ||
@@ -181,7 +181,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
                     ConversionFactor = 1,
                     BaseQuantity = line.Quantity,
                     ProductName = productName,
-                    VariantName = line.IdProductVariant is long variantId
+                    VariantName = line.IdVariant is long variantId
                         ? variantNames.GetValueOrDefault(variantId)
                         : null,
                     UnitName = unitName

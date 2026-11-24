@@ -222,13 +222,13 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                         itemPlanProduct.item.IdOrder,
                         itemPlanProduct.item.IdProduct,
                         itemPlanProduct.item.IdSalesPlan,
-                        ProductName = itemPlanProduct.product.Name,
+                        ProductName = itemPlanProduct.product.NameFa,
                         VariantName = db.ProductVariants
-                            .Where(variant => variant.Id == itemPlanProduct.item.IdProductVariant)
+                            .Where(variant => variant.Id == itemPlanProduct.item.IdVariant)
                             .Select(variant => variant.VariantName.TreePathNames)
                             .FirstOrDefault(),
                         itemPlanProduct.item.Quantity,
-                        itemPlanProduct.item.IdProductVariant,
+                        itemPlanProduct.item.IdVariant,
                         itemPlanProduct.item.IdPriceVersion,
                         PriceAmount = itemPlanProduct.item.PriceVersion.PriceBeforeDiscountAmount,
                         itemPlanProduct.item.PriceVersion.DiscountPercent,
@@ -256,7 +256,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                         referenceVersion.reference.IdProduct,
                         referenceVersion.reference.IdSalesPlan,
                         referenceVersion.reference.IdPriceVersion,
-                        referenceVersion.version.IdProductVariant,
+                        referenceVersion.version.IdVariant,
                         referenceVersion.reference.IdAccessory,
                         PriceAmount = referenceVersion.reference.UnitAmountSnapshot,
                         BaseAmount = referenceVersion.version.PriceBeforeDiscountAmount,
@@ -286,11 +286,11 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                 components.Add(new
                 {
                     productName = item.ProductName,
-                    componentType = item.IdProductVariant.HasValue ? "تنوع" : "کالا",
+                    componentType = item.IdVariant.HasValue ? "تنوع" : "کالا",
                     accessoryRequirement = (string?)null,
-                    componentId = item.IdProductVariant ?? item.IdProduct,
+                    componentId = item.IdVariant ?? item.IdProduct,
                     priceVersionId = item.IdPriceVersion,
-                    treePathNames = item.IdProductVariant.HasValue ? item.VariantName : null,
+                    treePathNames = item.IdVariant.HasValue ? item.VariantName : null,
                     accessoryName = (string?)null,
                     salesPlan = item.SalesPlanName,
                     quantity = item.Quantity,
@@ -353,7 +353,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                     new
                     {
                         priceVersionId = r.IdPriceVersion,
-                        component = StorePriceVersionReference.GetComponent(r.IdProductVariant, r.IdAccessory),
+                        component = StorePriceVersionReference.GetComponent(r.IdVariant, r.IdAccessory),
                         name = r.AccessoryName,
                         calculatedUnitAmount = r.PriceAmount,
                         recordedPriceAmount = r.PriceAmount,
@@ -363,7 +363,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                         reason = r.ChangeReason
                     }).Prepend(new
                 {
-                    priceVersionId = i.IdPriceVersion, component = i.IdProductVariant.HasValue ? "variant" : "product",
+                    priceVersionId = i.IdPriceVersion, component = i.IdVariant.HasValue ? "variant" : "product",
                     name = i.VariantName ?? i.ProductName, calculatedUnitAmount = i.FinalPriceAmount,
                     recordedPriceAmount = i.PriceAmount, discountPercent = i.DiscountPercent, isCurrent = i.IsActive,
                     recordedAtUtc = i.CreatedAtUtc, reason = i.ChangeReason

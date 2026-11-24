@@ -34,16 +34,16 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             .Where(balanceInventoryPlan =>
                 siteWarehouseIds.Contains(balanceInventoryPlan.balance.IdWarehouse) &&
                 balanceInventoryPlan.inventory.IsActive && balanceInventoryPlan.inventory.Product.IsWarehouseEnabled &&
-                ((balanceInventoryPlan.inventory.IdProductVariant.HasValue &&
+                ((balanceInventoryPlan.inventory.IdVariant.HasValue &&
                   dbContext.ProductVariants.Any(variant =>
-                      variant.Id == balanceInventoryPlan.inventory.IdProductVariant.Value && variant.IsActive) &&
+                      variant.Id == balanceInventoryPlan.inventory.IdVariant.Value && variant.IsActive) &&
                   dbContext.StoreProductVariantSalesPlanOffers.Any(offer =>
-                      offer.IdProductVariant == balanceInventoryPlan.inventory.IdProductVariant &&
+                      offer.IdVariant == balanceInventoryPlan.inventory.IdVariant &&
                       offer.IdSalesPlan == balanceInventoryPlan.plan.Id && offer.IsEnabled) &&
                   dbContext.StorePriceVersions.Any(version =>
-                      version.IdProductVariant == balanceInventoryPlan.inventory.IdProductVariant &&
+                      version.IdVariant == balanceInventoryPlan.inventory.IdVariant &&
                       version.IdSalesPlan == balanceInventoryPlan.plan.Id && version.IsActive)) ||
-                 (!balanceInventoryPlan.inventory.IdProductVariant.HasValue &&
+                 (!balanceInventoryPlan.inventory.IdVariant.HasValue &&
                   !dbContext.ProductVariants.Any(variant =>
                       variant.IdProduct == balanceInventoryPlan.inventory.IdProduct && variant.IsActive))))
             .GroupBy(balanceInventoryPlan => new
@@ -65,18 +65,18 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         var activePriceRows = await dbContext.StorePriceVersions.AsNoTracking()
             .Where(x => x.IsActive && products.Select(p => p.Id).Contains(x.IdProduct)).OrderByDescending(x => x.Id)
             .ToListAsync(cancellationToken);
-        var planProductPrices = activePriceRows.Where(x => !x.IdProductVariant.HasValue &&
+        var planProductPrices = activePriceRows.Where(x => !x.IdVariant.HasValue &&
                                                            !x.IdAccessory.HasValue)
             .ToDictionary(x => (x.IdProduct, x.IdSalesPlan));
-        var variantPrices = activePriceRows.Where(x => x.IdProductVariant.HasValue)
-            .ToDictionary(x => (x.IdProductVariant!.Value, x.IdSalesPlan));
+        var variantPrices = activePriceRows.Where(x => x.IdVariant.HasValue)
+            .ToDictionary(x => (x.IdVariant!.Value, x.IdSalesPlan));
         var accessoryPrices = activePriceRows.Where(x => x.IdAccessory.HasValue)
             .ToDictionary(x => (x.IdProduct, x.IdAccessory!.Value, x.IdSalesPlan));
         var variantOfferRows = await dbContext.StoreProductVariantSalesPlanOffers
             .AsNoTracking()
             .Join(
                 dbContext.ProductVariants.AsNoTracking(),
-                offer => offer.IdProductVariant,
+                offer => offer.IdVariant,
                 variant => variant.Id,
                 (offer, variant) => new { offer, variant })
             .Join(
@@ -88,12 +88,12 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 offerVariantPlan.offer.IsEnabled && offerVariantPlan.plan.IdStockOwnerType == 1 &&
                 offerVariantPlan.variant.IsActive && offerVariantPlan.variant.Product.IsStoreEnabled &&
                 dbContext.InventoryItems.Any(inventory =>
-                    inventory.IdProductVariant == offerVariantPlan.variant.Id && inventory.IsActive))
-            .OrderBy(offerVariantPlan => offerVariantPlan.offer.IdProductVariant)
+                    inventory.IdVariant == offerVariantPlan.variant.Id && inventory.IsActive))
+            .OrderBy(offerVariantPlan => offerVariantPlan.offer.IdVariant)
             .ThenBy(offerVariantPlan => offerVariantPlan.plan.StoreSalesPlanKey)
             .Select(offerVariantPlan => new
             {
-                offerVariantPlan.offer.IdProductVariant,
+                IdProductVariant = offerVariantPlan.offer.IdVariant,
                 ProductId = offerVariantPlan.variant.IdProduct,
                 VariantId = offerVariantPlan.variant.Id,
                 PlanId = offerVariantPlan.plan.Id,
@@ -115,7 +115,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             decimal price = priceVersion?.PriceBeforeDiscountAmount ?? 0;
             decimal stock = siteStock.GetValueOrDefault((product.Id, plan.Id));
             int stockQuantity = stock >= int.MaxValue ? int.MaxValue : checked((int)Math.Floor(stock));
-            int maxQuantity = custom?.MaxPurchaseQuantity ?? product.MaxPurchaseQuantity ?? 99;
+            int maxQuantity = custom?.MaxPurchaseQuantity ?? product.MaxPurchaseQuantity;
             bool enabled = (custom?.IsEnabled ?? true) && product.IsStoreEnabled && plan.IsActive;
             offers[(checked((int)product.Id), plan.StoreSalesPlanKey)] = new(checked((int)product.Id),
                 plan.StoreSalesPlanKey, price, discount, stockQuantity, maxQuantity, enabled, priceVersion?.Id ?? 0,
@@ -133,7 +133,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             .Where(variantProduct =>
                 variantProduct.variant.IsActive && variantProduct.product.IsStoreEnabled &&
                 dbContext.InventoryItems.Any(inventory =>
-                    inventory.IdProductVariant == variantProduct.variant.Id && inventory.IsActive))
+                    inventory.IdVariant == variantProduct.variant.Id && inventory.IsActive))
             .Select(variantProduct => new
             {
                 ProductId = variantProduct.variant.IdProduct,
@@ -193,18 +193,18 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 (inventoryBalance, plan) => new { inventoryBalance.inventory, inventoryBalance.balance, plan })
             .Where(inventoryBalancePlan =>
                 inventoryBalancePlan.inventory.IsActive && inventoryBalancePlan.inventory.Product.IsWarehouseEnabled &&
-                inventoryBalancePlan.inventory.IdProductVariant.HasValue &&
+                inventoryBalancePlan.inventory.IdVariant.HasValue &&
                 siteWarehouseIds.Contains(inventoryBalancePlan.balance.IdWarehouse) &&
                 inventoryBalancePlan.plan.IdStockOwnerType == 1 &&
                 dbContext.StoreProductVariantSalesPlanOffers.Any(offer =>
-                    offer.IdProductVariant == inventoryBalancePlan.inventory.IdProductVariant &&
+                    offer.IdVariant == inventoryBalancePlan.inventory.IdVariant &&
                     offer.IdSalesPlan == inventoryBalancePlan.plan.Id && offer.IsEnabled) &&
                 dbContext.StorePriceVersions.Any(version =>
-                    version.IdProductVariant == inventoryBalancePlan.inventory.IdProductVariant &&
+                    version.IdVariant == inventoryBalancePlan.inventory.IdVariant &&
                     version.IdSalesPlan == inventoryBalancePlan.plan.Id && version.IsActive))
             .Select(inventoryBalancePlan => new
             {
-                inventoryBalancePlan.inventory.IdProductVariant,
+                IdProductVariant = inventoryBalancePlan.inventory.IdVariant,
                 inventoryBalancePlan.inventory.IdProduct,
                 inventoryBalancePlan.plan.StoreSalesPlanKey,
                 inventoryBalancePlan.balance.Quantity
@@ -229,8 +229,8 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 (offer, plan) => new { offer, plan })
             .Where(offerPlan =>
                 !offerPlan.offer.IsEnabled && offerPlan.plan.IdStockOwnerType == 1 &&
-                eligibleVariantIds.Contains(offerPlan.offer.IdProductVariant))
-            .Select(offerPlan => new { offerPlan.offer.IdProductVariant, offerPlan.plan.StoreSalesPlanKey })
+                eligibleVariantIds.Contains(offerPlan.offer.IdVariant))
+            .Select(offerPlan => new { IdProductVariant = offerPlan.offer.IdVariant, offerPlan.plan.StoreSalesPlanKey })
             .ToListAsync(cancellationToken);
         foreach (var row in disabledVariantPlans)
             if (variantById.TryGetValue(row.IdProductVariant, out var variant))
@@ -278,7 +278,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 if (hasCustom)
                 {
                     var overrideRow = offerAccessoryOverrides.FirstOrDefault(x =>
-                        x.IdProductSalesPlanOffer == customOffer!.Id && x.IdAccessory == accessory.IdAccessory);
+                        x.IdOffer == customOffer!.Id && x.IdAccessory == accessory.IdAccessory);
                     if (overrideRow is null || !overrideRow.IsAllowed) continue;
                 }
 
@@ -299,7 +299,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             .AsNoTracking()
             .Join(
                 dbContext.StoreProductSalesPlanOffers.AsNoTracking(),
-                overrideRow => overrideRow.IdProductSalesPlanOffer,
+                overrideRow => overrideRow.IdOffer,
                 offer => offer.Id,
                 (overrideRow, offer) => new { overrideRow, offer })
             .Join(
@@ -344,7 +344,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             .Select(x => new { x.MaxPurchaseQuantity }).SingleOrDefaultAsync(cancellationToken);
         if (product is null) return null;
 
-        int maxPurchaseQuantity = product.MaxPurchaseQuantity ?? 99;
+        int maxPurchaseQuantity = product.MaxPurchaseQuantity;
 
         long? planId = await dbContext.SalesPlanReferences.AsNoTracking()
             .Where(x => x.IdStockOwnerType == 1 && x.StoreSalesPlanKey == salesPlanId).Select(x => (long?)x.Id)

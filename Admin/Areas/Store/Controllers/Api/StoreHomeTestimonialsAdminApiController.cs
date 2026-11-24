@@ -38,7 +38,7 @@ public sealed class StoreHomeTestimonialsAdminApiController(
                 featured.FeedbackText,
                 featured.Rating,
                 featured.CreatedAtUtc,
-                ProductName = product.Name,
+                ProductName = product.NameFa,
                 ProductKey = product.ProductKey,
                 featured.IsActive,
                 featured.SortOrder,
@@ -61,8 +61,8 @@ public sealed class StoreHomeTestimonialsAdminApiController(
     [Authorize(Roles = "system.full-access")]
     public async Task<IActionResult> Products(CancellationToken cancellationToken) => Ok(await db.Products
         .AsNoTracking()
-        .OrderBy(x => x.Name).ThenBy(x => x.Id)
-        .Select(x => new { x.Id, x.Name, x.ProductKey, x.IsStoreEnabled }).ToListAsync(cancellationToken));
+        .OrderBy(x => x.NameFa).ThenBy(x => x.Id)
+        .Select(x => new { x.Id, Name = x.NameFa, x.ProductKey, x.IsStoreEnabled }).ToListAsync(cancellationToken));
 
     [HttpPost]
     [Authorize(Roles = "system.full-access")]

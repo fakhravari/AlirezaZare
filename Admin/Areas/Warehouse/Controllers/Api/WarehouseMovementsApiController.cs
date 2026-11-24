@@ -257,7 +257,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         if (warehouseId.HasValue) query = query.Where(x => x.movement.IdWarehouse == warehouseId.Value);
         if (productId.HasValue) query = query.Where(x => x.item.IdProduct == productId.Value);
         if (!string.IsNullOrEmpty(search))
-            query = query.Where(x => x.item.Product.Name.Contains(search)
+            query = query.Where(x => x.item.Product.NameFa.Contains(search)
                                      || x.item.Product.ProductKey.Contains(search) || (x.item.ProductVariant != null &&
                                          x.item.ProductVariant.VariantName.Name.Contains(search)));
         if (!string.IsNullOrEmpty(salesPlan))
@@ -271,7 +271,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
             WarehouseId = x.warehouse.Id,
             Warehouse = x.warehouse.Company.Name + " / " + x.warehouse.Name + " (" + x.warehouse.Code + ")",
             ItemId = x.item.Id,
-            Product = x.item.Product.Name,
+            Product = x.item.Product.NameFa,
             ProductKey = x.item.Product.ProductKey,
             Variant = x.item.ProductVariant == null ? null : x.item.ProductVariant.VariantName.Name,
             PlanId = x.plan.Id,
@@ -324,7 +324,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                 {
                     lineDocument.document.IdWarehouse,
                     item.Product.Id,
-                    item.Product.Name,
+                    item.Product.NameFa,
                     Code = item.Product.ProductKey
                 });
         if (!User.IsInRole("system.full-access"))
@@ -343,8 +343,8 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         }
 
         if (!string.IsNullOrEmpty(paging.Search))
-            query = query.Where(x => x.Name.Contains(paging.Search) || x.Code.Contains(paging.Search));
-        var products = await query.Select(x => new { x.Id, x.Name, x.Code }).Distinct()
+            query = query.Where(x => x.NameFa.Contains(paging.Search) || x.Code.Contains(paging.Search));
+        var products = await query.Select(x => new { x.Id, Name = x.NameFa, x.Code }).Distinct()
             .OrderBy(x => x.Name).ThenBy(x => x.Id).Skip(paging.Offset).Take(size + 1).ToListAsync(cancellationToken);
         return Ok(new { items = products.Take(size), more = products.Count > size });
     }

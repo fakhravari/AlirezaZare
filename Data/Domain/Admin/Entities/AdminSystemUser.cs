@@ -32,7 +32,7 @@ public sealed class AdminPermission
     public long Id { get; set; }
     public string PermissionKey { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string? ParentKey { get; set; }
+    public string? ParentPermissionKey { get; set; }
     public string Area { get; set; } = string.Empty;
     public string Controller { get; set; } = string.Empty;
     public string Action { get; set; } = string.Empty;

@@ -436,7 +436,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("InventoryItem", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasOne(x => x.Product).WithMany(x => x.InventoryItems).HasForeignKey(x => x.IdProduct);
-            entity.HasOne(x => x.ProductVariant).WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct })
+            entity.HasOne(x => x.ProductVariant).WithMany().HasForeignKey(x => new { x.IdVariant, x.IdProduct })
                 .HasPrincipalKey(x => new { x.Id, x.IdProduct });
         });
         modelBuilder.Entity<WarehouseProduct>(entity =>
@@ -589,7 +589,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
                 .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.PreviousVersion).WithMany().HasForeignKey(x => x.IdPreviousVersion)
                 .OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct })
+            entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => new { x.IdVariant, x.IdProduct })
                 .HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<StoreAccessory>().WithMany().HasForeignKey(x => x.IdAccessory)
                 .OnDelete(DeleteBehavior.Restrict);
@@ -699,7 +699,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("ProductVariantSalesPlanOffer", "Store");
             entity.HasKey(x => x.Id);
-            entity.HasIndex(x => new { x.IdProductVariant, x.IdSalesPlan }).IsUnique();
+            entity.HasIndex(x => new { x.IdVariant, x.IdSalesPlan }).IsUnique();
         });
         modelBuilder.Entity<StoreAccessory>(entity =>
         {
@@ -716,13 +716,13 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("ProductSalesPlanOfferAccessory", "Store");
             entity.HasKey(x => x.Id);
-            entity.HasIndex(x => new { x.IdProductSalesPlanOffer, x.IdAccessory }).IsUnique();
+            entity.HasIndex(x => new { x.IdOffer, x.IdAccessory }).IsUnique();
         });
         modelBuilder.Entity<StoreProductSalesPlanOfferSpecificationOverride>(entity =>
         {
             entity.ToTable("ProductSalesPlanOfferSpecificationOverride", "Store");
             entity.HasKey(x => x.Id);
-            entity.HasIndex(x => new { x.IdProductSalesPlanOffer, x.SpecificationKey }).IsUnique();
+            entity.HasIndex(x => new { x.IdOffer, x.SpecificationKey }).IsUnique();
         });
         modelBuilder.Entity<StoreProductMediaType>(entity =>
         {
@@ -838,7 +838,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("ProductCollectionItem", "Store");
             entity.HasKey(x => x.Id);
-            entity.HasIndex(x => new { x.IdProductCollection, x.IdProduct }).IsUnique();
+            entity.HasIndex(x => new { x.IdCollection, x.IdProduct }).IsUnique();
         });
         modelBuilder.Entity<StoreHomeCategoryTab>(entity =>
         {

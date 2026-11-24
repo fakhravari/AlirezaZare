@@ -101,7 +101,7 @@ public sealed class StoreProductImageApiController(
                 {
                     IdProduct = productId, IdMediaType = ProductMediaTypes.Image, Path = image.MainPath,
                     CardPath = GetVariantPath(image.MainPath, "card"), ThumbnailPath = image.ThumbnailPath,
-                    Title = product.Name, SortOrder = nextOrder++, IsDefault = !hasDefault,
+                    Title = product.NameFa, SortOrder = nextOrder++, IsDefault = !hasDefault,
                     CreatedAtUtc = DateTime.UtcNow
                 });
                 hasDefault = true;

@@ -152,8 +152,8 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
             {
                 inventoryItem.inventoryItem.Id,
                 inventoryItem.inventoryItem.IdProduct,
-                inventoryItem.inventoryItem.IdProductVariant,
-                ProductName = inventoryItem.inventoryItem.Product.Name,
+                IdProductVariant = inventoryItem.inventoryItem.IdVariant,
+                ProductName = inventoryItem.inventoryItem.Product.NameFa,
                 VariantName = inventoryItem.inventoryItem.ProductVariant == null
                     ? null
                     : inventoryItem.inventoryItem.ProductVariant.VariantName.Name,
@@ -544,7 +544,7 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
 
             result.Add(new PreparedLine(item.Id, unit.IdUnit, line.SalesPlanId, quantity, unit.ConversionFactor,
                 baseQuantity,
-                item.Product.Name, item.ProductVariant?.VariantName.Name, unit.NameFa));
+                item.Product.NameFa, item.ProductVariant?.VariantName.Name, unit.NameFa));
         }
 
         return result.ToArray();

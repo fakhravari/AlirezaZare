@@ -15,7 +15,7 @@ public sealed class StorePriceVersion
     public decimal Id { get; set; }
     public decimal IdProduct { get; set; }
     public long IdSalesPlan { get; set; }
-    public long? IdProductVariant { get; set; }
+    public long? IdVariant { get; set; }
     public decimal? IdAccessory { get; set; }
     public decimal PriceBeforeDiscountAmount { get; set; }
     public decimal DiscountPercent { get; set; }

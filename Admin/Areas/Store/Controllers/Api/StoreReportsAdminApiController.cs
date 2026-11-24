@@ -225,7 +225,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                 (itemOrderProduct, amount) => new { itemOrderProduct.item, itemOrderProduct.order,
                     itemOrderProduct.product, amount })
             .Where(itemDetails => itemDetails.order.CreatedAtUtc >= start && itemDetails.order.CreatedAtUtc < end)
-            .GroupBy(itemDetails => new { itemDetails.item.IdProduct, ProductName = itemDetails.product.Name })
+            .GroupBy(itemDetails => new { itemDetails.item.IdProduct, ProductName = itemDetails.product.NameFa })
             .Select(productGroup => new
             {
                 ProductId = productGroup.Key.IdProduct,
@@ -387,7 +387,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             cancellationToken);
         int outOfStockCount = await balances.CountAsync(x => x.Quantity <= 0, cancellationToken);
         var values = await balances.OrderBy(x => x.Warehouse.Company.Name).ThenBy(x => x.Warehouse.Name)
-            .ThenBy(x => x.InventoryItem.Product.Name).ThenBy(x => x.SalesPlanReference.DisplayName)
+            .ThenBy(x => x.InventoryItem.Product.NameFa).ThenBy(x => x.SalesPlanReference.DisplayName)
             .Skip((page - 1) * pageSize).Take(pageSize).Select(x => new
             {
                 warehouseId = x.IdWarehouse,
@@ -395,7 +395,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                 salesPlanReferenceId = x.IdSalesPlanReference,
                 warehouseLabel = x.Warehouse.Company.Name + " / " + x.Warehouse.Name + " (" + x.Warehouse.Code + ")",
                 productCode = x.InventoryItem.Product.ProductKey,
-                productName = x.InventoryItem.Product.Name,
+                productName = x.InventoryItem.Product.NameFa,
                 variantName = x.InventoryItem.ProductVariant == null
                     ? "—"
                     : x.InventoryItem.ProductVariant.VariantName.Name,

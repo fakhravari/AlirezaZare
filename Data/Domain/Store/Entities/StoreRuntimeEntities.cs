@@ -78,7 +78,7 @@ public sealed class StoreProductCollection
 public sealed class StoreProductCollectionItem
 {
     public decimal Id { get; set; }
-    public long IdProductCollection { get; set; }
+    public long IdCollection { get; set; }
     public decimal IdProduct { get; set; }
     public int SortOrder { get; set; }
 }

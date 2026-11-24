@@ -14,7 +14,7 @@ public sealed class StoreProductSalesPlanOffer
 public sealed class StoreProductVariantSalesPlanOffer
 {
     public decimal Id { get; set; }
-    public long IdProductVariant { get; set; }
+    public long IdVariant { get; set; }
     public long IdSalesPlan { get; set; }
     public bool IsEnabled { get; set; }
     public DateTime CreatedAtUtc { get; set; }
@@ -42,7 +42,7 @@ public sealed class StoreProductAccessory
 public sealed class StoreProductSalesPlanOfferAccessory
 {
     public decimal Id { get; set; }
-    public decimal IdProductSalesPlanOffer { get; set; }
+    public decimal IdOffer { get; set; }
     public decimal IdAccessory { get; set; }
     public bool IsIncludedByDefault { get; set; }
     public bool IsAllowed { get; set; }
@@ -51,7 +51,7 @@ public sealed class StoreProductSalesPlanOfferAccessory
 public sealed class StoreProductSalesPlanOfferSpecificationOverride
 {
     public long Id { get; set; }
-    public decimal IdProductSalesPlanOffer { get; set; }
+    public decimal IdOffer { get; set; }
     public string SpecificationKey { get; set; } = "";
     public string Value { get; set; } = "";
 }

@@ -57,14 +57,14 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 unit => unit.Id,
                 (linkProduct, unit) => new { linkProduct.link, linkProduct.product, unit })
             .Where(linkDetails => !linkDetails.link.IsActive)
-            .OrderBy(linkDetails => linkDetails.product.Name)
+            .OrderBy(linkDetails => linkDetails.product.NameFa)
             .ThenByDescending(linkDetails => linkDetails.link.IsBaseUnit)
             .ThenBy(linkDetails => linkDetails.unit.NameFa)
             .Select(linkDetails => new
             {
                 linkDetails.link.Id,
                 linkDetails.link.IdProduct,
-                ProductName = linkDetails.product.Name,
+                ProductName = linkDetails.product.NameFa,
                 linkDetails.link.IdUnit,
                 UnitName = linkDetails.unit.NameFa,
                 linkDetails.link.ConversionFactor,
@@ -98,28 +98,28 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 {
                     variantProduct.variant.Id,
                     variantProduct.variant.IdProduct,
-                    ProductName = variantProduct.product.Name,
+                    ProductName = variantProduct.product.NameFa,
                     ProductCode = variantProduct.product.ProductKey,
                     variantProduct.variant.IdVariantName,
                     Name = variantProduct.variant.VariantName.Name,
                     variantProduct.variant.IsDefault,
                     variantProduct.variant.IsActive,
                     variantProduct.variant.CreatedAtUtc,
-                    HasNonZeroStock = db.InventoryItems.Any(item => item.IdProductVariant == variantProduct.variant.Id &&
+                    HasNonZeroStock = db.InventoryItems.Any(item => item.IdVariant == variantProduct.variant.Id &&
                                                                     db.StockBalances.Any(balance =>
                                                                         balance.IdInventoryItem == item.Id &&
                                                                         balance.Quantity != 0)),
-                    HasWarehouseHistory = db.InventoryItems.Any(item => item.IdProductVariant == variantProduct.variant.Id &&
+                    HasWarehouseHistory = db.InventoryItems.Any(item => item.IdVariant == variantProduct.variant.Id &&
                                                                         (db.VoucherLines.Any(line =>
                                                                              line.IdInventoryItem == item.Id) ||
                                                                          db.WarehouseStockMovements.Any(movement =>
                                                                              movement.IdInventoryItem == item.Id))),
-                    HasStoreHistory = db.StorePriceVersions.Any(price => price.IdProductVariant == variantProduct.variant.Id) ||
+                    HasStoreHistory = db.StorePriceVersions.Any(price => price.IdVariant == variantProduct.variant.Id) ||
                                       db.StoreProductVariantSalesPlanOffers.Any(offer =>
-                                          offer.IdProductVariant == variantProduct.variant.Id) ||
+                                          offer.IdVariant == variantProduct.variant.Id) ||
                                       db.AccountCartItems.Any(cart =>
-                                          cart.IdProductVariant == variantProduct.variant.Id) ||
-                                      db.StoreCustomerOrderItems.Any(order => order.IdProductVariant == variantProduct.variant.Id),
+                                          cart.IdVariant == variantProduct.variant.Id) ||
+                                      db.StoreCustomerOrderItems.Any(order => order.IdVariant == variantProduct.variant.Id),
                     HasOtherActiveVariant = db.ProductVariants.Any(other =>
                         other.IdProduct == variantProduct.variant.IdProduct && other.Id != variantProduct.variant.Id && other.IsActive)
                 })
@@ -424,19 +424,19 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             await db.ProductVariants.AnyAsync(x => x.IdProduct == variant.IdProduct && x.Id != id && x.IsActive,
                 cancellationToken);
         bool hasNonZeroStock = await db.InventoryItems
-            .Where(item => item.IdProductVariant == id)
+            .Where(item => item.IdVariant == id)
             .AnyAsync(item => db.StockBalances.Any(balance =>
                 balance.IdInventoryItem == item.Id && balance.Quantity != 0), cancellationToken);
         bool hasWarehouseHistory = await db.InventoryItems
-            .Where(item => item.IdProductVariant == id)
+            .Where(item => item.IdVariant == id)
             .AnyAsync(item =>
                 db.VoucherLines.Any(line => line.IdInventoryItem == item.Id) ||
                 db.WarehouseStockMovements.Any(movement => movement.IdInventoryItem == item.Id), cancellationToken);
-        bool hasStoreHistory = await db.StorePriceVersions.AnyAsync(x => x.IdProductVariant == id, cancellationToken) ||
-                               await db.StoreProductVariantSalesPlanOffers.AnyAsync(x => x.IdProductVariant == id,
+        bool hasStoreHistory = await db.StorePriceVersions.AnyAsync(x => x.IdVariant == id, cancellationToken) ||
+                               await db.StoreProductVariantSalesPlanOffers.AnyAsync(x => x.IdVariant == id,
                                    cancellationToken) ||
-                               await db.AccountCartItems.AnyAsync(x => x.IdProductVariant == id, cancellationToken) ||
-                               await db.StoreCustomerOrderItems.AnyAsync(x => x.IdProductVariant == id,
+                               await db.AccountCartItems.AnyAsync(x => x.IdVariant == id, cancellationToken) ||
+                               await db.StoreCustomerOrderItems.AnyAsync(x => x.IdVariant == id,
                                    cancellationToken);
 
         if (variant.IsDefault || (variant.IsActive && !hasOtherActiveVariant) || hasNonZeroStock ||
@@ -451,7 +451,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             });
 
         var inventoryItems =
-            await db.InventoryItems.Where(x => x.IdProductVariant == id).ToListAsync(cancellationToken);
+            await db.InventoryItems.Where(x => x.IdVariant == id).ToListAsync(cancellationToken);
         if (inventoryItems.Count > 0)
         {
             var inventoryItemIds = inventoryItems.Select(x => x.Id).ToArray();
@@ -695,7 +695,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                         return Conflict(new
                             { detail = "تنوع پیش‌فرض قابل غیرفعال‌سازی نیست؛ ابتدا تنوع فعال دیگری را پیش‌فرض کنید." });
                     bool hasStock = await db.InventoryItems
-                        .Where(item => item.IdProductVariant == id)
+                        .Where(item => item.IdVariant == id)
                         .AnyAsync(item => db.StockBalances.Any(balance =>
                             balance.IdInventoryItem == item.Id && balance.Quantity != 0), cancellationToken);
                     if (hasStock)
@@ -707,7 +707,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     variant.IsActive = false;
                     variant.UpdatedAtUtc = DateTime.UtcNow;
                     var inventoryItem =
-                        await db.InventoryItems.SingleOrDefaultAsync(x => x.IdProductVariant == id, cancellationToken);
+                        await db.InventoryItems.SingleOrDefaultAsync(x => x.IdVariant == id, cancellationToken);
                     if (inventoryItem is not null) inventoryItem.IsActive = false;
                     await db.SaveChangesAsync(cancellationToken);
                     await transaction.CommitAsync(cancellationToken);
@@ -746,15 +746,15 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             bool hasUnvariedVouchers = await db.VoucherLines
                 .AnyAsync(line => db.InventoryItems.Any(item =>
                     item.Id == line.IdInventoryItem && item.IdProduct == variant.IdProduct &&
-                    item.IdProductVariant == null), cancellationToken);
+                    item.IdVariant == null), cancellationToken);
             bool hasUnvariedMovements = await db.WarehouseStockMovements
                 .AnyAsync(movement => db.InventoryItems.Any(item =>
                     item.Id == movement.IdInventoryItem && item.IdProduct == variant.IdProduct &&
-                    item.IdProductVariant == null), cancellationToken);
+                    item.IdVariant == null), cancellationToken);
             bool hasUnvariedBalance = await db.StockBalances
                 .AnyAsync(balance => db.InventoryItems.Any(item =>
                     item.Id == balance.IdInventoryItem && item.IdProduct == variant.IdProduct &&
-                    item.IdProductVariant == null) && balance.Quantity != 0, cancellationToken);
+                    item.IdVariant == null) && balance.Quantity != 0, cancellationToken);
             if (hasUnvariedVouchers || hasUnvariedMovements || hasUnvariedBalance)
                 return Conflict(new
                 {
@@ -766,7 +766,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         variant.IsActive = true;
         variant.UpdatedAtUtc = DateTime.UtcNow;
         var inventoryItem =
-            await db.InventoryItems.SingleOrDefaultAsync(x => x.IdProductVariant == id, cancellationToken);
+            await db.InventoryItems.SingleOrDefaultAsync(x => x.IdVariant == id, cancellationToken);
         if (inventoryItem is not null) inventoryItem.IsActive = true;
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
@@ -1219,15 +1219,15 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     bool hasUnvariedVouchers = await db.VoucherLines
                         .AnyAsync(line => db.InventoryItems.Any(item =>
                             item.Id == line.IdInventoryItem && item.IdProduct == productId &&
-                            item.IdProductVariant == null), cancellationToken);
+                            item.IdVariant == null), cancellationToken);
                     bool hasUnvariedMovements = await db.WarehouseStockMovements
                         .AnyAsync(movement => db.InventoryItems.Any(item =>
                             item.Id == movement.IdInventoryItem && item.IdProduct == productId &&
-                            item.IdProductVariant == null), cancellationToken);
+                            item.IdVariant == null), cancellationToken);
                     bool hasUnvariedBalance = await db.StockBalances
                         .AnyAsync(balance => db.InventoryItems.Any(item =>
                             item.Id == balance.IdInventoryItem && item.IdProduct == productId &&
-                            item.IdProductVariant == null) && balance.Quantity != 0, cancellationToken);
+                            item.IdVariant == null) && balance.Quantity != 0, cancellationToken);
                     if (hasUnvariedVouchers || hasUnvariedMovements || hasUnvariedBalance)
                         return Conflict(new
                         {
@@ -1292,11 +1292,11 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 }
 
                 if (!id.HasValue &&
-                    !await db.InventoryItems.AnyAsync(x => x.IdProduct == productId && x.IdProductVariant == entity.Id,
+                    !await db.InventoryItems.AnyAsync(x => x.IdProduct == productId && x.IdVariant == entity.Id,
                         cancellationToken))
                 {
                     db.InventoryItems.Add(new InventoryItem
-                        { IdProduct = productId, IdProductVariant = entity.Id, IsActive = true });
+                        { IdProduct = productId, IdVariant = entity.Id, IsActive = true });
                     await db.SaveChangesAsync(cancellationToken);
                 }
 
@@ -1652,7 +1652,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         var plans = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DisplayName)
             .Select(x => new { x.Id, x.DisplayName, x.StoreSalesPlanKey }).ToListAsync(cancellationToken);
         var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive && x.IdParent != null)
-            .OrderBy(x => x.NameFa).Select(x => new { x.Id, name = x.NameFa, x.NameFa, x.NameEn })
+            .OrderBy(x => x.NameFa).Select(x => new { x.Id, name = x.NameFa, Name = x.NameFa, x.NameEn })
             .ToListAsync(cancellationToken);
         var products = await db.Products
             .AsNoTracking()
@@ -1662,11 +1662,11 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 baseUnit => baseUnit.IdProduct,
                 (product, baseUnit) => new { product, baseUnit })
             .Where(productUnit => productUnit.product.IsWarehouseEnabled)
-            .OrderBy(productUnit => productUnit.product.Name)
+            .OrderBy(productUnit => productUnit.product.NameFa)
             .Select(productUnit => new
                 {
                     productUnit.product.Id,
-                    productUnit.product.Name,
+                    Name = productUnit.product.NameFa,
                     StoreProductKey = productUnit.product.ProductKey,
                     IdBaseUnit = productUnit.baseUnit.IdUnit
                 })
@@ -1681,7 +1681,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         if (settings is null) return false;
 
         settings.IdWarehouse = warehouseId;
-        settings.SettingsUpdatedAtUtc = DateTime.UtcNow;
+        settings.IdentityUpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
         return true;

@@ -28,13 +28,13 @@ public sealed class HomeCollectionController(ShopDbContext db) : Controller
                 item => item.IdProduct,
                 product => product.Id,
                 (item, product) => new { item, product })
-            .Where(itemProduct => itemProduct.item.IdProductCollection == collectionId)
+            .Where(itemProduct => itemProduct.item.IdCollection == collectionId)
             .OrderBy(itemProduct => itemProduct.item.SortOrder)
             .ThenBy(itemProduct => itemProduct.item.Id)
             .Select(itemProduct => new HomeCollectionProduct(
                 itemProduct.item.Id,
                 itemProduct.product.Id,
-                itemProduct.product.Name,
+                itemProduct.product.NameFa,
                 itemProduct.product.ProductKey,
                 itemProduct.item.SortOrder,
                 itemProduct.product.IsStoreEnabled))
@@ -66,10 +66,10 @@ public sealed class HomeCollectionController(ShopDbContext db) : Controller
                 .ToListAsync(cancellationToken)
             : [];
         var products = db.Products.AsNoTracking()
-            .Where(x => x.IsStoreEnabled && (q == "" || x.Name.Contains(q) || x.ProductKey.Contains(q)));
+            .Where(x => x.IsStoreEnabled && (q == "" || x.NameFa.Contains(q) || x.ProductKey.Contains(q)));
         int total = await products.CountAsync(cancellationToken);
-        var candidates = await products.OrderBy(x => x.Name).ThenBy(x => x.Id).Skip((page - 1) * 50).Take(50)
-            .Select(x => new HomeCollectionCandidate(x.Id, x.Name, x.ProductKey)).ToListAsync(cancellationToken);
+        var candidates = await products.OrderBy(x => x.NameFa).ThenBy(x => x.Id).Skip((page - 1) * 50).Take(50)
+            .Select(x => new HomeCollectionCandidate(x.Id, x.NameFa, x.ProductKey)).ToListAsync(cancellationToken);
         return View(new HomeCollectionModel(selected, tabs, categories, candidates, q, page, total, tabsReady));
     }
 
@@ -91,13 +91,13 @@ public sealed class HomeCollectionController(ShopDbContext db) : Controller
         }
 
         if (!await db.StoreProductCollectionItems.AnyAsync(
-                x => x.IdProductCollection == collection.Id && x.IdProduct == productId, cancellationToken))
+                x => x.IdCollection == collection.Id && x.IdProduct == productId, cancellationToken))
         {
-            int last = await db.StoreProductCollectionItems.Where(x => x.IdProductCollection == collection.Id)
+            int last = await db.StoreProductCollectionItems.Where(x => x.IdCollection == collection.Id)
                 .MaxAsync(x => (int?)x.SortOrder, cancellationToken) ?? 0;
             if (last > int.MaxValue - 10) return BadRequest();
             db.StoreProductCollectionItems.Add(new StoreProductCollectionItem
-                { IdProductCollection = collection.Id, IdProduct = productId, SortOrder = last + 10 });
+                { IdCollection = collection.Id, IdProduct = productId, SortOrder = last + 10 });
             await db.SaveChangesAsync(cancellationToken);
         }
 
@@ -113,7 +113,7 @@ public sealed class HomeCollectionController(ShopDbContext db) : Controller
         var item = await db.StoreProductCollectionItems
             .Join(
                 db.StoreProductCollections,
-                entry => entry.IdProductCollection,
+                entry => entry.IdCollection,
                 collection => collection.Id,
                 (entry, collection) => new { entry, collection })
             .Where(entryCollection => entryCollection.entry.Id == id &&

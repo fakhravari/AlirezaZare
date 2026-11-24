@@ -29,7 +29,7 @@ public sealed class StoreCatalogAdminApiController(
                 (version, plan) => new { version, plan })
             .Where(pricePlan => pricePlan.version.IsActive && pricePlan.plan.IsRegular &&
                                 pricePlan.plan.IdStockOwnerType == 1 &&
-                                pricePlan.version.IdProductVariant == null && pricePlan.version.IdAccessory == null)
+                                pricePlan.version.IdVariant == null && pricePlan.version.IdAccessory == null)
             .OrderBy(pricePlan => pricePlan.plan.Id)
             .ThenByDescending(pricePlan => pricePlan.version.Id)
             .Select(pricePlan => pricePlan.version);
@@ -103,7 +103,7 @@ public sealed class StoreCatalogAdminApiController(
         var offers = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id).ToListAsync(cancellationToken);
         db.StoreProductSalesPlanOfferAccessories.AddRange(offers.Select(x => new StoreProductSalesPlanOfferAccessory
         {
-            IdProductSalesPlanOffer = x.Id, IdAccessory = accessory.Id, IsAllowed = true,
+            IdOffer = x.Id, IdAccessory = accessory.Id, IsAllowed = true,
             IsIncludedByDefault = input.IsRequired
         }));
         await db.SaveChangesAsync(cancellationToken);
@@ -145,7 +145,7 @@ public sealed class StoreCatalogAdminApiController(
             var overrides = await db.StoreProductSalesPlanOfferAccessories
                 .Join(
                     db.StoreProductSalesPlanOffers,
-                    row => row.IdProductSalesPlanOffer,
+                    row => row.IdOffer,
                     offer => offer.Id,
                     (row, offer) => new { row, offer })
                 .Where(rowOffer => rowOffer.offer.IdProduct == id && rowOffer.row.IdAccessory == accessory.Id)
@@ -159,11 +159,11 @@ public sealed class StoreCatalogAdminApiController(
 
             var offerIds = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id).Select(x => x.Id)
                 .ToListAsync(cancellationToken);
-            var existingIds = overrides.Select(x => x.IdProductSalesPlanOffer).ToHashSet();
+            var existingIds = overrides.Select(x => x.IdOffer).ToHashSet();
             db.StoreProductSalesPlanOfferAccessories.AddRange(offerIds.Where(x => !existingIds.Contains(x)).Select(x =>
                 new StoreProductSalesPlanOfferAccessory
                 {
-                    IdProductSalesPlanOffer = x, IdAccessory = accessory.Id, IsAllowed = true,
+                    IdOffer = x, IdAccessory = accessory.Id, IsAllowed = true,
                     IsIncludedByDefault = true
                 }));
             var offerPlans = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id)
@@ -223,7 +223,7 @@ public sealed class StoreCatalogAdminApiController(
 
         var product = await db.Products.AsNoTracking().Where(x => x.Id == id)
             .Select(x => new
-                { x.Id, code = x.ProductKey, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.MaxPurchaseQuantity })
+                { x.Id, code = x.ProductKey, Name = x.NameFa, EnglishName = x.NameEn, x.IdBrand, x.IdCategory, x.MaxPurchaseQuantity })
             .SingleOrDefaultAsync(cancellationToken);
         if (product is null) return NotFound();
         var price = await RegularProductPrices().FirstOrDefaultAsync(x => x.IdProduct == id, cancellationToken);
@@ -288,7 +288,7 @@ public sealed class StoreCatalogAdminApiController(
     {
         var product = await db.Products.AsNoTracking().Where(x => x.Id == id).Select(x => new
         {
-            x.Id, x.ProductKey, Code = x.ProductKey, x.Name, x.EnglishName, x.IdBrand, x.IdCategory,
+            x.Id, x.ProductKey, Code = x.ProductKey, Name = x.NameFa, EnglishName = x.NameEn, x.IdBrand, x.IdCategory,
             x.MaxPurchaseQuantity,
             x.Slug, Badge = x.ProductBadge == null ? null : x.ProductBadge.Title, x.IsStoreEnabled,
             x.IsWarehouseEnabled, x.CreatedAtUtc, x.UpdatedAtUtc
@@ -545,7 +545,7 @@ public sealed class StoreCatalogAdminApiController(
                     (version, plan) => new { version, plan })
                 .GroupJoin(
                     db.ProductVariants.AsNoTracking(),
-                    versionPlan => versionPlan.version.IdProductVariant,
+                    versionPlan => versionPlan.version.IdVariant,
                     variant => (long?)variant.Id,
                     (versionPlan, variants) => new { versionPlan, variants })
                 .SelectMany(
@@ -591,8 +591,8 @@ public sealed class StoreCatalogAdminApiController(
             product.Id,
             product.ProductKey,
             Code = product.ProductKey,
-            product.Name,
-            product.EnglishName,
+            Name = product.Name,
+            EnglishName = product.EnglishName,
             BrandName = brandName,
             CategoryName = categoryPath,
             UnitName = unitName,
@@ -765,8 +765,8 @@ public sealed class StoreCatalogAdminApiController(
             return Conflict(new { title = "کد کالا قبلاً ثبت شده است." });
 
         product.ProductKey = key;
-        product.Name = name;
-        product.EnglishName = englishName;
+        product.NameFa = name;
+        product.NameEn = englishName;
         product.IdBrand = input.BrandId;
         product.IdCategory = input.CategoryId;
         product.MaxPurchaseQuantity = input.MaxPurchaseQuantity;
@@ -780,7 +780,7 @@ public sealed class StoreCatalogAdminApiController(
         {
             var currentPrice = await db.StorePriceVersions.SingleOrDefaultAsync(x => x.IdProduct == id &&
                 x.IdSalesPlan == planId && x.IsActive &&
-                x.IdProductVariant == null && x.IdAccessory == null, cancellationToken);
+                x.IdVariant == null && x.IdAccessory == null, cancellationToken);
             if (currentPrice is null || currentPrice.PriceBeforeDiscountAmount != input.PriceAmount ||
                 currentPrice.DiscountPercent != input.DiscountPercent)
                 await priceVersions.AppendAsync(id, planId, null, null, input.PriceAmount, input.DiscountPercent,
@@ -1029,7 +1029,7 @@ public sealed class StoreCatalogAdminApiController(
                 Id = productBrandCategory.product.Id,
                 CreatedAtUtc = productBrandCategory.product.CreatedAtUtc,
                 Code = productBrandCategory.product.ProductKey,
-                Name = productBrandCategory.product.Name,
+                Name = productBrandCategory.product.NameFa,
                 BrandName = productBrandCategory.brand == null ? null : productBrandCategory.brand.NameFa,
                 CategoryName = productBrandCategory.category == null ? null : productBrandCategory.category.NameFa,
                 PriceAmount = regularPrices.Where(price => price.IdProduct == productBrandCategory.product.Id)
@@ -1110,8 +1110,8 @@ public sealed class StoreCatalogAdminApiController(
         {
             Id = id,
             ProductKey = key,
-            Name = name,
-            EnglishName = english,
+            NameFa = name,
+            NameEn = english,
             IdBrand = input.BrandId,
             IdCategory = input.CategoryId,
             MaxPurchaseQuantity = input.MaxPurchaseQuantity,
@@ -1179,7 +1179,7 @@ public sealed class StoreCatalogAdminApiController(
         bool hasPrice = await RegularProductPrices().AnyAsync(x => x.IdProduct == id, cancellationToken);
         bool validProduct = hasPrice && product.MaxPurchaseQuantity is >= 1 and <= 99 &&
                             !string.IsNullOrWhiteSpace(product.Slug) &&
-                            !string.IsNullOrWhiteSpace(product.EnglishName);
+                            !string.IsNullOrWhiteSpace(product.NameEn);
         if (!validCategory || !validBrand || !validMedia || !validProduct)
             return Conflict(new { title = "پیش‌نویس پیدا نشد یا اطلاعات و تصویر آن کامل نیست." });
 
@@ -1796,8 +1796,8 @@ public sealed class StoreCatalogAdminApiController(
                                             productBrandCategory.category != null));
         if (query.Length > 0)
             productSource = productSource.Where(x =>
-                x.product.ProductKey.Contains(query) || x.product.Name.Contains(query) ||
-                (x.product.EnglishName != null && x.product.EnglishName.Contains(query)) ||
+                x.product.ProductKey.Contains(query) || x.product.NameFa.Contains(query) ||
+                (x.product.NameEn != null && x.product.NameEn.Contains(query)) ||
                 x.brand.NameFa.Contains(query) ||
                 (x.category != null && x.category.NameFa.Contains(query)));
         int productTotal = await productSource.CountAsync(cancellationToken);
@@ -1806,8 +1806,8 @@ public sealed class StoreCatalogAdminApiController(
             {
                 x.product.Id,
                 Code = x.product.ProductKey,
-                x.product.Name,
-                x.product.EnglishName,
+                x.product.NameFa,
+                x.product.NameEn,
                 BrandName = x.brand.NameFa,
                 CategoryName = x.category == null ? "" : x.category.NameFa,
                 PriceVersion = regularPrices.FirstOrDefault(v => v.IdProduct == x.product.Id)
@@ -1835,7 +1835,7 @@ public sealed class StoreCatalogAdminApiController(
             decimal stock = productStockTotals.GetValueOrDefault(x.Id);
             int stockQuantity = stock >= int.MaxValue ? int.MaxValue : Math.Max(0, (int)Math.Floor(stock));
 
-            return new ProductRow(checked((int)x.Id), x.Code, x.Name, x.EnglishName ?? x.Name, x.BrandName,
+            return new ProductRow(checked((int)x.Id), x.Code, x.NameFa, x.NameEn ?? x.NameFa, x.BrandName,
                 x.CategoryName, FinalPrice(x.PriceVersion) / 1_000_000m, stockQuantity,
                 x.PriceVersion?.DiscountPercent ?? 0m);
         });

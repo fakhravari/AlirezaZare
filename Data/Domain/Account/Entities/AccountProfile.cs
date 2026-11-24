@@ -40,7 +40,7 @@ public sealed class AccountCartItem
     public decimal Id { get; set; }
     public decimal IdCart { get; set; }
     public decimal IdProduct { get; set; }
-    public long? IdProductVariant { get; set; }
+    public long? IdVariant { get; set; }
     public long IdSalesPlan { get; set; }
     public int Quantity { get; set; }
     public DateTime UpdatedAtUtc { get; set; }
@@ -159,7 +159,7 @@ public sealed class StoreCustomerOrderItem
     public decimal Id { get; set; }
     public decimal IdOrder { get; set; }
     public decimal IdProduct { get; set; }
-    public long? IdProductVariant { get; set; }
+    public long? IdVariant { get; set; }
     public long IdSalesPlan { get; set; }
     public int Quantity { get; set; }
     public decimal IdPriceVersion { get; set; }

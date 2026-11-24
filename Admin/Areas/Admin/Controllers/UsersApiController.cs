@@ -46,7 +46,7 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
             {
                 x.Id, x.PermissionKey, x.Name,
                 ParentKey =
-                    string.IsNullOrWhiteSpace(x.ParentKey) ? null : canonicalKeys.GetValueOrDefault(x.ParentKey),
+                    string.IsNullOrWhiteSpace(x.ParentPermissionKey) ? null : canonicalKeys.GetValueOrDefault(x.ParentPermissionKey),
                 x.Area, x.Controller, x.Action
             }).ToList();
             long[] allPermissionIds = permissions.Select(x => x.Id).ToArray();
@@ -249,7 +249,7 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
 
     private static List<AdminPermission> GetVisiblePermissions(IReadOnlyCollection<AdminPermission> permissions)
     {
-        var children = permissions.GroupBy(x => string.IsNullOrWhiteSpace(x.ParentKey) ? "" : x.ParentKey,
+        var children = permissions.GroupBy(x => string.IsNullOrWhiteSpace(x.ParentPermissionKey) ? "" : x.ParentPermissionKey,
                 StringComparer.OrdinalIgnoreCase)
             .ToDictionary(group => group.Key, group => group.ToArray(), StringComparer.OrdinalIgnoreCase);
         var visible = new List<AdminPermission>();

@@ -112,7 +112,7 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
         if (!string.IsNullOrWhiteSpace(salesPlanKey))
             query = query.Where(x => x.plan.StoreSalesPlanKey == salesPlanKey);
         if (!string.IsNullOrWhiteSpace(search))
-            query = query.Where(x => x.inventoryItem.Product.Name.Contains(search)
+            query = query.Where(x => x.inventoryItem.Product.NameFa.Contains(search)
                                      || x.inventoryItem.Product.ProductKey.Contains(search)
                                      || (x.inventoryItem.ProductVariant != null &&
                                          x.inventoryItem.ProductVariant.VariantName.Name.Contains(search)));
@@ -121,7 +121,7 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                 x.plan.IsRegular && x.balance != null && x.balance.MinimumQuantity > 0 &&
                 x.balance.Quantity <= x.balance.MinimumQuantity);
 
-        return await query.OrderBy(x => x.warehouse.Name).ThenBy(x => x.inventoryItem.Product.Name)
+        return await query.OrderBy(x => x.warehouse.Name).ThenBy(x => x.inventoryItem.Product.NameFa)
             .ThenBy(x =>
                 x.inventoryItem.ProductVariant == null ? string.Empty : x.inventoryItem.ProductVariant.VariantName.Name)
             .ThenBy(x => x.plan.StoreSalesPlanKey).Skip((page - 1) * pageSize).Take(pageSize).Select(x =>
@@ -134,8 +134,8 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                     x.warehouse.Company.Name,
                     x.inventoryItem.Product.Id,
                     x.inventoryItem.Product.ProductKey,
-                    x.inventoryItem.Product.Name,
-                    x.inventoryItem.IdProductVariant,
+                    x.inventoryItem.Product.NameFa,
+                    x.inventoryItem.IdVariant,
                     x.inventoryItem.ProductVariant == null ? null : x.inventoryItem.ProductVariant.VariantName.Name,
                     x.plan.StoreSalesPlanKey,
                     x.plan.DisplayName,

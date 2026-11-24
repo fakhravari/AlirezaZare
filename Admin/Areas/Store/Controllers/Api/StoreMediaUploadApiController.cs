@@ -209,7 +209,7 @@ public sealed class StoreMediaUploadApiController(
             var product = await db.Products.AsNoTracking()
                 .SingleOrDefaultAsync(x => x.Id == productId, cancellationToken);
             if (product is null) return NotFound(new { title = "کالای فروشگاهی پیدا نشد." });
-            productName = product.Name;
+            productName = product.NameFa;
             if (string.IsNullOrEmpty(title)) title = productName;
 
             if (video)

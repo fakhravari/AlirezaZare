@@ -82,12 +82,12 @@ public sealed class StoreProductBadgesApiController(ShopDbContext db) : Controll
         q = q?.Trim() ?? "";
         if (q.Length > 100 || page is < 1 or > 100000 || badgeId is < 1 || (badgeId.HasValue && withoutBadge))
             return BadRequest();
-        var query = db.Products.AsNoTracking().Where(x => q == "" || x.Name.Contains(q) || x.ProductKey.Contains(q));
+        var query = db.Products.AsNoTracking().Where(x => q == "" || x.NameFa.Contains(q) || x.ProductKey.Contains(q));
         if (badgeId.HasValue) query = query.Where(x => x.IdBadge == badgeId.Value);
         if (withoutBadge) query = query.Where(x => x.IdBadge == null);
         int total = await query.CountAsync(ct);
-        var items = await query.OrderBy(x => x.Name).ThenBy(x => x.Id).Skip((page - 1) * 30).Take(30)
-            .Select(x => new { x.Id, x.Name, code = x.ProductKey, x.IdBadge }).ToListAsync(ct);
+        var items = await query.OrderBy(x => x.NameFa).ThenBy(x => x.Id).Skip((page - 1) * 30).Take(30)
+            .Select(x => new { x.Id, Name = x.NameFa, code = x.ProductKey, x.IdBadge }).ToListAsync(ct);
         return Ok(new { items, total, page, pageSize = 30 });
     }
 

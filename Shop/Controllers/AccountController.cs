@@ -51,7 +51,7 @@ public sealed class AccountController(
             {
                 row.item.Id,
                 row.item.IdProduct,
-                row.item.IdProductVariant,
+                row.item.IdVariant,
                 row.item.Quantity,
                 row.plan.StoreSalesPlanKey
             })
@@ -81,8 +81,8 @@ public sealed class AccountController(
                         .Select(version => (decimal?)version.FinalPriceAmount).FirstOrDefault()
                 })
                 .ToListAsync(ct);
-        var cartVariantRows = cartRows.Where(item => item.IdProductVariant.HasValue)
-            .Select(item => item.IdProductVariant!.Value).Distinct().ToArray();
+        var cartVariantRows = cartRows.Where(item => item.IdVariant.HasValue)
+            .Select(item => item.IdVariant!.Value).Distinct().ToArray();
         var cartVariants = cartVariantRows.Length == 0
             ? []
             : await db.ProductVariants.AsNoTracking().Where(variant => cartVariantRows.Contains(variant.Id))
@@ -230,11 +230,11 @@ public sealed class AccountController(
                     itemPlanProduct.item.Id,
                     itemPlanProduct.item.IdOrder,
                     itemPlanProduct.item.IdProduct,
-                    itemPlanProduct.item.IdProductVariant,
+                    itemPlanProduct.item.IdVariant,
                     itemPlanProduct.item.IdSalesPlan,
-                    ProductName = itemPlanProduct.product.Name,
+                    ProductName = itemPlanProduct.product.NameFa,
                     VariantName = db.ProductVariants
-                        .Where(variant => variant.Id == itemPlanProduct.item.IdProductVariant)
+                        .Where(variant => variant.Id == itemPlanProduct.item.IdVariant)
                         .Select(variant => variant.VariantName.TreePathNames)
                         .FirstOrDefault(),
                     itemPlanProduct.plan.StoreSalesPlanKey,
@@ -263,7 +263,7 @@ public sealed class AccountController(
                     referenceVersion.reference.IdProduct,
                     referenceVersion.reference.IdSalesPlan,
                     referenceVersion.reference.IdPriceVersion,
-                    referenceVersion.version.IdProductVariant,
+                    referenceVersion.version.IdVariant,
                     referenceVersion.reference.IdAccessory,
                     PriceAmount = referenceVersion.reference.UnitAmountSnapshot,
                     referenceVersion.version.PriceBeforeDiscountAmount,
@@ -293,12 +293,12 @@ public sealed class AccountController(
             ["cart"] = cartRows.Select(item => new
             {
                 id = item.IdProduct,
-                variantId = item.IdProductVariant,
+                variantId = item.IdVariant,
                 item.Quantity,
                 salesPlanId = item.StoreSalesPlanKey,
                 options = new
                 {
-                    inventoryVariant = item.IdProductVariant is { } variantId &&
+                    inventoryVariant = item.IdVariant is { } variantId &&
                                        cartVariants.FirstOrDefault(variant => variant.Id == variantId) is { } variant
                         ? new
                         {
@@ -376,7 +376,7 @@ public sealed class AccountController(
                 items = orderItemsById.GetValueOrDefault(order.Id, []).Select(item => new
                 {
                     productId = item.IdProduct,
-                    variantId = item.IdProductVariant,
+                    variantId = item.IdVariant,
                     name = item.ProductName,
                     variantName = item.VariantName,
                     salesPlanId = item.StoreSalesPlanKey,
@@ -399,7 +399,7 @@ public sealed class AccountController(
                         reference.IdSalesPlan == item.IdSalesPlan).Select(reference => new
                     {
                         priceVersionId = reference.IdPriceVersion,
-                        component = StorePriceVersionReference.GetComponent(reference.IdProductVariant,
+                        component = StorePriceVersionReference.GetComponent(reference.IdVariant,
                             reference.IdAccessory),
                         name = reference.AccessoryName,
                         calculatedUnitAmount = reference.PriceAmount,
@@ -412,7 +412,7 @@ public sealed class AccountController(
                     }).Prepend(new
                     {
                         priceVersionId = item.IdPriceVersion,
-                        component = item.IdProductVariant.HasValue ? "variant" : "product",
+                        component = item.IdVariant.HasValue ? "variant" : "product",
                         name = item.VariantName ?? item.ProductName, calculatedUnitAmount = item.FinalPriceAmount,
                         priceBeforeDiscountAmount = (decimal?)item.PriceAmount,
                         discountPercent = (decimal?)item.DiscountPercent
@@ -699,7 +699,7 @@ public sealed class AccountController(
         {
             IdCart = cart.Id,
             IdProduct = item.ProductId,
-            IdProductVariant = item.VariantId,
+            IdVariant = item.VariantId,
             IdSalesPlan = planIds[item.SalesPlanId],
             Quantity = item.Quantity,
             UpdatedAtUtc = now
@@ -789,7 +789,7 @@ public sealed class AccountController(
             {
                 cartItemPlan.item.Id,
                 cartItemPlan.item.IdProduct,
-                cartItemPlan.item.IdProductVariant,
+                cartItemPlan.item.IdVariant,
                 cartItemPlan.item.Quantity,
                 SalesPlanId = cartItemPlan.plan.StoreSalesPlanKey
             })
@@ -817,7 +817,7 @@ public sealed class AccountController(
             ProductInventoryVariant[] productVariants =
                 catalog.InventoryVariants.Where(variant => variant.ProductId == row.IdProduct).ToArray();
             ProductInventoryVariant? inventoryVariant = catalog.InventoryVariants.SingleOrDefault(variant =>
-                variant.ProductId == row.IdProduct && variant.VariantId == row.IdProductVariant);
+                variant.ProductId == row.IdProduct && variant.VariantId == row.IdVariant);
             if (productVariants.Length > 0)
             {
                 if (inventoryVariant is null ||
@@ -831,7 +831,7 @@ public sealed class AccountController(
                 if (!inventoryVariant.FinalPriceBySalesPlan.TryGetValue(row.SalesPlanId, out unitAmount))
                     return Conflict(new { code = "variant-price-unavailable" });
             }
-            else if (row.IdProductVariant.HasValue)
+            else if (row.IdVariant.HasValue)
                 return Conflict(new { code = "product-variant-unavailable" });
 
             ProductPurchaseConfiguration? configuration =
@@ -929,7 +929,7 @@ public sealed class AccountController(
             {
                 cartItemPlan.item.Id,
                 cartItemPlan.item.IdProduct,
-                cartItemPlan.item.IdProductVariant,
+                cartItemPlan.item.IdVariant,
                 cartItemPlan.item.Quantity,
                 SalesPlanId = cartItemPlan.plan.StoreSalesPlanKey
             })
@@ -970,7 +970,7 @@ public sealed class AccountController(
             };
             JsonElement options = JsonSerializer.SerializeToElement(selections, AccountStateJsonOptions);
 
-            return new CartLineRequest(item.IdProduct, item.Quantity, item.SalesPlanId, options, item.IdProductVariant);
+            return new CartLineRequest(item.IdProduct, item.Quantity, item.SalesPlanId, options, item.IdVariant);
         }).ToList();
         if (cartLines.Any(item => item.ProductId is < 1 or > int.MaxValue || item.VariantId is < 1 ||
                                   item.Quantity is < 1 or > 99 || string.IsNullOrWhiteSpace(item.SalesPlanId)))
@@ -1061,7 +1061,7 @@ public sealed class AccountController(
                     return Conflict(new { code = "product-variant-unavailable" });
 
                 string? productName = await db.Products.AsNoTracking()
-                    .Where(x => x.Id == line.ProductId && x.IsStoreEnabled).Select(x => x.Name)
+                    .Where(x => x.Id == line.ProductId && x.IsStoreEnabled).Select(x => x.NameFa)
                     .SingleOrDefaultAsync(ct);
                 if (productName is null) return Conflict(new { code = "product-unavailable" });
 
@@ -1201,7 +1201,7 @@ public sealed class AccountController(
             Items = priced.Select(item => new StoreCustomerOrderItem
             {
                 IdProduct = item.Line.ProductId,
-                IdProductVariant = item.Line.VariantId,
+                IdVariant = item.Line.VariantId,
                 IdSalesPlan = checkoutPlanIds[item.Line.SalesPlanId],
                 Quantity = item.Line.Quantity,
                 IdPriceVersion = item.IdPriceVersion,

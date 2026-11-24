@@ -39,7 +39,7 @@ public sealed class HomeController : PageController
         var reviewItems = await _db.StoreHomeTestimonials.AsNoTracking().Where(x => x.IsActive)
             .OrderBy(x => x.SortOrder).ThenByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
             .Select(x => new
-                { x.DisplayName, ProductName = x.Product.Name, x.FeedbackText, x.Rating, x.CreatedAtUtc, x.ImagePath })
+                { x.DisplayName, ProductName = x.Product.NameFa, x.FeedbackText, x.Rating, x.CreatedAtUtc, x.ImagePath })
             .ToListAsync(HttpContext.RequestAborted);
         string cdnBaseUrl = await _mediaCdn.GetBaseUrlAsync(HttpContext.RequestAborted);
         var reviews = reviewItems.Select(x => new HomeReviewCard(x.DisplayName, x.ProductName, x.FeedbackText,

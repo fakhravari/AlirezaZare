@@ -40,7 +40,7 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
                 db.StoreProductVariantSalesPlanOffers.AsNoTracking(),
                 productPlanVariant => new { Variant = productPlanVariant.variant.Id,
                     Plan = productPlanVariant.plan.Id },
-                offer => new { Variant = offer.IdProductVariant, Plan = offer.IdSalesPlan },
+                offer => new { Variant = offer.IdVariant, Plan = offer.IdSalesPlan },
                 (productPlanVariant, offers) => new { productPlanVariant, offers })
             .SelectMany(
                 productPlanOffers => productPlanOffers.offers.DefaultIfEmpty(),
@@ -48,15 +48,15 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
             .Where(productPlanVariantOffer =>
                 productPlanVariantOffer.productPlanVariant.variant.IsActive &&
                 db.InventoryItems.Any(item =>
-                    item.IdProductVariant == productPlanVariantOffer.productPlanVariant.variant.Id && item.IsActive) &&
+                    item.IdVariant == productPlanVariantOffer.productPlanVariant.variant.Id && item.IsActive) &&
                 (productPlanVariantOffer.offer == null ||
                  (productPlanVariantOffer.offer.IsEnabled && !db.StorePriceVersions.Any(price =>
-                     price.IdProductVariant == productPlanVariantOffer.productPlanVariant.variant.Id &&
+                     price.IdVariant == productPlanVariantOffer.productPlanVariant.variant.Id &&
                      price.IdSalesPlan == productPlanVariantOffer.productPlanVariant.plan.Id && price.IsActive))))
             .Select(productPlanVariantOffer => new SystemProblemRow
             {
                 Id = productPlanVariantOffer.productPlanVariant.variant.Id,
-                Subject = productPlanVariantOffer.productPlanVariant.product.Name,
+                Subject = productPlanVariantOffer.productPlanVariant.product.NameFa,
                 Context = productPlanVariantOffer.productPlanVariant.variant.VariantName.Name,
                 Plan = productPlanVariantOffer.productPlanVariant.plan.DisplayName,
                 Detail = productPlanVariantOffer.offer == null
@@ -73,20 +73,20 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
             .Where(productPlanVariant =>
                 productPlanVariant.variant.IsActive && productPlanVariant.variant.IsDefault &&
                 !db.StoreProductVariantSalesPlanOffers.Any(offer =>
-                    offer.IdProductVariant == productPlanVariant.variant.Id &&
+                    offer.IdVariant == productPlanVariant.variant.Id &&
                     offer.IdSalesPlan == productPlanVariant.plan.Id && !offer.IsEnabled) &&
                 (!db.InventoryItems.Any(item =>
-                     item.IdProductVariant == productPlanVariant.variant.Id && item.IsActive) ||
+                     item.IdVariant == productPlanVariant.variant.Id && item.IsActive) ||
                  !db.StoreProductVariantSalesPlanOffers.Any(offer =>
-                     offer.IdProductVariant == productPlanVariant.variant.Id &&
+                     offer.IdVariant == productPlanVariant.variant.Id &&
                      offer.IdSalesPlan == productPlanVariant.plan.Id && offer.IsEnabled) ||
                  !db.StorePriceVersions.Any(price =>
-                     price.IdProductVariant == productPlanVariant.variant.Id &&
+                     price.IdVariant == productPlanVariant.variant.Id &&
                      price.IdSalesPlan == productPlanVariant.plan.Id && price.IsActive)))
             .Select(productPlanVariant => new SystemProblemRow
             {
                 Id = productPlanVariant.variant.Id,
-                Subject = productPlanVariant.product.Name,
+                Subject = productPlanVariant.product.NameFa,
                 Context = productPlanVariant.variant.VariantName.Name,
                 Plan = productPlanVariant.plan.DisplayName,
                 Detail = "تنوع پیش‌فرض در این طرح قلم موجودی، اتصال فعال یا قیمت فعال ندارد؛ وضعیت آن را بررسی کنید"
@@ -97,11 +97,11 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
                 !db.ProductVariants.Any(variant => variant.IdProduct == productPlan.product.Id && variant.IsActive) &&
                 !db.StorePriceVersions.Any(price =>
                     price.IdProduct == productPlan.product.Id && price.IdSalesPlan == productPlan.plan.Id &&
-                    price.IdProductVariant == null && price.IdAccessory == null && price.IsActive))
+                    price.IdVariant == null && price.IdAccessory == null && price.IsActive))
             .Select(productPlan => new SystemProblemRow
             {
                 Id = productPlan.product.Id,
-                Subject = productPlan.product.Name,
+                Subject = productPlan.product.NameFa,
                 Context = "کالای بدون تنوع فعال",
                 Plan = productPlan.plan.DisplayName,
                 Detail = "قیمت فعال کالا ثبت نشده"
@@ -115,7 +115,7 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
             .Select(product => new SystemProblemRow
             {
                 Id = product.Id,
-                Subject = product.Name,
+                Subject = product.NameFa,
                 Plan = "",
                 Detail = "تنوع پیش‌فرض فعال ندارد"
             });
@@ -124,12 +124,12 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
             .AsNoTracking()
             .Where(variant => variant.IsActive && variant.Product.IsStoreEnabled &&
                               !db.InventoryItems.Any(item =>
-                                  item.IdProductVariant == variant.Id && item.IdProduct == variant.IdProduct &&
+                                  item.IdVariant == variant.Id && item.IdProduct == variant.IdProduct &&
                                   item.IsActive))
             .Select(variant => new SystemProblemRow
             {
                 Id = variant.Id,
-                Subject = variant.Product.Name,
+                Subject = variant.Product.NameFa,
                 Context = variant.VariantName.Name,
                 Plan = "",
                 Detail = "قلم موجودی فعال برای تنوع ثبت نشده"
@@ -139,11 +139,11 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
             .Where(product =>
                 !db.ProductVariants.Any(variant => variant.IdProduct == product.Id && variant.IsActive) &&
                 !db.InventoryItems.Any(item =>
-                    item.IdProduct == product.Id && item.IdProductVariant == null && item.IsActive))
+                    item.IdProduct == product.Id && item.IdVariant == null && item.IsActive))
             .Select(product => new SystemProblemRow
             {
                 Id = product.Id,
-                Subject = product.Name,
+                Subject = product.NameFa,
                 Plan = "",
                 Detail = "قلم موجودی فعال برای کالای بدون تنوع ثبت نشده"
             });
@@ -161,7 +161,7 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
             .Select(product => new SystemProblemRow
             {
                 Id = product.Id,
-                Subject = product.Name,
+                Subject = product.NameFa,
                 Plan = "",
                 Detail = "واحد پایهٔ فعال، ضریب یک یا مرجع واحد فعال معتبر نیست"
             });
@@ -188,12 +188,12 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
                      offer.IdProduct == productPlanAccessory.product.Id &&
                      offer.IdSalesPlan == productPlanAccessory.plan.Id && offer.IsEnabled &&
                      !db.StoreProductSalesPlanOfferAccessories.Any(overrideRow =>
-                         overrideRow.IdProductSalesPlanOffer == offer.Id &&
+                         overrideRow.IdOffer == offer.Id &&
                          overrideRow.IdAccessory == productPlanAccessory.accessory.Id && overrideRow.IsAllowed))))
             .Select(productPlanAccessory => new SystemProblemRow
             {
                 Id = productPlanAccessory.relation.Id,
-                Subject = productPlanAccessory.product.Name,
+                Subject = productPlanAccessory.product.NameFa,
                 Context = productPlanAccessory.accessory.Name,
                 Plan = productPlanAccessory.plan.DisplayName,
                 Detail = "قیمت فعال یا مجوز متعلقهٔ اجباری در طرح موجود نیست"
@@ -204,11 +204,11 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
             .Where(stock =>
                 stock.Quantity < 0 && stock.Warehouse.IsActive && stock.InventoryItem.IsActive &&
                 stock.InventoryItem.Product.IsWarehouseEnabled && stock.SalesPlanReference.IsActive &&
-                (!stock.InventoryItem.IdProductVariant.HasValue || stock.InventoryItem.ProductVariant!.IsActive))
+                (!stock.InventoryItem.IdVariant.HasValue || stock.InventoryItem.ProductVariant!.IsActive))
             .Select(stock => new SystemProblemRow
             {
                 Id = stock.Id,
-                Subject = stock.InventoryItem.Product.Name,
+                Subject = stock.InventoryItem.Product.NameFa,
                 Context = stock.InventoryItem.ProductVariant != null
                     ? stock.InventoryItem.ProductVariant.VariantName.Name
                     : "بدون تنوع",
