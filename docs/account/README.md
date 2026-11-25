@@ -6,4 +6,4 @@
 |---|---|
 | [پروفایل](profile.md) | احراز هویت، اطلاعات شخصی، نشانی‌ها، سفارش‌ها و دادهٔ حساب |
 
-پیش از تغییر، routeها را در `Shop/Controllers/AccountController.cs` و `ProfileController.cs` و source داده را از DI دنبال کنید. قرارداد queryهای EF Core برای کد `Shop` در [راهنمای پایگاه داده](../architecture/database.md) آمده است. [فهرست docs](../README.md).
+پیش از تغییر، routeهای API را در `Shop/Controllers/Account/`، صفحه‌ها را در `ProfileController.cs` و source داده را از DI دنبال کنید. قرارداد queryهای EF Core برای کد `Shop` در [راهنمای پایگاه داده](../architecture/database.md) آمده است. [فهرست docs](../README.md).

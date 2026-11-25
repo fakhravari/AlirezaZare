@@ -5,7 +5,7 @@ using Shop.Data.Application.Account.Contracts;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Data.Domain.Store.Entities;
 
-namespace Shop.Data.Application.Account.Queries;
+namespace Shop.Data.Infrastructure.Account;
 
 public sealed class AccountStateQueryService(ShopDbContext db) : IAccountStateQueryService
 {

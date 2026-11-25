@@ -103,7 +103,7 @@ builder.Services.AddScoped<Shop.Services.DatabaseAccountDataSource>();
 builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services =>
     services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
 builder.Services.AddScoped<Shop.Data.Application.Account.Contracts.IAccountStateQueryService,
-    Shop.Data.Application.Account.Queries.AccountStateQueryService>();
+    Shop.Data.Infrastructure.Account.AccountStateQueryService>();
 builder.Services.AddScoped<Shop.Services.AccountCheckoutService>();
 var persianHtmlEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Arabic);
 persianHtmlEncoderSettings.AllowCharacter('\u200C');
