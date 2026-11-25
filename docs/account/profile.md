@@ -2,7 +2,7 @@
 
 نشانی‌ای که به سفارش متصل است حذف نمی‌شود؛ API پاسخ ۴۰۹ می‌دهد و صفحه علت را نشان می‌دهد. نشانی ذخیره‌شده در زمان ثبت سفارش همچنان جداگانه در snapshot سفارش نگهداری می‌شود.
 
-ورود/ثبت‌نام و endpointهای احراز را از `Shop/Controllers/AccountController.cs`، `EmailVerificationController.cs` و `PasswordLoginController.cs` دنبال کنید. صفحهٔ حساب در `ProfileController.cs` و `Shop/Views/Profile/` است. سمت مرورگر، projection حساب در `Shop/wwwroot/shop/js/store/account-data.js` و صفحه در `js/pages/account-page.js` مصرف می‌شود. کد پنجرهٔ ویرایش پروفایل و ثبت اطلاعات در `js/pages/profile-edit.js` قرار دارد و پس از اسکریپت‌های صفحه بارگذاری می‌شود.
+endpointهای `/api/account` در `Shop/Controllers/Account/` بر اساس state، پیام و جستجو، پروفایل و نشانی، سبد، checkout، فهرست‌ها و تعاملات مقاله جدا شده‌اند. کنترلرها فقط هویت درخواست و نگاشت پاسخ HTTP را مدیریت می‌کنند؛ تجمیع state در `Data/Application/Account/Queries/AccountStateQueryService.cs` و قیمت‌گذاری و ثبت checkout در `Shop/Services/AccountCheckoutService.cs` انجام می‌شود. ورود/ثبت‌نام و endpointهای احراز را در `EmailVerificationController.cs` و `PasswordLoginController.cs` دنبال کنید. صفحهٔ حساب در `ProfileController.cs` و `Shop/Views/Profile/` است. سمت مرورگر، projection حساب در `Shop/wwwroot/shop/js/store/account-data.js` و صفحه در `js/pages/account-page.js` مصرف می‌شود. کد پنجرهٔ ویرایش پروفایل و ثبت اطلاعات در `js/pages/profile-edit.js` قرار دارد و پس از اسکریپت‌های صفحه بارگذاری می‌شود.
 
 فرم ورود و کد یک‌بارمصرف از اعتبارسنج مشترک فرم‌ها استفاده می‌کنند: خطای ورودی کنار همان فیلد نمایش داده و با اصلاح آن پاک می‌شود؛ خطای ارتباط یا پاسخ سرور جداگانه در فرم می‌ماند. با تغییر روش ورود، فیلد رمز غیرفعال و خطای آن پاک می‌شود.
 

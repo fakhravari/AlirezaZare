@@ -9,7 +9,7 @@
 | خانه | `Shop/Controllers/HomeController.cs` → `Shop/Views/Home/` |
 | جست‌وجو و دیتیل | `ProductController.cs` → `Views/Product/`; مسیر دیتیل `/products/{slug}` و جست‌وجو `/Search` |
 | سبد و checkout | `CartController.cs`, `CheckoutController.cs` → `Views/Cart/`, `Views/Checkout/` |
-| حساب | `AccountController.cs`, `ProfileController.cs` → `Views/Profile/` و endpointهای `/api/account` |
+| حساب | `Shop/Controllers/Account/` (endpointهای `/api/account`) و `ProfileController.cs` → `Views/Profile/` |
 | پیگیری سفارش | `/Tracking` → `TrackingController.cs` → `POST /api/store/orders/tracking` |
 | پرداخت | `PaymentController.cs` برای `/api/payment`; صفحهٔ موسسات در `PaymentInstitutionsController.cs` |
 | محتوا | `MagazineController`, `BrandsController`, `FaqController`, `PageController` و controllerهای درباره/قانون/ارسال |

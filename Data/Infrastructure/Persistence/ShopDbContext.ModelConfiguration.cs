@@ -631,6 +631,8 @@ public sealed partial class ShopDbContext
         modelBuilder.Entity<AccountCompareItem>().HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.NoAction); // Account.CompareItem -> Warehouse.Product
         modelBuilder.Entity<AccountArticleFeedback>().HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile); // Account.ArticleFeedback -> Account.Profile
         modelBuilder.Entity<AccountArticleFeedback>().HasOne<MagazineArticle>().WithMany().HasForeignKey(x => x.IdMagazineArticle).OnDelete(DeleteBehavior.NoAction); // Account.ArticleFeedback -> Mag.MagazineArticle
+        modelBuilder.Entity<AccountArticleFeedback>().HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.NoAction); // Account.ArticleFeedback -> Account.ArticleFeedbackStatus
+        modelBuilder.Entity<StoreContactMessage>().HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.NoAction); // Store.ContactFormMessage -> Store.ContactMessageStatus
         modelBuilder.Entity<AccountCartItem>().HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.NoAction); // Account.CartItem -> Warehouse.Product
         modelBuilder.Entity<StoreProductBenefit>().HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.NoAction); // Store.ProductBenefit -> Warehouse.Product
         modelBuilder.Entity<StoreProductCollectionItem>().HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.NoAction); // Store.ProductCollectionItem -> Warehouse.Product
