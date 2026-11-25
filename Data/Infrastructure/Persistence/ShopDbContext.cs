@@ -79,36 +79,20 @@ public sealed partial class ShopDbContext(DbContextOptions<ShopDbContext> option
     public DbSet<StoreCatalogFeature> StoreCatalogFeatures => Set<StoreCatalogFeature>();
     public DbSet<StoreCatalogFeatureValue> StoreCatalogFeatureValues => Set<StoreCatalogFeatureValue>();
     public DbSet<StoreCategoryCatalogFeature> StoreCategoryCatalogFeatures => Set<StoreCategoryCatalogFeature>();
-
-    public DbSet<StoreProductCatalogFeatureValue> StoreProductCatalogFeatureValues =>
-        Set<StoreProductCatalogFeatureValue>();
-
-    public DbSet<StoreVariantCatalogFeatureValue> StoreVariantCatalogFeatureValues =>
-        Set<StoreVariantCatalogFeatureValue>();
-
+    public DbSet<StoreProductCatalogFeatureValue> StoreProductCatalogFeatureValues => Set<StoreProductCatalogFeatureValue>();
+    public DbSet<StoreVariantCatalogFeatureValue> StoreVariantCatalogFeatureValues => Set<StoreVariantCatalogFeatureValue>();
     public DbSet<StoreProductColor> StoreProductColors => Set<StoreProductColor>();
-
-    public DbSet<StoreProductSpecificationValue> StoreProductSpecificationValues =>
-        Set<StoreProductSpecificationValue>();
-
+    public DbSet<StoreProductSpecificationValue> StoreProductSpecificationValues => Set<StoreProductSpecificationValue>();
     public DbSet<StoreProductCollection> StoreProductCollections => Set<StoreProductCollection>();
     public DbSet<StoreProductCollectionItem> StoreProductCollectionItems => Set<StoreProductCollectionItem>();
     public DbSet<StoreHomeCategoryTab> StoreHomeCategoryTabs => Set<StoreHomeCategoryTab>();
     public DbSet<StoreCategory> StoreCategories => Set<StoreCategory>();
     public DbSet<StoreProductSalesPlanOffer> StoreProductSalesPlanOffers => Set<StoreProductSalesPlanOffer>();
-
-    public DbSet<StoreProductVariantSalesPlanOffer> StoreProductVariantSalesPlanOffers =>
-        Set<StoreProductVariantSalesPlanOffer>();
-
+    public DbSet<StoreProductVariantSalesPlanOffer> StoreProductVariantSalesPlanOffers => Set<StoreProductVariantSalesPlanOffer>();
     public DbSet<StoreAccessory> StoreAccessories => Set<StoreAccessory>();
     public DbSet<StoreProductAccessory> StoreProductAccessories => Set<StoreProductAccessory>();
-
-    public DbSet<StoreProductSalesPlanOfferAccessory> StoreProductSalesPlanOfferAccessories =>
-        Set<StoreProductSalesPlanOfferAccessory>();
-
-    public DbSet<StoreProductSalesPlanOfferSpecificationOverride> StoreProductSalesPlanOfferSpecificationOverrides =>
-        Set<StoreProductSalesPlanOfferSpecificationOverride>();
-
+    public DbSet<StoreProductSalesPlanOfferAccessory> StoreProductSalesPlanOfferAccessories => Set<StoreProductSalesPlanOfferAccessory>();
+    public DbSet<StoreProductSalesPlanOfferSpecificationOverride> StoreProductSalesPlanOfferSpecificationOverrides => Set<StoreProductSalesPlanOfferSpecificationOverride>();
     public DbSet<StorePriceVersion> StorePriceVersions => Set<StorePriceVersion>();
     public DbSet<StoreOrderAccessory> StoreOrderAccessories => Set<StoreOrderAccessory>();
     public DbSet<StoreOrderItemAmount> StoreOrderItemAmounts => Set<StoreOrderItemAmount>();
@@ -141,9 +125,6 @@ public sealed partial class ShopDbContext(DbContextOptions<ShopDbContext> option
     public DbSet<StoreOrderPreviousNumber> StoreOrderPreviousNumbers => Set<StoreOrderPreviousNumber>();
     public DbSet<StoreNewsletterSubscriber> StoreNewsletterSubscribers => Set<StoreNewsletterSubscriber>();
     public DbSet<StoreContactMessage> StoreContactMessages => Set<StoreContactMessage>();
-
-    public DbSet<StoreOrderShipmentTrackingHistory> StoreOrderShipmentTrackingHistories =>
-        Set<StoreOrderShipmentTrackingHistory>();
-
+    public DbSet<StoreOrderShipmentTrackingHistory> StoreOrderShipmentTrackingHistories => Set<StoreOrderShipmentTrackingHistory>();
     public DbSet<StoreSchemaMigration> StoreSchemaMigrations => Set<StoreSchemaMigration>();
 }
