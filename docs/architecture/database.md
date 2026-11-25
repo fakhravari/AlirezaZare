@@ -1,5 +1,46 @@
 # مدل و زیرساخت پایگاه داده
 
+## استاندارد Queryهای EF Core در Shop
+
+Queryهای EF Core در پروژهٔ `Shop` باید با قالب یکسان زیر نوشته شوند تا مسیر ساخت query و تفاوت خواندن با تغییر داده روشن بماند:
+
+- همهٔ queryها با Method Syntax نوشته شوند؛ برای اتصال داده از `Join` و برای ترتیب از `OrderBy`/`ThenBy` استفاده کنید.
+- هر فراخوانی زنجیره‌ای query در خط مستقل بیاید. شرط‌های `Where` چندخطی و با تورفتگی زیر خود نوشته شوند.
+- هر عضو projection در `Select` در خط جداگانه قرار گیرد.
+- queryهای خواندنی از `AsNoTracking()` استفاده کنند؛ این قاعده برای هر منبع EF در join نیز برقرار است. queryهایی که قرار است entity را تغییر دهند باید tracking را حفظ کنند.
+- اجرای ناهمگام از متدهای Async متناظر و `cancellationToken` استفاده کند؛ token را تا متد نهایی اجرا مانند `ToListAsync`، `FirstOrDefaultAsync` یا `AnyAsync` عبور دهید.
+
+نمونهٔ قالب:
+
+```csharp
+var rows = await dbContext.Products
+    .AsNoTracking()
+    .Where(product =>
+        product.IsStoreEnabled &&
+        product.NameFa.Contains(searchText))
+    .Join(
+        dbContext.ProductVariants.AsNoTracking(),
+        product => product.Id,
+        variant => variant.IdProduct,
+        (product, variant) => new
+        {
+            ProductId = product.Id,
+            ProductName = product.NameFa,
+            VariantId = variant.Id
+        })
+    .OrderBy(row => row.ProductName)
+    .ThenBy(row => row.VariantId)
+    .Select(row => new ProductVariantRow
+    {
+        ProductId = row.ProductId,
+        ProductName = row.ProductName,
+        VariantId = row.VariantId
+    })
+    .ToListAsync(cancellationToken);
+```
+
+برای خواندن یک مقدار یا بررسی وجود ردیف نیز همین ترتیب رعایت می‌شود: منبع خواندنی بدون tracking، شرط‌ها در خطوط مستقل و متد پایانی Async همراه token. متدهای میانی مانند `Where` و `OrderBy` سازندهٔ query هستند و خودشان Async نیستند.
+
 در مدل EF، `Warehouse.WarehouseStockOwner`, `Store.VariantCatalogFeatureValue` و `Store.CouponUsage` کلید اصلی `Id` از نوع `numeric(30,0) IDENTITY` دارند. کلیدهای مرکب پیشین به قیدهای `UNIQUE` به نام‌های `UQ_WarehouseStockOwner_Warehouse_StockOwner`، `UQ_VariantCatalogFeatureValue_Variant_Feature` و `UQ_CouponUsage_Coupon_Order` تبدیل شده‌اند؛ migration `172-surrogate-keys-for-association-tables.sql` آن‌ها را در پایگاه تعریف می‌کند و در صورت وجود ردیف تکراری متوقف می‌شود. این migration در ۲۴ نوامبر ۲۰۲۶ روی پایگاه اصلی اجرا شد: ۴ اتصال مالک، ۴۹ مقدار ویژگی و صفر مصرف کوپن حفظ شدند و هر سه قید یکتا فعال و روی جفت ستون درست تأیید شدند. قید فیلترشدهٔ `UX_WarehouseStockOwner_OneDefaultPerWarehouse` نیز فعال است و فقط یک `IsDefault = 1` را برای هر انبار می‌پذیرد؛ marker migration ثبت شد.
 
 در سفارش فروشگاه، `Store.Order.CreatedAtUtc` مرجع زمان ثبت است. migration `171-remove-order-redundant-columns.sql` در ۲۴ نوامبر ۲۰۲۶ روی پایگاه اصلی `bsshopir_fakhravari` اجرا شد: ستون‌های `OrderedAtUtc` و `ExternalOrderKey` و شاخص یکتای `UX_Account_CustomerOrder_ExternalOrderKey` حذف شدند؛ `CreatedAtUtc` حفظ شد، marker ثبت شد و هر ۲۳ سفارش باقی ماندند. پیش از اجرا پشتیبان `COPY_ONLY` با `CHECKSUM` در مسیر سرور `C:\Program Files\Microsoft SQL Server\MSSQL16.SQLSERVER2022\MSSQL\Backup\bsshopir_fakhravari-before-order-columns-20261124-153637.bak` ساخته شد؛ `RESTORE VERIFYONLY` به‌دلیل نداشتن مجوز `CREATE DATABASE` در `master` تأیید نشد.

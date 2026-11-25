@@ -9,8 +9,7 @@ public sealed class WarehouseStockLedger(ShopDbContext db) : IWarehouseStockLedg
 {
     public async Task RebuildVoucherAsync(decimal voucherId, CancellationToken ct)
     {
-        var document = await db.Vouchers.SingleOrDefaultAsync(x => x.Id == voucherId, ct) ??
-                       throw new InvalidOperationException("Warehouse voucher was not found.");
+        var document = await db.Vouchers.SingleOrDefaultAsync(x => x.Id == voucherId, ct) ?? throw new InvalidOperationException("Warehouse voucher was not found.");
         var type = await db.VoucherTypes.AsNoTracking().SingleAsync(x => x.Id == document.IdVoucherType, ct);
         var previous = await db.WarehouseStockMovements.Where(x => x.IdVoucher == voucherId).ToListAsync(ct);
         var lines = await db.VoucherLines.Where(x => x.IdVoucher == voucherId).ToListAsync(ct);
@@ -23,8 +22,7 @@ public sealed class WarehouseStockLedger(ShopDbContext db) : IWarehouseStockLedg
         }
 
         var replacement = new List<WarehouseStockMovement>();
-        if (type.AffectsStock &&
-            await db.VoucherStatuses.AnyAsync(x => x.Id == document.IdVoucherStatus && x.Code == "F", ct))
+        if (type.AffectsStock && await db.VoucherStatuses.AnyAsync(x => x.Id == document.IdVoucherStatus && x.Code == "F", ct))
         {
             decimal direction = type.Direction switch { "R" => 1m, "I" => -1m, _ => 0m };
             foreach (var line in lines)
@@ -71,8 +69,7 @@ public sealed class WarehouseStockLedger(ShopDbContext db) : IWarehouseStockLedg
     private async Task ApplyDeltasAsync(Dictionary<StockKey, decimal> deltas, CancellationToken ct)
     {
         DateTime now = DateTime.UtcNow;
-        foreach (var key in deltas.Keys.OrderBy(x => x.WarehouseId).ThenBy(x => x.InventoryItemId)
-                     .ThenBy(x => x.PlanId))
+        foreach (var key in deltas.Keys.OrderBy(x => x.WarehouseId).ThenBy(x => x.InventoryItemId).ThenBy(x => x.PlanId))
         {
             int locked = await db.StockBalances.Where(x =>
                     x.IdWarehouse == key.WarehouseId && x.IdInventoryItem == key.InventoryItemId &&

@@ -6,8 +6,7 @@ using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Data.Infrastructure.Persistence.Repositories;
 
-public sealed class StoreMediaCdnBaseUrlProvider(ShopDbContext dbContext, IOptions<MediaCdnOptions> options)
-    : IMediaCdnBaseUrlProvider
+public sealed class StoreMediaCdnBaseUrlProvider(ShopDbContext dbContext, IOptions<MediaCdnOptions> options) : IMediaCdnBaseUrlProvider
 {
     private string? _requestBaseUrl;
 
