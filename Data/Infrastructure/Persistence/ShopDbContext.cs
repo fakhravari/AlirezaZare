@@ -151,12 +151,16 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("MagazineArticle", "Mag");
             entity.HasKey(x => x.Id);
             entity.HasIndex(x => x.ArticleKey).IsUnique();
-            entity.HasOne(x => x.Category).WithMany().HasForeignKey(x => x.IdCategory);
-            entity.HasOne(x => x.Branch).WithMany().HasForeignKey(x => x.IdBranch);
-            entity.HasOne(x => x.Topic).WithMany().HasForeignKey(x => x.IdTopic);
-            entity.HasOne(x => x.Area).WithMany().HasForeignKey(x => x.IdArea);
+            entity.HasOne(x => x.Category).WithMany().HasForeignKey(x => x.IdCategory)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(x => x.Branch).WithMany().HasForeignKey(x => x.IdBranch)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(x => x.Topic).WithMany().HasForeignKey(x => x.IdTopic)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(x => x.Area).WithMany().HasForeignKey(x => x.IdArea)
+                .OnDelete(DeleteBehavior.NoAction);
             entity.HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.IdMagazineArticle)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
         });
         modelBuilder.Entity<MagazineArticleSource>(entity =>
         {
@@ -172,7 +176,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("MagazineArticleRelated", "Mag");
             entity.HasKey(x => x.Id);
-            entity.HasOne<MagazineArticle>().WithMany().HasForeignKey(x => x.IdRelatedArticle);
+            entity.HasOne<MagazineArticle>().WithMany().HasForeignKey(x => x.IdRelatedArticle)
+                .OnDelete(DeleteBehavior.NoAction);
         });
         modelBuilder.Entity<MagazineArticleMetric>(entity =>
         {
@@ -240,7 +245,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("CartItemAccessory", "Account");
             entity.HasKey(x => x.Id);
             entity.HasIndex(x => new { x.IdCartItem, x.IdProductAccessory }).IsUnique();
-            entity.HasOne<StoreProductAccessory>().WithMany().HasForeignKey(x => x.IdProductAccessory);
+            entity.HasOne<StoreProductAccessory>().WithMany().HasForeignKey(x => x.IdProductAccessory)
+                .OnDelete(DeleteBehavior.NoAction);
         });
         modelBuilder.Entity<AccountAddress>(entity =>
         {
@@ -286,7 +292,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("FaqItem", "Store");
             entity.HasKey(x => x.Id);
-            entity.HasOne<StoreContentPage>().WithMany().HasForeignKey(x => x.IdContentPage);
+            entity.HasOne<StoreContentPage>().WithMany().HasForeignKey(x => x.IdContentPage)
+                .OnDelete(DeleteBehavior.NoAction);
         });
         modelBuilder.Entity<AdminSystemUser>(entity =>
         {
@@ -331,7 +338,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("Warehouse", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.HasOne(x => x.Company).WithMany(x => x.Warehouses).HasForeignKey(x => x.IdCompany);
+            entity.HasOne(x => x.Company).WithMany(x => x.Warehouses).HasForeignKey(x => x.IdCompany)
+                .OnDelete(DeleteBehavior.NoAction);
             entity.HasIndex(x => new { x.IdCompany, x.Name }).IsUnique().HasDatabaseName("UX_Warehouse_Company_Name");
         });
         modelBuilder.Entity<Company>(entity =>
@@ -354,15 +362,18 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("Party", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.HasOne<WarehouseEntity>().WithMany().HasForeignKey(x => x.IdWarehouse);
+            entity.HasOne<WarehouseEntity>().WithMany().HasForeignKey(x => x.IdWarehouse)
+                .OnDelete(DeleteBehavior.NoAction);
         });
         modelBuilder.Entity<WarehouseProductUnit>(entity =>
         {
             entity.ToTable("ProductUnit", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasIndex(x => new { x.IdProduct, x.IdUnit }).IsUnique();
-            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct);
-            entity.HasOne<WarehouseUnit>().WithMany().HasForeignKey(x => x.IdUnit);
+            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne<WarehouseUnit>().WithMany().HasForeignKey(x => x.IdUnit)
+                .OnDelete(DeleteBehavior.NoAction);
         });
         modelBuilder.Entity<Voucher>(entity =>
         {
@@ -372,7 +383,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
                 .OnDelete(DeleteBehavior.Restrict);
             entity.HasIndex(x => new { x.CustomerOrderKey, x.IdSalesPlanReference }).IsUnique()
                 .HasFilter("[CustomerOrderKey] IS NOT NULL");
-            entity.HasMany(x => x.Lines).WithOne().HasForeignKey(x => x.IdVoucher);
+            entity.HasMany(x => x.Lines).WithOne().HasForeignKey(x => x.IdVoucher)
+                .OnDelete(DeleteBehavior.NoAction);
         });
         modelBuilder.Entity<VoucherLine>(entity =>
         {
@@ -427,16 +439,19 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Version).IsRowVersion();
             entity.HasIndex(x => new { x.IdWarehouse, x.IdInventoryItem, x.IdSalesPlanReference }).IsUnique();
-            entity.HasOne(x => x.Warehouse).WithMany(x => x.StockBalances).HasForeignKey(x => x.IdWarehouse);
-            entity.HasOne(x => x.InventoryItem).WithMany().HasForeignKey(x => x.IdInventoryItem);
+            entity.HasOne(x => x.Warehouse).WithMany(x => x.StockBalances).HasForeignKey(x => x.IdWarehouse)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(x => x.InventoryItem).WithMany().HasForeignKey(x => x.IdInventoryItem)
+                .OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(x => x.SalesPlanReference).WithMany(x => x.StockBalances)
-                .HasForeignKey(x => x.IdSalesPlanReference);
+                .HasForeignKey(x => x.IdSalesPlanReference).OnDelete(DeleteBehavior.NoAction);
         });
         modelBuilder.Entity<InventoryItem>(entity =>
         {
             entity.ToTable("InventoryItem", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.HasOne(x => x.Product).WithMany(x => x.InventoryItems).HasForeignKey(x => x.IdProduct);
+            entity.HasOne(x => x.Product).WithMany(x => x.InventoryItems).HasForeignKey(x => x.IdProduct)
+                .OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(x => x.ProductVariant).WithMany().HasForeignKey(x => new { x.IdVariant, x.IdProduct })
                 .HasPrincipalKey(x => new { x.Id, x.IdProduct });
         });
@@ -466,7 +481,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasAlternateKey(x => new { x.Id, x.IdProduct });
             entity.HasAlternateKey(x => new { x.IdProduct, x.Id });
             entity.HasIndex(x => x.IdProduct).IsUnique().HasFilter("[IsDefault] = 1");
-            entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct);
+            entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct)
+                .OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(x => x.VariantName).WithMany().HasForeignKey(x => x.IdVariantName)
                 .OnDelete(DeleteBehavior.Restrict);
         });
@@ -735,7 +751,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("ProductAsset", "Store");
             entity.HasKey(x => x.Id);
-            entity.HasOne<StoreProductMediaType>().WithMany().HasForeignKey(x => x.IdMediaType);
+            entity.HasOne<StoreProductMediaType>().WithMany().HasForeignKey(x => x.IdMediaType)
+                .OnDelete(DeleteBehavior.NoAction);
         });
         modelBuilder.Entity<StoreProductBenefit>(entity =>
         {
@@ -889,6 +906,84 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
         });
         ConfigureDatabaseForeignKeys(modelBuilder);
+        ConfigureDatabaseUniqueIndexes(modelBuilder);
+    }
+
+    private static void ConfigureDatabaseUniqueIndexes(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AccountCartItem>().HasIndex(x => new { x.IdCart, x.IdProduct, x.IdSalesPlan, x.IdVariant })
+            .IsUnique().HasFilter(null).HasDatabaseName("UQ_Account_CartItem_Configuration");
+        modelBuilder.Entity<AccountCompareItem>().HasIndex(x => new { x.IdProfile, x.IdProduct })
+            .IsUnique().HasDatabaseName("UQ_Account_CompareItem_Profile_Product");
+        modelBuilder.Entity<AccountFavorite>().HasIndex(x => new { x.IdProfile, x.IdProduct })
+            .IsUnique().HasDatabaseName("UQ_Account_Favorite_Profile_Product");
+        modelBuilder.Entity<AccountProfile>().HasIndex(x => x.Email)
+            .IsUnique().HasDatabaseName("UQ_Account_Profile_Email");
+        modelBuilder.Entity<GeoProvince>().HasIndex(x => new { x.IdCountry, x.NameFa })
+            .IsUnique().HasDatabaseName("UQ_Geo_Province_Country_Name");
+        modelBuilder.Entity<StoreBank>().HasIndex(x => x.Code)
+            .IsUnique().HasDatabaseName("UQ_Store_Bank_Code");
+        modelBuilder.Entity<StoreBank>().HasIndex(x => x.NameFa)
+            .IsUnique().HasDatabaseName("UQ_Store_Bank_NameFa");
+        modelBuilder.Entity<StoreCustomerOrderReference>().HasIndex(x => x.OrderNumber)
+            .IsUnique().HasDatabaseName("UQ_Account_CustomerOrder_Number");
+        modelBuilder.Entity<StorePaymentAttempt>().HasIndex(x => x.GatewayReference)
+            .IsUnique().HasFilter("([GatewayReference] IS NOT NULL)")
+            .HasDatabaseName("UX_Store_PaymentAttempt_GatewayReference");
+        modelBuilder.Entity<StorePaymentAttempt>().HasIndex(x => x.ReceiptReference)
+            .IsUnique().HasFilter("([ReceiptReference] IS NOT NULL)")
+            .HasDatabaseName("UX_Store_PaymentAttempt_ReceiptReference");
+        modelBuilder.Entity<StorePaymentAttempt>().HasIndex(x => x.IdOrder)
+            .IsUnique().HasFilter("([IdStatus]=(5))")
+            .HasDatabaseName("UX_Store_PaymentAttempt_VerifiedOrder");
+        modelBuilder.Entity<StorePriceVersion>().HasIndex(x => new { x.IdProduct, x.IdSalesPlan, x.IdVariant, x.IdAccessory })
+            .IsUnique().HasFilter("([IsActive]=(1))")
+            .HasDatabaseName("UX_Store_PriceVersion_ActiveTypedScope");
+        modelBuilder.Entity<StoreProductAsset>().HasIndex(x => x.IdProduct)
+            .IsUnique().HasFilter("([IsDefault]=(1))")
+            .HasDatabaseName("UX_ProductAsset_Default");
+        modelBuilder.Entity<Company>().HasIndex(x => x.Code)
+            .IsUnique().HasDatabaseName("UQ_Warehouse_Company_Code");
+        modelBuilder.Entity<InventoryItem>().HasIndex(x => new { x.IdProduct, x.IdVariant })
+            .IsUnique().HasFilter("([IdVariant] IS NOT NULL)")
+            .HasDatabaseName("UX_Warehouse_InventoryItem_ProductVariant");
+        modelBuilder.Entity<InventoryItem>().HasIndex(x => x.IdProduct)
+            .IsUnique().HasFilter("([IdVariant] IS NULL)")
+            .HasDatabaseName("UX_Warehouse_InventoryItem_ProductWithoutVariant");
+        modelBuilder.Entity<WarehouseParty>().HasIndex(x => x.ExternalPartyKey)
+            .IsUnique().HasFilter("([ExternalPartyKey] IS NOT NULL)")
+            .HasDatabaseName("UX_Warehouse_Party_ExternalKey");
+        modelBuilder.Entity<WarehouseParty>().HasIndex(x => x.IdWarehouse)
+            .IsUnique().HasFilter("([IdWarehouse] IS NOT NULL)")
+            .HasDatabaseName("UX_Warehouse_Party_Warehouse");
+        modelBuilder.Entity<WarehouseProduct>().HasIndex(x => x.ProductKey)
+            .IsUnique().HasDatabaseName("UX_Warehouse_Product_ProductKey");
+        modelBuilder.Entity<WarehouseProduct>().HasIndex(x => x.Slug)
+            .IsUnique().HasFilter("([Slug] IS NOT NULL)")
+            .HasDatabaseName("UX_Warehouse_Product_Slug");
+        modelBuilder.Entity<WarehouseProductUnit>().HasIndex(x => x.IdProduct, "UX_ProductUnit_OneActiveBasePerProduct")
+            .IsUnique().HasFilter("([IsBaseUnit]=(1) AND [IsActive]=(1))")
+            .HasDatabaseName("UX_ProductUnit_OneActiveBasePerProduct");
+        modelBuilder.Entity<WarehouseProductUnit>().HasIndex(x => x.IdProduct, "UX_Warehouse_ProductUnit_OneBaseUnitPerProduct")
+            .IsUnique().HasFilter("([IsBaseUnit]=(1))")
+            .HasDatabaseName("UX_Warehouse_ProductUnit_OneBaseUnitPerProduct");
+        modelBuilder.Entity<SalesPlanReference>().HasIndex(x => x.StoreSalesPlanKey)
+            .IsUnique().HasDatabaseName("UQ_Warehouse_SalesPlanReference_StoreSalesPlanKey");
+        modelBuilder.Entity<SalesPlanReference>().HasIndex(x => x.IsRegular)
+            .IsUnique().HasFilter("([IsRegular]=(1))")
+            .HasDatabaseName("UX_Warehouse_SalesPlanReference_OneRegular");
+        modelBuilder.Entity<WarehouseStockMovement>().HasIndex(x => x.IdVoucherLine)
+            .IsUnique().HasDatabaseName("UQ_Warehouse_StockMovement_DocumentLine");
+        modelBuilder.Entity<Voucher>().HasIndex(x => x.VoucherNumber)
+            .IsUnique().HasDatabaseName("UQ_Warehouse_WarehouseDocument_DocumentNumber");
+        modelBuilder.Entity<VoucherType>().HasIndex(x => x.IsSystemSalesDispatch)
+            .IsUnique().HasFilter("([IsSystemSalesDispatch]=(1))")
+            .HasDatabaseName("UX_Warehouse_DocumentType_SystemSalesDispatch");
+        modelBuilder.Entity<WarehouseEntity>().HasIndex(x => new { x.IdCompany, x.Code })
+            .IsUnique().HasDatabaseName("UQ_Warehouse_Warehouse_Company_Code");
+        modelBuilder.Entity<WarehouseEntity>().HasIndex(x => x.IdCompany)
+            .IsUnique().HasFilter("([IsSalesWarehouse]=(1))")
+            .HasDatabaseName("UX_Warehouse_Warehouse_OneSalesWarehousePerCompany");
     }
 
     private static void ConfigureDatabaseForeignKeys(ModelBuilder modelBuilder)
