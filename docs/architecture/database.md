@@ -19,7 +19,8 @@ var rows = await dbContext.Products
         product.IsStoreEnabled &&
         product.NameFa.Contains(searchText))
     .Join(
-        dbContext.ProductVariants.AsNoTracking(),
+        dbContext.ProductVariants
+            .AsNoTracking(),
         product => product.Id,
         variant => variant.IdProduct,
         (product, variant) => new
@@ -258,4 +259,14 @@ Migration `152-price-version-final-price.sql` ستون فیزیکی `Store.Price
 در بازبینی خواندنی ۲۵ نوامبر ۲۰۲۶، مدل EF و پایگاه `bsshopir_fakhravari` روی اتصال پیکربندی‌شدهٔ Shop تطبیق داده شدند: هر دو ۱۰۹ جدول و ۷۲۱ ستون نگاشت‌شده داشتند؛ ستون مفقود، ستون اضافه، تفاوت نوع پایه یا تفاوت nullable بودن پیدا نشد. ۱۰۹ کلید اصلی و ۱۵۲ رابطهٔ خارجی با پایگاه تطبیق داشتند؛ همهٔ کلیدهای خارجی فعال و trusted بودند و رفتار حذف EF نیز با پایگاه یکی بود. همهٔ قیدها و ایندکس‌های یکتا نیز از نظر ستون و فیلتر در مدل بازنمایی شدند. پایگاه ۹۹ تعریف فیزیکی یکتا دارد و دو ایندکس یکتای `Warehouse.Product.ProductKey` با تعریف یکسان نگه می‌دارد؛ مدل قاعدهٔ یکتایی را یک‌بار ثبت می‌کند. این بررسی فقط schema را خواند و هیچ migration یا تغییری روی پایگاه زنده اجرا نکرد. طول رشته و precision عددی جدا از نوع پایه‌اند و مطابق استاندارد این مخزن به Fluent API افزوده نشده‌اند.
 
 
-استاندارد Fluent API این مخزن در ShopDbContext فقط نگاشت جدول و schema، کلیدها، روابط، ایندکس‌های یکتا و رفتار حذف را نگه می‌دارد. محدودیت ستون، نام ستون، precision و requiredness به Fluent API یا Data Annotation سپرده نمی‌شود؛ رفتار پیش‌فرض مدل EF الزاماً همان محدودیت‌های موجود در پایگاه نیست و باید با schema زنده جداگانه مقایسه شود.
+## استاندارد پیکربندی EF Core (Database First)
+
+پایگاه داده منبع حقیقت است و هر دو برنامهٔ Shop و Admin از `Data/Infrastructure/Persistence/ShopDbContext` مشترک استفاده می‌کنند. `OnModelCreating` فقط `ConfigureDatabaseTables` و `ConfigureDatabaseRelationships` را فراخوانی می‌کند: نگاشت جدول/schema و کلیدهای لازم در اولی، و هر رابطه دقیقاً یک‌بار در دومی تعریف می‌شود. هر رابطه با مسیر `Schema.Child -> Schema.Parent` مستند شده است.
+
+ایندکس‌ها و محدودیت‌های یکتا، فیلترها، نام ایندکس/قید، طول و نوع ستون، precision و default در Fluent API تعریف نمی‌شوند؛ مرجع آن‌ها اسکریپت‌های SQL و schema پایگاه‌اند. حذف این تنظیمات از مدل EF، قیدهای فیزیکی پایگاه را حذف نمی‌کند. خطای یکتایی هنگام ذخیره‌سازی از پایگاه به شکل `DbUpdateException` بازمی‌گردد و لایهٔ سرویس باید آن را متناسب با عملیات به پیام کاربردی تبدیل کند. Migrationهای EF ساخته یا اجرا نمی‌شوند.
+
+چون EF مقدار پیش‌فرض ستون‌های پایگاه را در این مدل اعلام‌شده نمی‌بیند، ممکن است مقدار CLR مانند `false` یا `0` را ارسال کند؛ مقدار لازم باید در Entity یا سرویس تنظیم شود. nullable بودن propertyها باید با schema هم‌خوان باشد. بررسی read-only schema اتصال Shop در ۲۶ نوامبر ۲۰۲۶ scaleهای decimal/numeric برابر ۰، ۲، ۳، ۸ و ۹ را نشان داد؛ برای جلوگیری از گردشدن پارامترها به scale پیش‌فرض ۲، `ConfigureConventions` روی propertyهای `decimal` و `decimal?` دقت `(38, 9)` را به‌صورت عمومی تنظیم می‌کند. این convention ساختار دیتابیس را تغییر نمی‌دهد و Migration EF اجرا نمی‌شود. همان بررسی نشان داد کلید `Id` در `Warehouse.Product` و `Geo.Country`، `Geo.Province` و `Geo.City` Identity نیست؛ چون برنامه برای این جدول‌ها شناسه را صریح تولید و درج می‌کند، فقط همان چهار کلید با `ValueGeneratedNever` تنظیم شده‌اند. کلیدهای عددی دیگر که در schema Identity هستند از convention استفاده می‌کنند.
+
+مقادیر پیش‌فرضی که برای رفتار برنامه لازم‌اند باید هنگام ساخت Entity در کد مشخص شوند. نمونهٔ آن `Warehouse.Voucher.VoucherNumber` است: سرویس `IVoucherNumberGenerator` مقدار بعدی را مستقیماً از sequence موجود `[Warehouse].[VoucherNumberSequence]` می‌خواند و هر دو مسیر صدور حواله آن را پیش از درج تنظیم می‌کنند؛ EF به default constraint ستون تکیه نمی‌کند.
+
+یادداشت تطبیق schema مورخ ۲۵ نوامبر ۲۰۲۶ در بند پیشین، وضعیت مدل پیش از این بازآرایی را ثبت می‌کند؛ آن snapshot توصیف وضعیت فعلی Fluent API یا الزام به بازنمایی ایندکس‌های پایگاه در مدل نیست.

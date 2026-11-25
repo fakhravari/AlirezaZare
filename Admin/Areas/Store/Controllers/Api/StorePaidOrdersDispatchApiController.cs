@@ -17,7 +17,10 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [ApiController]
 [Authorize]
 [Route("api/admin/store/paid-orders-dispatch")]
-public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWarehouseStockLedger stockLedger)
+public sealed class StorePaidOrdersDispatchApiController(
+    ShopDbContext db,
+    IWarehouseStockLedger stockLedger,
+    IVoucherNumberGenerator voucherNumberGenerator)
     : ControllerBase
 {
     [HttpGet]
@@ -191,6 +194,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             var headerPlanId = lineDetails.Min(x => x.IdSalesPlanReference);
             var document = new Voucher
             {
+                VoucherNumber = await voucherNumberGenerator.NextAsync(cancellationToken),
                 IdWarehouse = warehouse.Id,
                 IdVoucherType = type.Id,
                 IdParty = party.Id,

@@ -24,8 +24,15 @@ public sealed class PasswordLoginController(
         if (!IsValidEmail(email) || string.IsNullOrEmpty(password))
             return Unauthorized(new { code = "invalid-credentials", message = "ایمیل یا رمز عبور درست نیست." });
 
-        var profile = await db.AccountProfiles.AsNoTracking().Where(x => x.Email == email)
-            .Select(x => new { x.Id, x.Password }).SingleOrDefaultAsync(ct);
+        var profile = await db.AccountProfiles
+            .AsNoTracking()
+            .Where(x => x.Email == email)
+            .Select(x => new
+            {
+                x.Id,
+                x.Password
+            })
+            .SingleOrDefaultAsync(ct);
         if (string.IsNullOrWhiteSpace(profile?.Password) ||
             (!profile.Password.StartsWith("AQAAAA", StringComparison.Ordinal) && profile.Password != password) ||
             (profile.Password.StartsWith("AQAAAA", StringComparison.Ordinal) &&

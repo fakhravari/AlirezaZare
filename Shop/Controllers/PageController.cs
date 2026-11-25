@@ -30,7 +30,9 @@ public abstract class PageController : Controller
         if (model.ContentKey is not null)
         {
             var db = HttpContext.RequestServices.GetRequiredService<ShopDbContext>();
-            var page = await db.StoreContentPages.AsNoTracking().Include(x => x.Sections)
+            var page = await db.StoreContentPages
+                .AsNoTracking()
+                .Include(x => x.Sections)
                 .SingleOrDefaultAsync(x => x.PageKey == model.ContentKey, HttpContext.RequestAborted);
             if (page is null || !page.IsPublished) return NotFound();
 

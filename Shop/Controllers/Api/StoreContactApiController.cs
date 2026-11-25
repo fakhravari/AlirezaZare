@@ -49,7 +49,11 @@ public sealed class StoreContactApiController(
             Email = string.IsNullOrWhiteSpace(email) ? null : email,
             SubjectKey = subject,
             Message = message,
-            IdStatus = await db.ContactMessageStatuses.Where(x => x.Code == "new").Select(x => x.Id).SingleAsync(ct),
+            IdStatus = await db.ContactMessageStatuses
+                .AsNoTracking()
+                .Where(x => x.Code == "new")
+                .Select(x => x.Id)
+                .SingleAsync(ct),
             CreatedAtUtc = DateTime.UtcNow
         };
         db.StoreContactMessages.Add(contactMessage);

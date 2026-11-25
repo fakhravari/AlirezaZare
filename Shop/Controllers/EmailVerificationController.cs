@@ -26,8 +26,11 @@ public sealed partial class EmailVerificationController(
         var email = NormalizeEmail(request.Email);
         if (!IsValidEmail(email)) return BadRequest(new { code = "invalid-email", message = "ایمیل معتبر نیست." });
 
-        var lifetimeMinutes = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1)
-            .Select(x => x.EmailVerificationCodeLifetimeMinutes).SingleOrDefaultAsync(cancellationToken);
+        var lifetimeMinutes = await db.StoreSiteIdentities
+            .AsNoTracking()
+            .Where(x => x.Id == 1)
+            .Select(x => x.EmailVerificationCodeLifetimeMinutes)
+            .SingleOrDefaultAsync(cancellationToken);
         if (lifetimeMinutes is < 1 or > 1440) lifetimeMinutes = 15;
         EmailCodeCreateResult codeResult = await codes.TryCreateAsync(email, lifetimeMinutes, cancellationToken);
         if (!codeResult.Created)
@@ -89,7 +92,8 @@ public sealed partial class EmailVerificationController(
         if (!await codes.VerifyAsync(email, request.Code!, cancellationToken))
             return BadRequest(new { code = "invalid-code" });
 
-        var profile = await db.AccountProfiles.SingleOrDefaultAsync(x => x.Email == email, cancellationToken);
+        var profile = await db.AccountProfiles
+            .SingleOrDefaultAsync(x => x.Email == email, cancellationToken);
         if (profile is null)
         {
             profile = new() { Email = email, CreatedAtUtc = DateTime.UtcNow };

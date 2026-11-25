@@ -66,9 +66,11 @@ public sealed class SalesPlansController(
             (plan.EndsAtUtc is { } endsAt && now >= endsAt))
             return NotFound(new { code = "price-history-not-found" });
 
-        long? databasePlanId = await db.SalesPlanReferences.AsNoTracking()
+        long? databasePlanId = await db.SalesPlanReferences
+            .AsNoTracking()
             .Where(item => item.IdStockOwnerType == 1 && item.StoreSalesPlanKey == salesPlanId)
-            .Select(item => (long?)item.Id).SingleOrDefaultAsync(cancellationToken);
+            .Select(item => (long?)item.Id)
+            .SingleOrDefaultAsync(cancellationToken);
         if (!databasePlanId.HasValue) return NotFound(new { code = "price-history-not-found" });
 
         var inventoryVariant = variantId.HasValue
@@ -79,14 +81,22 @@ public sealed class SalesPlansController(
             return BadRequest(new { code = "invalid-price-history-scope" });
         long? pricedVariantId = inventoryVariant is null ? null : variantId;
 
-        var productVersions = await db.StorePriceVersions.AsNoTracking()
+        var productVersions = await db.StorePriceVersions
+            .AsNoTracking()
             .Where(item => item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value &&
                            item.IdVariant == pricedVariantId && item.IdAccessory == null)
-            .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
+            .OrderBy(item => item.CreatedAtUtc)
+            .ThenBy(item => item.Id)
             .Select(item => new
             {
-                item.Id, item.IdVariant, item.IdAccessory, PriceAmount = item.PriceBeforeDiscountAmount,
-                item.DiscountPercent, item.FinalPriceAmount, item.IsActive, item.CreatedAtUtc
+                item.Id,
+                item.IdVariant,
+                item.IdAccessory,
+                PriceAmount = item.PriceBeforeDiscountAmount,
+                item.DiscountPercent,
+                item.FinalPriceAmount,
+                item.IsActive,
+                item.CreatedAtUtc
             })
             .ToListAsync(cancellationToken);
         if (productVersions.Count == 0)

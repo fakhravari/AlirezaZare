@@ -23,7 +23,8 @@ public sealed class StoreNewsletterApiController(ShopDbContext db) : ControllerB
             if (!long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out long profileId))
                 return Unauthorized();
 
-            var profile = await db.AccountProfiles.SingleOrDefaultAsync(x => x.Id == profileId, ct);
+            var profile = await db.AccountProfiles
+                .SingleOrDefaultAsync(x => x.Id == profileId, ct);
             if (profile is null) return Unauthorized();
 
             profile.NewsletterEnabled = true;
@@ -37,7 +38,9 @@ public sealed class StoreNewsletterApiController(ShopDbContext db) : ControllerB
         if (!IsValidEmail(email))
             return BadRequest(new { code = "invalid-email", message = "نشانی ایمیل معتبر نیست." });
 
-        if (await db.StoreNewsletterSubscribers.AnyAsync(x => x.Email == email, ct))
+        if (await db.StoreNewsletterSubscribers
+                .AsNoTracking()
+                .AnyAsync(x => x.Email == email, ct))
             return Ok(new { subscribed = true, alreadySubscribed = true });
 
         var subscriber = new StoreNewsletterSubscriber { Email = email, SubscribedAtUtc = DateTime.UtcNow };
@@ -49,7 +52,9 @@ public sealed class StoreNewsletterApiController(ShopDbContext db) : ControllerB
         catch (DbUpdateException)
         {
             db.Entry(subscriber).State = EntityState.Detached;
-            if (!await db.StoreNewsletterSubscribers.AnyAsync(x => x.Email == email, ct)) throw;
+            if (!await db.StoreNewsletterSubscribers
+                    .AsNoTracking()
+                    .AnyAsync(x => x.Email == email, ct)) throw;
 
             return Ok(new { subscribed = true, alreadySubscribed = true });
         }

@@ -9,8 +9,10 @@ using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Application.Warehouse.Services;
 using Shop.Data.Infrastructure.Email;
 using Shop.Data.Infrastructure.Identity;
+using Shop.Data.Infrastructure.Media;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Data.Infrastructure.Persistence.Repositories;
+using Shop.Data.Infrastructure.Store;
 using Shop.Data.Infrastructure.Warehouse;
 
 namespace Shop.Data.Infrastructure;
@@ -27,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<IEmailSender, SmtpEmailSender>();
         services.AddScoped<IEmailVerificationCodeStore, DatabaseEmailVerificationCodeStore>();
         services.AddScoped<IWarehouseStockLedger, WarehouseStockLedger>();
+        services.AddScoped<IVoucherNumberGenerator, VoucherNumberGenerator>();
 
         string mediaCdnBaseUrl =
             configuration[$"{MediaCdnOptions.SectionName}:BaseUrl"] ?? MediaCdnOptions.DefaultBaseUrl;

@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Domain.Store.Entities;
+using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Data.Infrastructure.Persistence.Repositories;
+namespace Shop.Data.Infrastructure.Store;
 
 public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVersionService
 {

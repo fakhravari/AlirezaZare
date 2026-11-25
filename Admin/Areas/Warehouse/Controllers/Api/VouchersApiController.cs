@@ -13,7 +13,10 @@ namespace Shop.Admin.Areas.Warehouse.Controllers.Api;
 [Area("Warehouse")]
 [ApiController]
 [Route("api/admin/warehouse/vouchers")]
-public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedger stockLedger) : ControllerBase
+public sealed class VouchersApiController(
+    ShopDbContext db,
+    IWarehouseStockLedger stockLedger,
+    IVoucherNumberGenerator voucherNumberGenerator) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] long? warehouseId, [FromQuery] string? status,
@@ -256,6 +259,7 @@ public sealed class VouchersApiController(ShopDbContext db, IWarehouseStockLedge
         // Acquire balance keys before inserting documents so competing issues lock in the same order.
         var document = new Voucher
         {
+            VoucherNumber = await voucherNumberGenerator.NextAsync(cancellationToken),
             IdWarehouse = input.WarehouseId,
             IdVoucherType = input.VoucherTypeId,
             IdParty = input.PartyId,

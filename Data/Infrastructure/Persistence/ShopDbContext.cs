@@ -9,6 +9,14 @@ namespace Shop.Data.Infrastructure.Persistence;
 
 public sealed partial class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbContext(options)
 {
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+
+        configurationBuilder.Properties<decimal>().HavePrecision(38, 9);
+        configurationBuilder.Properties<decimal?>().HavePrecision(38, 9);
+    }
+
     public DbSet<AdminSystemUser> AdminSystemUsers => Set<AdminSystemUser>();
     public DbSet<AdminRole> AdminRoles => Set<AdminRole>();
     public DbSet<AdminPermission> AdminPermissions => Set<AdminPermission>();

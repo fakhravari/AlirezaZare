@@ -3,8 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shop.Data.Application.Store;
 using Shop.Data.Application.Store.Contracts;
+using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Data.Infrastructure.Persistence.Repositories;
+namespace Shop.Data.Infrastructure.Media;
 
 public sealed class StoreMediaCdnBaseUrlProvider(ShopDbContext dbContext, IOptions<MediaCdnOptions> options) : IMediaCdnBaseUrlProvider
 {

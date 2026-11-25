@@ -52,7 +52,9 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
             var account = await accountDataSource.ReadAsync(HttpContext.RequestAborted);
             long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out long profileId);
             var assignedCoupons = profileId > 0
-                ? await db.AccountCoupons.AsNoTracking().Where(coupon => coupon.IdProfile == profileId)
+                ? await db.AccountCoupons
+                    .AsNoTracking()
+                    .Where(coupon => coupon.IdProfile == profileId)
                     .Select(coupon => new
                     {
                         coupon.CouponKey, coupon.Code, coupon.DiscountPercent, coupon.Enabled, coupon.ExpiresOn,
@@ -80,8 +82,11 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
                     .ToArray())).ToArray();
         }
 
-        var genders = await db.AccountGenders.AsNoTracking().OrderBy(x => x.Id)
-            .Select(x => new ProfileGenderOption(x.Id, x.Code, x.NameFa)).ToListAsync(HttpContext.RequestAborted);
+        var genders = await db.AccountGenders
+            .AsNoTracking()
+            .OrderBy(x => x.Id)
+            .Select(x => new ProfileGenderOption(x.Id, x.Code, x.NameFa))
+            .ToListAsync(HttpContext.RequestAborted);
         PageModel<ProfilePageViewModel> model = new(
             new ProfilePageViewModel(section, title, description, icon, Array.Empty<AccountOrder>(), coupons, genders),
             new SeoModel($"{title} | ندا اولیائی", description, Robots: "noindex, nofollow"),
