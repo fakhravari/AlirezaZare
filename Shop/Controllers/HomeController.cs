@@ -1,7 +1,6 @@
 using Shop.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Data.Application.Store;
 using Shop.Data.Application.Store.Contracts;
@@ -13,16 +12,16 @@ public sealed class HomeController : PageController
     private readonly SiteIdentityOptions _identity;
     private readonly Shop.Services.IMagazineContentSource _magazine;
     private readonly Shop.Services.ICatalogSource _catalog;
-    private readonly ShopDbContext _db;
+    private readonly IStorePublicPageData _pageData;
     private readonly IMediaCdnBaseUrlProvider _mediaCdn;
 
     public HomeController(IOptions<SiteIdentityOptions> identity, Shop.Services.IMagazineContentSource magazine,
-        Shop.Services.ICatalogSource catalog, ShopDbContext db, IMediaCdnBaseUrlProvider mediaCdn)
+        Shop.Services.ICatalogSource catalog, IStorePublicPageData pageData, IMediaCdnBaseUrlProvider mediaCdn)
     {
         _identity = identity.Value;
         _magazine = magazine;
         _catalog = catalog;
-        _db = db;
+        _pageData = pageData;
         _mediaCdn = mediaCdn;
     }
 
@@ -36,31 +35,12 @@ public sealed class HomeController : PageController
 
         var magazine = await _magazine.ReadIndexAsync(HttpContext.RequestAborted);
         ViewData["HomeBrands"] = (await _catalog.ReadAsync(HttpContext.RequestAborted)).Brands;
-        var reviewItems = await _db.StoreHomeTestimonials
-            .AsNoTracking()
-            .Where(x => x.IsActive)
-            .OrderBy(x => x.SortOrder)
-            .ThenByDescending(x => x.CreatedAtUtc)
-            .ThenByDescending(x => x.Id)
-            .Select(x => new
-            {
-                x.DisplayName,
-                ProductName = x.Product.NameFa,
-                x.FeedbackText,
-                x.Rating,
-                x.CreatedAtUtc,
-                x.ImagePath
-            })
-            .ToListAsync(HttpContext.RequestAborted);
+        var reviewItems = await _pageData.ReadHomeTestimonialsAsync(HttpContext.RequestAborted);
         string cdnBaseUrl = await _mediaCdn.GetBaseUrlAsync(HttpContext.RequestAborted);
         var reviews = reviewItems.Select(x => new HomeReviewCard(x.DisplayName, x.ProductName, x.FeedbackText,
             x.Rating, x.CreatedAtUtc,
             string.IsNullOrWhiteSpace(x.ImagePath) ? null : ContentCdn.ToUrl(x.ImagePath, cdnBaseUrl))).ToArray();
-        ViewData["HomeSliders"] = await _db.StoreSliders
-            .AsNoTracking()
-            .Where(x => x.ShowOnMobile || x.ShowOnDesktop)
-            .OrderBy(x => x.Id)
-            .ToListAsync(HttpContext.RequestAborted);
+        ViewData["HomeSliders"] = await _pageData.ReadHomeSlidersAsync(HttpContext.RequestAborted);
         ViewData["HomeReviews"] = reviews;
 
         return await PageAsync(new PageModel<MagazineIndexViewModel>(magazine, model.Seo, IsHome: true));

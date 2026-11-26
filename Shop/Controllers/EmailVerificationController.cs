@@ -4,10 +4,9 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Account.Contracts;
 using Shop.Data.Application.Email.Contracts;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Services;
 
 namespace Shop.Controllers;
@@ -17,7 +16,7 @@ namespace Shop.Controllers;
 public sealed partial class EmailVerificationController(
     IEmailVerificationCodeStore codes,
     IEmailSender emailSender,
-    ShopDbContext db) : ControllerBase
+    IStorePublicPageData pageData) : ControllerBase
 {
     [HttpPost]
     [EnableRateLimiting("email-code")]
@@ -26,11 +25,7 @@ public sealed partial class EmailVerificationController(
         var email = NormalizeEmail(request.Email);
         if (!IsValidEmail(email)) return BadRequest(new { code = "invalid-email", message = "ایمیل معتبر نیست." });
 
-        var lifetimeMinutes = await db.StoreSiteIdentities
-            .AsNoTracking()
-            .Where(x => x.Id == 1)
-            .Select(x => x.EmailVerificationCodeLifetimeMinutes)
-            .SingleOrDefaultAsync(cancellationToken);
+        var lifetimeMinutes = await pageData.ReadEmailVerificationLifetimeMinutesAsync(cancellationToken);
         if (lifetimeMinutes is < 1 or > 1440) lifetimeMinutes = 15;
         EmailCodeCreateResult codeResult = await codes.TryCreateAsync(email, lifetimeMinutes, cancellationToken);
         if (!codeResult.Created)
@@ -92,25 +87,12 @@ public sealed partial class EmailVerificationController(
         if (!await codes.VerifyAsync(email, request.Code!, cancellationToken))
             return BadRequest(new { code = "invalid-code" });
 
-        var profile = await db.AccountProfiles
-            .SingleOrDefaultAsync(x => x.Email == email, cancellationToken);
-        if (profile is null)
-        {
-            profile = new() { Email = email, CreatedAtUtc = DateTime.UtcNow };
-            db.AccountProfiles.Add(profile);
-        }
-
-        if (isRegistration)
-        {
-            profile.Password = request.Password;
-        }
-
-        profile.UpdatedAtUtc = DateTime.UtcNow;
-        await db.SaveChangesAsync(cancellationToken);
+        var profile = await pageData.EnsureVerifiedAccountAsync(email,
+            isRegistration ? request.Password : null, cancellationToken);
 
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, profile.Id.ToString()), new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.NameIdentifier, profile.ProfileId.ToString()), new Claim(ClaimTypes.Email, email),
             new Claim(ClaimTypes.Name, email)
         };
         await HttpContext.SignInAsync("ShopCookie", new ClaimsPrincipal(new ClaimsIdentity(claims, "ShopCookie")));

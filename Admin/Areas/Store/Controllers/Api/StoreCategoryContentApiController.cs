@@ -1,28 +1,26 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
 [ApiController]
 [Route("api/admin/store/category-content")]
-public sealed class StoreCategoryContentApiController(ShopDbContext db) : ControllerBase
+public sealed class StoreCategoryContentApiController(IStoreContentAdminData data) : ControllerBase
 {
     [HttpGet("{key}")]
     public async Task<IActionResult> Get(string key, CancellationToken cancellationToken)
     {
-        var category = await db.StoreCategories.AsNoTracking()
-            .SingleOrDefaultAsync(x => x.CategoryKey == key, cancellationToken);
+        var category = await data.ReadCategoryContentAsync(key, cancellationToken);
 
         return category is null
             ? NotFound()
             : Ok(new
             {
-                intro = category.ProductIntro ?? "",
-                highlights = category.ProductHighlightsJson ?? "[]",
-                specs = category.ProductSpecsJson ?? "[]"
+                intro = category.Intro,
+                highlights = category.Highlights,
+                specs = category.Specs
             });
     }
 
@@ -35,13 +33,8 @@ public sealed class StoreCategoryContentApiController(ShopDbContext db) : Contro
             !ValidArray(input.Specs, true))
             return ValidationProblem(detail: "معرفی یا قالب نکات و مشخصات معتبر نیست.", statusCode: 400);
 
-        var category = await db.StoreCategories.SingleOrDefaultAsync(x => x.CategoryKey == key, cancellationToken);
-        if (category is null) return NotFound();
-
-        category.ProductIntro = input.Intro ?? "";
-        category.ProductHighlightsJson = input.Highlights!;
-        category.ProductSpecsJson = input.Specs!;
-        await db.SaveChangesAsync(cancellationToken);
+        if (!await data.SaveCategoryContentAsync(key, input.Intro ?? "", input.Highlights!, input.Specs!,
+                cancellationToken)) return NotFound();
 
         return Ok(new { message = "محتوای دسته ذخیره شد." });
     }

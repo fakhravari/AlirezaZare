@@ -1,8 +1,7 @@
 using Shop.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Shop.Data.Infrastructure.Persistence;
 using Microsoft.Extensions.Options;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Controllers;
 
@@ -29,20 +28,17 @@ public abstract class PageController : Controller
         };
         if (model.ContentKey is not null)
         {
-            var db = HttpContext.RequestServices.GetRequiredService<ShopDbContext>();
-            var page = await db.StoreContentPages
-                .AsNoTracking()
-                .Include(x => x.Sections)
-                .SingleOrDefaultAsync(x => x.PageKey == model.ContentKey, HttpContext.RequestAborted);
-            if (page is null || !page.IsPublished) return NotFound();
+            var pageData = HttpContext.RequestServices.GetRequiredService<IStorePublicPageData>();
+            var page = await pageData.ReadPublishedPageAsync(model.ContentKey, HttpContext.RequestAborted);
+            if (page is null) return NotFound();
 
             string title = StoreName(page.Title);
             string description = StoreName(page.Description ?? "");
             var managed = new ManagedPageContent(page.Id, page.PageKey, page.RoutePath, title, description,
-                page.IsPublished,
-                page.Sections.Where(x => x.IsPublished).OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
+                true,
+                page.Sections
                     .Select(x =>
-                        new ManagedPageSection(x.Id, x.SectionKey, x.Heading, x.Body, x.SortOrder, x.IsPublished))
+                        new ManagedPageSection(x.Id, x.SectionKey, x.Heading, x.Body, x.SortOrder, true))
                     .ToArray());
             var crumbList = model.Seo.Breadcrumbs?.ToArray();
             if (crumbList is { Length: > 0 }) crumbList[^1] = crumbList[^1] with { Name = title };

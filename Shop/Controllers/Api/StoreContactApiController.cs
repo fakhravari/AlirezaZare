@@ -2,11 +2,9 @@ using System.Net.Mail;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Email.Contracts;
-using Shop.Data.Domain.Store.Entities;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Helpers.Extensions;
-using Shop.Data.Infrastructure.Persistence;
 using Shop.Models;
 
 namespace Shop.Controllers.Api;
@@ -17,7 +15,7 @@ namespace Shop.Controllers.Api;
 public sealed class StoreContactApiController(
     IEmailSender emailSender,
     Shop.Services.DatabaseSiteIdentitySource siteIdentitySource,
-    ShopDbContext db,
+    IStorePublicPageData pageData,
     ILogger<StoreContactApiController> logger) : ControllerBase
 {
     private static readonly HashSet<string> Subjects = new(StringComparer.Ordinal)
@@ -42,22 +40,8 @@ public sealed class StoreContactApiController(
             return BadRequest(new
                 { code = "invalid-contact-request", message = "اطلاعات فرم تماس را بررسی و کامل کنید." });
 
-        var contactMessage = new StoreContactMessage
-        {
-            Name = name,
-            Phone = phone,
-            Email = string.IsNullOrWhiteSpace(email) ? null : email,
-            SubjectKey = subject,
-            Message = message,
-            IdStatus = await db.ContactMessageStatuses
-                .AsNoTracking()
-                .Where(x => x.Code == "new")
-                .Select(x => x.Id)
-                .SingleAsync(ct),
-            CreatedAtUtc = DateTime.UtcNow
-        };
-        db.StoreContactMessages.Add(contactMessage);
-        await db.SaveChangesAsync(ct);
+        decimal contactMessageId = await pageData.SaveContactMessageAsync(name, phone,
+            string.IsNullOrWhiteSpace(email) ? null : email, subject, message, ct);
 
         string subjectLabel = subject switch
         {
@@ -83,7 +67,7 @@ public sealed class StoreContactApiController(
             else
                 logger.LogWarning(
                     "Contact message {ContactMessageId} was saved, but no public email recipient is configured.",
-                    contactMessage.Id);
+                    contactMessageId);
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
@@ -92,7 +76,7 @@ public sealed class StoreContactApiController(
         catch (Exception exception)
         {
             logger.LogWarning(exception, "Contact message {ContactMessageId} was saved, but email notification failed.",
-                contactMessage.Id);
+                contactMessageId);
         }
 
         return Ok(new

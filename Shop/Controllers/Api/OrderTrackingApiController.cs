@@ -2,16 +2,15 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.EntityFrameworkCore;
 using Shop.Data.Helpers.Extensions;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Controllers.Api;
 
 [ApiController]
 [AllowAnonymous]
 [Route("api/store/orders/tracking")]
-public sealed class OrderTrackingApiController(ShopDbContext db) : ControllerBase
+public sealed class OrderTrackingApiController(IStorePublicPageData pageData) : ControllerBase
 {
     [HttpPost]
     [EnableRateLimiting("order-tracking")]
@@ -25,40 +24,12 @@ public sealed class OrderTrackingApiController(ShopDbContext db) : ControllerBas
             return BadRequest(new
                 { code = "invalid-tracking-request", message = "کد سفارش یا شمارهٔ همراه معتبر نیست." });
 
-        var candidates = await db.StoreCustomerOrders
-            .AsNoTracking()
-            .Where(x => x.OrderNumber == orderNumber ||
-                        db.StoreOrderPreviousNumbers
-                            .AsNoTracking()
-                            .Any(previous =>
-                                previous.IdOrder == x.Id && previous.PreviousNumber == orderNumber))
-            .Select(x => new
-            {
-                x.Id,
-                x.OrderNumber,
-                Status = x.StatusReference.Code,
-                StatusName = x.StatusReference.NameFa,
-                x.CreatedAtUtc,
-                x.ShippingCarrier,
-                x.ShippingTrackingCode,
-                x.AddressSnapshotJson
-            })
-            .ToListAsync(ct);
+        var candidates = await pageData.FindOrderTrackingCandidatesAsync(orderNumber, ct);
         var order = candidates.FirstOrDefault(x => SnapshotPhoneMatches(x.AddressSnapshotJson, phone));
         if (order is null)
             return NotFound(new { code = "order-not-found", message = "سفارشی با این کد و شمارهٔ همراه پیدا نشد." });
 
-        var trackingRows = await db.StoreOrderShipmentTrackingHistories
-            .AsNoTracking()
-            .Where(x => x.IdOrder == order.Id)
-            .OrderBy(x => x.ChangedAtUtc)
-            .Select(x => new
-            {
-                x.Carrier,
-                x.TrackingCode,
-                x.ChangedAtUtc
-            })
-            .ToListAsync(ct);
+        var trackingRows = await pageData.ReadOrderTrackingHistoryAsync(order.Id, ct);
         var trackingHistory = trackingRows.Select(x => new
                 { x.Carrier, x.TrackingCode, changedAtUtc = DateTime.SpecifyKind(x.ChangedAtUtc, DateTimeKind.Utc) })
             .ToArray();

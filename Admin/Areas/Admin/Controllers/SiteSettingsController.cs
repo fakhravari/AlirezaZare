@@ -2,15 +2,14 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Store;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Admin.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Authorize(Roles = "system.full-access")]
-public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProvider protection) : Controller
+public sealed class SiteSettingsController(IStoreSiteSettingsAdminData data, IDataProtectionProvider protection) : Controller
 {
     [HttpGet]
     public IActionResult Slider() => View();
@@ -18,8 +17,7 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        var settings = await db.StoreSiteIdentities.AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
+        var settings = await data.ReadAsync(cancellationToken);
         if (settings is null) return NotFound();
 
         var model = new SiteSettingsInput
@@ -39,7 +37,7 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
             IdWarehouse = settings.IdWarehouse,
             SmtpHost = settings.SmtpHost ?? "",
             SmtpPort = settings.SmtpPort,
-            SmtpEnableSsl = settings.SmtpEnableSsl ?? false,
+            SmtpEnableSsl = settings.SmtpEnableSsl,
             SmtpUsername = settings.SmtpUsername ?? "",
             SmtpFrom = settings.SmtpFrom ?? "",
             SmtpPassword = settings.SmtpPassword,
@@ -48,8 +46,8 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
             FtpPort = settings.FtpPort,
             FtpUsername = settings.FtpUsername,
             FtpPassword = settings.FtpPassword,
-            LegacyFtpPassword = settings.FtpPasswordProtected,
-            FtpPasswordConfigured = settings.FtpPassword is not null || settings.FtpPasswordProtected is not null
+            LegacyFtpPassword = settings.LegacyFtpPassword,
+            FtpPasswordConfigured = settings.FtpPassword is not null || settings.LegacyFtpPassword is not null
         };
         bool ftpPasswordUnreadable = false;
         if (string.IsNullOrEmpty(model.FtpPassword) && !string.IsNullOrEmpty(model.LegacyFtpPassword))
@@ -96,10 +94,6 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
             ModelState.AddModelError(nameof(model.MediaCdnBaseUrl), "نشانی CDN باید مبدأ HTTPS بدون مسیر اضافی باشد.");
         }
 
-        if (model.IdWarehouse.HasValue && !await db.Warehouses.AnyAsync(
-                w => w.Id == model.IdWarehouse && w.IsActive && w.IsSalesWarehouse && w.Company.IsActive,
-                cancellationToken))
-            ModelState.AddModelError(nameof(model.IdWarehouse), "انبار باید انبار فروش فعال یک شرکت فعال باشد.");
         if (!ModelState.IsValid)
         {
             await PopulateWarehouses(cancellationToken);
@@ -107,43 +101,27 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
             return View(model);
         }
 
-        var settings = await db.StoreSiteIdentities.SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
-        if (settings is null) return NotFound();
-
-        settings.DisplayName = model.DisplayName;
-        settings.StoreName = model.StoreName;
-        settings.VisualBrandName = model.VisualBrandName;
-        settings.SupportPhoneDisplay = model.SupportPhoneDisplay;
-        settings.SupportPhoneUri = model.SupportPhoneUri;
-        settings.WhatsAppNumber = model.WhatsAppNumber;
-        settings.PublicEmail = model.PublicEmail;
-        settings.MediaCdnBaseUrl = model.MediaCdnBaseUrl;
-        settings.IdWarehouse = model.IdWarehouse;
-        settings.FooterDescription = model.FooterDescription;
-        settings.InstagramUrl = NormalizeOptionalUrl(model.InstagramUrl);
-        settings.TelegramUrl = NormalizeOptionalUrl(model.TelegramUrl);
-        settings.LinkedInUrl = NormalizeOptionalUrl(model.LinkedInUrl);
-        settings.SmtpHost = model.SmtpHost;
-        settings.SmtpPort = model.SmtpPort;
-        settings.SmtpEnableSsl = model.SmtpEnableSsl;
-        settings.SmtpUsername = model.SmtpUsername;
-        settings.SmtpFrom = model.SmtpFrom;
-
-        if (model.SmtpPassword is not null) settings.SmtpPassword = model.SmtpPassword;
-        settings.EmailVerificationCodeLifetimeMinutes = model.EmailVerificationCodeLifetimeMinutes;
-        settings.FtpHost = model.FtpHost;
-        settings.FtpPort = model.FtpPort;
-        settings.FtpUsername = model.FtpUsername;
-
-        if (model.FtpPassword is not null)
+        var result = await data.SaveAsync(new StoreSiteSettingsData
         {
-            settings.FtpPassword = model.FtpPassword;
-            settings.FtpPasswordProtected = null;
+            DisplayName = model.DisplayName, StoreName = model.StoreName, VisualBrandName = model.VisualBrandName,
+            SupportPhoneDisplay = model.SupportPhoneDisplay, SupportPhoneUri = model.SupportPhoneUri,
+            WhatsAppNumber = model.WhatsAppNumber, PublicEmail = model.PublicEmail,
+            MediaCdnBaseUrl = model.MediaCdnBaseUrl, IdWarehouse = model.IdWarehouse,
+            FooterDescription = model.FooterDescription, InstagramUrl = NormalizeOptionalUrl(model.InstagramUrl),
+            TelegramUrl = NormalizeOptionalUrl(model.TelegramUrl), LinkedInUrl = NormalizeOptionalUrl(model.LinkedInUrl),
+            SmtpHost = model.SmtpHost, SmtpPort = model.SmtpPort, SmtpEnableSsl = model.SmtpEnableSsl,
+            SmtpUsername = model.SmtpUsername, SmtpFrom = model.SmtpFrom, SmtpPassword = model.SmtpPassword,
+            EmailVerificationCodeLifetimeMinutes = model.EmailVerificationCodeLifetimeMinutes,
+            FtpHost = model.FtpHost, FtpPort = model.FtpPort, FtpUsername = model.FtpUsername,
+            FtpPassword = model.FtpPassword
+        }, User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value, cancellationToken);
+        if (result == StoreSettingsSaveResult.NotFound) return NotFound();
+        if (result == StoreSettingsSaveResult.InvalidWarehouse)
+        {
+            ModelState.AddModelError(nameof(model.IdWarehouse), "انبار باید انبار فروش فعال یک شرکت فعال باشد.");
+            await PopulateWarehouses(cancellationToken);
+            return View(model);
         }
-
-        settings.UpdatedAtUtc = DateTime.UtcNow;
-        settings.UpdatedByUserKey = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value;
-        await db.SaveChangesAsync(cancellationToken);
 
         TempData["SiteSettingsSaved"] = true;
 
@@ -151,12 +129,9 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
     }
 
     private async Task PopulateWarehouses(CancellationToken cancellationToken) =>
-        ViewData["Warehouses"] = await db.Warehouses.AsNoTracking()
-            .Where(w => w.IsActive && w.IsSalesWarehouse && w.Company.IsActive)
-            .OrderBy(w => w.Company.Name).ThenBy(w => w.Name).Select(w =>
-                new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-                    { Value = w.Id.ToString(), Text = w.Company.Name + " / " + w.Name + " (" + w.Code + ")" })
-            .ToListAsync(cancellationToken);
+        ViewData["Warehouses"] = (await data.ReadSalesWarehousesAsync(cancellationToken))
+            .Select(w => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                { Value = w.Id.ToString(), Text = w.Text }).ToList();
 
     private static string? NormalizeOptionalUrl(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();

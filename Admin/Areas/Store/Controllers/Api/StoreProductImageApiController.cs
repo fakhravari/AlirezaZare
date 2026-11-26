@@ -3,12 +3,9 @@ using FluentFTP;
 using ImageMagick;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Store;
 using Shop.Data.Application.Store.Contracts;
-using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Ftp;
-using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Admin.Areas.Store.Controllers.Api;
 
@@ -17,7 +14,7 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [Authorize(Roles = "system.full-access")]
 [Route("api/admin/store/product-images")]
 public sealed class StoreProductImageApiController(
-    ShopDbContext db,
+    IStoreProductImageAdminData data,
     FtpMediaUploadService storage,
     IMediaCdnBaseUrlProvider mediaCdn,
     ILogger<StoreProductImageApiController> logger) : ControllerBase
@@ -30,11 +27,8 @@ public sealed class StoreProductImageApiController(
     [HttpGet("{productId:long}")]
     public async Task<IActionResult> GetImages(long productId, CancellationToken cancellationToken)
     {
-        if (!await db.Products.AnyAsync(x => x.Id == productId, cancellationToken)) return NotFound();
-
-        var images = await db.StoreProductAssets.AsNoTracking()
-            .Where(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image).OrderBy(x => x.SortOrder)
-            .ThenBy(x => x.Id).ToListAsync(cancellationToken);
+        if (!await data.ProductExistsAsync(productId, cancellationToken)) return NotFound();
+        var images = await data.ReadImagesAsync(productId, cancellationToken);
         string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
         var items = images.Select(image => new ProductImageItem(image.Id, image.Path,
             ContentCdn.ToUrl(image.Path, cdnBaseUrl), ContentCdn.ToUrl(image.ThumbnailPath, cdnBaseUrl),
@@ -55,8 +49,8 @@ public sealed class StoreProductImageApiController(
             images.Sum(image => image.Length) > MaximumRequestSize)
             return BadRequest(new { title = "حداکثر ۱۰ تصویر و هرکدام حداکثر ۱۰ مگابایت انتخاب کنید." });
 
-        var product = await db.Products.AsNoTracking().SingleOrDefaultAsync(x => x.Id == productId, cancellationToken);
-        if (product is null) return NotFound();
+        string? productName = await data.ReadProductNameAsync(productId, cancellationToken);
+        if (productName is null) return NotFound();
 
         var preparedImages = new List<PreparedImage>(images.Count);
         try
@@ -89,26 +83,9 @@ public sealed class StoreProductImageApiController(
                 uploadedPaths.Add(remotePath);
             }
 
-            await using var transaction =
-                await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-            var currentImages =
-                db.StoreProductAssets.Where(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image);
-            int nextOrder = (await currentImages.MaxAsync(x => (int?)x.SortOrder, cancellationToken) ?? 0) + 1;
-            bool hasDefault = await currentImages.AnyAsync(x => x.IsDefault, cancellationToken);
-            foreach (PreparedImage image in preparedImages)
-            {
-                db.StoreProductAssets.Add(new StoreProductAsset
-                {
-                    IdProduct = productId, IdMediaType = ProductMediaTypes.Image, Path = image.MainPath,
-                    CardPath = GetVariantPath(image.MainPath, "card"), ThumbnailPath = image.ThumbnailPath,
-                    Title = product.NameFa, SortOrder = nextOrder++, IsDefault = !hasDefault,
-                    CreatedAtUtc = DateTime.UtcNow
-                });
-                hasDefault = true;
-            }
-
-            await db.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
+            var uploads = preparedImages.Select(image => new ProductImageUploadData(image.MainPath,
+                GetVariantPath(image.MainPath, "card"), image.ThumbnailPath)).ToArray();
+            if (!await data.AddImagesAsync(productId, productName, uploads, cancellationToken)) return NotFound();
 
             databaseSaved = true;
 
@@ -143,19 +120,7 @@ public sealed class StoreProductImageApiController(
     public async Task<IActionResult> SetDefault(long productId, [FromBody] ProductImageSelection input,
         CancellationToken cancellationToken)
     {
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        var images = await db.StoreProductAssets
-            .Where(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image)
-            .ToListAsync(cancellationToken);
-        var selected =
-            images.SingleOrDefault(x => string.Equals(x.Path, input.Path, StringComparison.OrdinalIgnoreCase));
-        if (selected is null) return NotFound();
-        foreach (var image in images) image.IsDefault = false;
-        await db.SaveChangesAsync(cancellationToken);
-        selected.IsDefault = true;
-        await db.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
+        if (!await data.SetDefaultAsync(productId, input.Path, cancellationToken)) return NotFound();
 
         return Ok(new { message = "تصویر پیش‌فرض کالا تغییر کرد." });
     }
@@ -165,9 +130,7 @@ public sealed class StoreProductImageApiController(
     public async Task<IActionResult> Delete(long productId, [FromQuery] string path,
         CancellationToken cancellationToken)
     {
-        var image = await db.StoreProductAssets.SingleOrDefaultAsync(
-            x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image && x.Path == path,
-            cancellationToken);
+        var image = await data.ReadImageAsync(productId, path, cancellationToken);
         if (image is null || !IsValidImagePath(path, productId)) return NotFound();
         if (image.IsDefault)
             return Conflict(new { title = "تصویر پیش‌فرض قابل حذف نیست؛ ابتدا تصویر دیگری را پیش‌فرض کنید." });
@@ -192,8 +155,7 @@ public sealed class StoreProductImageApiController(
                 title: "تصویر از FTP حذف نشد؛ رکورد گالری حفظ شد. اتصال FTP را بررسی کنید.");
         }
 
-        db.StoreProductAssets.Remove(image);
-        await db.SaveChangesAsync(cancellationToken);
+        if (!await data.DeleteImageRecordAsync(productId, path, cancellationToken)) return NotFound();
 
         return Ok(new { message = "تصویر از گالری کالا حذف شد." });
     }
@@ -203,15 +165,8 @@ public sealed class StoreProductImageApiController(
     public async Task<IActionResult> Reorder(long productId, [FromBody] ProductImageOrder input,
         CancellationToken cancellationToken)
     {
-        var images = await db.StoreProductAssets
-            .Where(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image)
-            .ToListAsync(cancellationToken);
-        if (input.Ids is null || input.Ids.Length != images.Count || input.Ids.Distinct().Count() != images.Count ||
-            images.Any(x => !input.Ids.Contains(x.Id)))
+        if (input.Ids is null || !await data.ReorderAsync(productId, input.Ids, cancellationToken))
             return BadRequest(new { title = "فهرست تصاویر تغییر کرده است؛ دوباره تلاش کنید." });
-        var byId = images.ToDictionary(x => x.Id);
-        for (int i = 0; i < input.Ids.Length; i++) byId[input.Ids[i]].SortOrder = i + 1;
-        await db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = "ترتیب تصاویر ذخیره شد." });
     }
 

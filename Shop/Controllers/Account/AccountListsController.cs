@@ -4,8 +4,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Account.Contracts;
 using Shop.Data.Application.Store;
 using Shop.Services;
 using Shop.Models;
@@ -19,7 +18,8 @@ namespace Shop.Controllers.Account;
 [Route("api/account")]
 public sealed class AccountListsController : AccountApiControllerBase
 {
-    public AccountListsController(ShopDbContext context) : base(context) { }
+    private readonly IAccountDataCommands data;
+    public AccountListsController(IAccountDataCommands accountData) : base(accountData) => data = accountData;
 
     [HttpPost("lists/{kind}/{productId:long}")]
     public async Task<IActionResult> ToggleList(string kind, long productId, CancellationToken ct)
@@ -27,44 +27,10 @@ public sealed class AccountListsController : AccountApiControllerBase
         if (kind is not ("favorites" or "compare") || productId < 1)
             return BadRequest(new { code = "invalid-list-item" });
 
-        if (!await db.Products
-                .AsNoTracking()
-                .AnyAsync(x => x.Id == productId && x.IsStoreEnabled, ct))
-            return Conflict(new { code = "product-unavailable" });
+        bool? changed = await data.ToggleListItemAsync(ProfileId, kind, productId, ct);
+        if (changed is null) return Conflict(new { code = "product-unavailable" });
 
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
-        bool changed;
-        if (kind == "favorites")
-        {
-            var existing =
-                await db.AccountFavorites
-                    .SingleOrDefaultAsync(
-                    x => x.IdProfile == ProfileId && x.IdProduct == productId, ct);
-            changed = existing is null;
-            if (existing is null)
-                db.AccountFavorites.Add(new AccountFavorite
-                    { IdProfile = ProfileId, IdProduct = productId, CreatedAtUtc = DateTime.UtcNow });
-            else db.AccountFavorites.Remove(existing);
-        }
-        else
-        {
-            var existing =
-                await db.AccountCompareItems
-                    .SingleOrDefaultAsync(
-                    x => x.IdProfile == ProfileId && x.IdProduct == productId, ct);
-            changed = existing is null;
-            if (existing is null)
-                db.AccountCompareItems.Add(new AccountCompareItem
-                    { IdProfile = ProfileId, IdProduct = productId, CreatedAtUtc = DateTime.UtcNow });
-            else db.AccountCompareItems.Remove(existing);
-        }
-
-        await db.SaveChangesAsync(ct);
-
-        await transaction.CommitAsync(ct);
-
-        return Ok(new { changed });
+        return Ok(new { changed = changed.Value });
     }
 
     [HttpPut("lists/{kind}")]
@@ -76,34 +42,8 @@ public sealed class AccountListsController : AccountApiControllerBase
             return BadRequest(new { code = "invalid-list" });
 
         decimal[] productIds = request.ProductIds.ToArray();
-        int availableProductCount = await db.Products
-            .AsNoTracking()
-            .CountAsync(x => productIds.Contains(x.Id) && x.IsStoreEnabled, ct);
-        if (availableProductCount != productIds.Length)
+        if (!await data.ReplaceListAsync(ProfileId, kind, productIds, ct))
             return Conflict(new { code = "product-unavailable" });
-
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
-        if (kind == "favorites")
-        {
-            await db.AccountFavorites
-                .Where(x => x.IdProfile == ProfileId)
-                .ExecuteDeleteAsync(ct);
-            db.AccountFavorites.AddRange(productIds.Select(id => new AccountFavorite
-                { IdProfile = ProfileId, IdProduct = id, CreatedAtUtc = DateTime.UtcNow }));
-        }
-        else
-        {
-            await db.AccountCompareItems
-                .Where(x => x.IdProfile == ProfileId)
-                .ExecuteDeleteAsync(ct);
-            db.AccountCompareItems.AddRange(productIds.Select(id => new AccountCompareItem
-                { IdProfile = ProfileId, IdProduct = id, CreatedAtUtc = DateTime.UtcNow }));
-        }
-
-        await db.SaveChangesAsync(ct);
-
-        await transaction.CommitAsync(ct);
 
         return Ok(new { saved = true });
     }
@@ -114,7 +54,7 @@ public sealed class AccountListsController : AccountApiControllerBase
         if (request.Items is null || request.Items.Count > 100)
             return BadRequest(new { code = "invalid-price-alerts" });
 
-        var normalized = new List<object>();
+        var normalized = new List<AccountPriceAlertData>();
         var configurations = new HashSet<string>(StringComparer.Ordinal);
         foreach (var item in request.Items)
         {
@@ -134,56 +74,13 @@ public sealed class AccountListsController : AccountApiControllerBase
             if (!configurations.Add($"{productId}:{item.Scope}:{signature}"))
                 return BadRequest(new { code = "duplicate-price-alert" });
 
-            normalized.Add(new
-            {
-                productId,
-                scope = item.Scope,
-                signature,
-                variantsJson = variants is null ? (System.Text.Json.JsonElement?)null : item.Variants,
-                item.PriceAtRegistration,
-                item.StockAtRegistration,
-                item.CreatedAt
-            });
+            normalized.Add(new AccountPriceAlertData(productId, item.Scope!, signature, variants,
+                item.PriceAtRegistration, item.StockAtRegistration,
+                DateTime.SpecifyKind(item.CreatedAt.UtcDateTime, DateTimeKind.Utc)));
         }
 
-        decimal[] alertProductIds = normalized
-            .Select(item => (decimal)item.GetType().GetProperty("productId")!.GetValue(item)!).Distinct().ToArray();
-        int availableAlertProducts = await db.Products
-            .AsNoTracking()
-            .CountAsync(x => alertProductIds.Contains(x.Id) && x.IsStoreEnabled, ct);
-        if (availableAlertProducts != alertProductIds.Length)
+        if (!await data.ReplacePriceAlertsAsync(ProfileId, normalized, ct))
             return Conflict(new { code = "product-unavailable" });
-
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
-        await db.AccountPriceAlerts
-            .Where(x => x.IdProfile == ProfileId)
-            .ExecuteDeleteAsync(ct);
-        foreach (dynamic item in normalized)
-        {
-            long productId = item.productId;
-            string scope = item.scope;
-            string signature = item.signature;
-            string? variantsJson = item.variantsJson?.GetRawText();
-            DateTime createdAt = item.CreatedAt is DateTime date
-                ? DateTime.SpecifyKind(date, DateTimeKind.Utc)
-                : DateTime.UtcNow;
-            db.AccountPriceAlerts.Add(new AccountPriceAlert
-            {
-                IdProfile = ProfileId,
-                IdProduct = productId,
-                Scope = scope,
-                VariantSignature = signature,
-                VariantsJson = variantsJson,
-                PriceAtRegistration = item.PriceAtRegistration,
-                StockAtRegistration = item.StockAtRegistration,
-                CreatedAtUtc = createdAt
-            });
-        }
-
-        await db.SaveChangesAsync(ct);
-
-        await transaction.CommitAsync(ct);
 
         return Ok(new { saved = true });
     }

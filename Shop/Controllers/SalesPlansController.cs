@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shop.Models;
 using Shop.Services;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Domain.Store.Entities;
-using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Controllers;
 
@@ -12,7 +11,7 @@ namespace Shop.Controllers;
 public sealed class SalesPlansController(
     ISalesPlanSource plans,
     IProductPurchaseConfigurationSource purchaseConfigurations,
-    ShopDbContext db) : ControllerBase
+    IStorePublicPageData pageData) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken) =>
@@ -66,13 +65,6 @@ public sealed class SalesPlansController(
             (plan.EndsAtUtc is { } endsAt && now >= endsAt))
             return NotFound(new { code = "price-history-not-found" });
 
-        long? databasePlanId = await db.SalesPlanReferences
-            .AsNoTracking()
-            .Where(item => item.IdStockOwnerType == 1 && item.StoreSalesPlanKey == salesPlanId)
-            .Select(item => (long?)item.Id)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (!databasePlanId.HasValue) return NotFound(new { code = "price-history-not-found" });
-
         var inventoryVariant = variantId.HasValue
             ? catalog.InventoryVariants.SingleOrDefault(item =>
                 item.ProductId == productId && item.VariantId == variantId.Value)
@@ -80,32 +72,16 @@ public sealed class SalesPlansController(
         if (variantId.HasValue && inventoryVariant is null)
             return BadRequest(new { code = "invalid-price-history-scope" });
         long? pricedVariantId = inventoryVariant is null ? null : variantId;
-
-        var productVersions = await db.StorePriceVersions
-            .AsNoTracking()
-            .Where(item => item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value &&
-                           item.IdVariant == pricedVariantId && item.IdAccessory == null)
-            .OrderBy(item => item.CreatedAtUtc)
-            .ThenBy(item => item.Id)
-            .Select(item => new
-            {
-                item.Id,
-                item.IdVariant,
-                item.IdAccessory,
-                PriceAmount = item.PriceBeforeDiscountAmount,
-                item.DiscountPercent,
-                item.FinalPriceAmount,
-                item.IsActive,
-                item.CreatedAtUtc
-            })
-            .ToListAsync(cancellationToken);
+        var productVersions = await pageData.ReadPriceHistoryAsync(productId, salesPlanId, pricedVariantId,
+            cancellationToken);
+        if (productVersions is null) return NotFound(new { code = "price-history-not-found" });
         if (productVersions.Count == 0)
             return Ok(new { productId, salesPlanId, currency = catalog.Currency, history = Array.Empty<object>() });
         var versions = productVersions.Select(item => new
         {
             item.Id,
-            item.IdVariant,
-            item.IdAccessory,
+            item.VariantId,
+            item.AccessoryId,
             item.PriceAmount,
             item.DiscountPercent,
             item.FinalPriceAmount,
@@ -121,8 +97,8 @@ public sealed class SalesPlansController(
             history = versions.Select(item => new
             {
                 priceVersionId = item.Id,
-                component = StorePriceVersionReference.GetComponent(item.IdVariant, item.IdAccessory),
-                targetId = item.IdVariant ?? item.IdAccessory,
+                component = StorePriceVersionReference.GetComponent(item.VariantId, item.AccessoryId),
+                targetId = item.VariantId ?? item.AccessoryId,
                 item.PriceAmount,
                 item.DiscountPercent,
                 priceBeforeDiscountAmount = item.PriceAmount,

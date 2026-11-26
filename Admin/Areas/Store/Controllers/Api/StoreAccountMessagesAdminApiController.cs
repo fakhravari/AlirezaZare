@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shop.Admin.Infrastructure;
 using Shop.Data.Application.Store;
-using Shop.Data.Domain.Account.Entities;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Helpers;
 
 namespace Shop.Admin.Areas.Store.Controllers.Api;
@@ -11,7 +9,7 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [Area("Store")]
 [ApiController]
 [Route("api/admin/store/account-messages")]
-public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : ControllerBase
+public sealed class StoreAccountMessagesAdminApiController(IStoreAccountMessageAdminData data) : ControllerBase
 {
     [HttpGet("customers")]
     public async Task<IActionResult> Customers([FromQuery] string? q, CancellationToken cancellationToken)
@@ -22,12 +20,7 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
 
         if (term.Length < 2) return Ok(Array.Empty<object>());
 
-        var rows = await db.AccountProfiles.AsNoTracking().Where(x =>
-                x.Email.Contains(term) || x.FirstName.Contains(term) || x.LastName.Contains(term))
-            .OrderBy(x => x.FirstName).ThenBy(x => x.LastName).Take(20)
-            .Select(x => new { x.Id, x.Email, x.FirstName, x.LastName }).ToListAsync(cancellationToken);
-
-        return Ok(rows);
+        return Ok(await data.FindCustomersAsync(term, cancellationToken));
     }
 
     [HttpGet]
@@ -54,36 +47,8 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
         DateTime? untilUtc = to.HasValue
             ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
             : null;
-        var query = db.AccountMessages
-            .AsNoTracking()
-            .Join(
-                db.AccountProfiles.AsNoTracking(),
-                message => message.IdProfile,
-                profile => profile.Id,
-                (message, profile) => new
-            {
-                message.Id,
-                message.Title,
-                message.Category,
-                message.Body,
-                message.IsRead,
-                message.CreatedAtUtc,
-                ProfileId = profile.Id,
-                profile.Email,
-                profile.FirstName,
-                profile.LastName
-            });
-        if (fromUtc.HasValue) query = query.Where(x => x.CreatedAtUtc >= fromUtc.Value);
-        if (untilUtc.HasValue) query = query.Where(x => x.CreatedAtUtc < untilUtc.Value);
-        if (paging.Search.Length > 0)
-        {
-            string term = paging.Search;
-            query = query.Where(x => x.Email.Contains(term) || x.FirstName.Contains(term) || x.LastName.Contains(term));
-        }
-
-        int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset)
-            .Take(paging.PageSize).ToListAsync(cancellationToken);
+        var (total, items) = await data.ReadMessagesAsync(paging.Search, fromUtc, untilUtc, paging.Offset,
+            paging.PageSize, cancellationToken);
         var result = items.Select(item => new
         {
             item.Id,
@@ -110,18 +75,8 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
             input.Category is not ("notice" or "support" or "orders" or "products"))
             return ValidationProblem(detail: "اطلاعات پیام معتبر نیست.", statusCode: 400);
 
-        if (!await db.AccountProfiles.AnyAsync(x => x.Id == input.ProfileId, cancellationToken)) return NotFound();
-
-        db.AccountMessages.Add(new AccountMessage
-        {
-            IdProfile = input.ProfileId,
-            Title = title,
-            Body = body,
-            Category = input.Category,
-            IsRead = false,
-            CreatedAtUtc = DateTime.UtcNow
-        });
-        await db.SaveChangesAsync(cancellationToken);
+        if (!await data.SendMessageAsync(input.ProfileId, title, input.Category, body, cancellationToken))
+            return NotFound();
 
         return Ok(new { message = "پیام در حساب مشتری ثبت شد." });
     }

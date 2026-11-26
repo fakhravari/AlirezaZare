@@ -1,6 +1,6 @@
 ﻿@{
     string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? "";
-    var slides = ViewData["HomeSliders"] as List<Shop.Data.Domain.Store.Entities.StoreSlider> ?? new();
+    var slides = ViewData["HomeSliders"] as IReadOnlyList<Shop.Data.Application.Store.Contracts.HomeSliderData> ?? [];
 }
 <section class="electrical-showcase" aria-label="دسته‌بندی و پیشنهادهای فروشگاه">
     <div class="electrical-home-row">

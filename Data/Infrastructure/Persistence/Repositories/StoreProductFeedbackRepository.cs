@@ -118,6 +118,52 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
         return imported.Count;
     }
 
+    public Task<bool> StatusExistsAsync(int statusId, CancellationToken cancellationToken) =>
+        dbContext.ProductFeedbackStatuses.AsNoTracking().AnyAsync(status => status.Id == statusId,
+            cancellationToken);
+
+    public async Task<IReadOnlyList<ProductFeedbackStatusData>> ReadStatusesAsync(
+        CancellationToken cancellationToken) => await dbContext.ProductFeedbackStatuses.AsNoTracking()
+        .OrderBy(status => status.Id).Select(status => new ProductFeedbackStatusData(status.Id, status.Name,
+            status.NameEn)).ToListAsync(cancellationToken);
+
+    public async Task<(int Total, IReadOnlyList<ProductFeedbackAdminItem> Items)> ReadAdminAsync(string type,
+        int? statusId, string search, DateTime? fromUtc, DateTime? untilUtc, int offset, int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var query = dbContext.ProductFeedback.AsNoTracking().Join(dbContext.Products.AsNoTracking(),
+            feedback => feedback.IdProduct, product => product.Id,
+            (feedback, product) => new { feedback, product })
+            .Where(row => row.feedback.FeedbackType == type)
+            .Select(row => new ProductFeedbackAdminItem(row.feedback.Id, row.feedback.IdProduct,
+                row.product.ProductKey, row.product.NameFa, row.feedback.DisplayName, row.feedback.FeedbackText,
+                row.feedback.Rating, row.feedback.IdStatus, row.feedback.Status.Name, row.feedback.AdminReply,
+                row.feedback.CreatedAtUtc, row.feedback.RepliedAtUtc));
+        if (statusId.HasValue) query = query.Where(item => item.StatusId == statusId.Value);
+        if (fromUtc.HasValue) query = query.Where(item => item.CreatedAtUtc >= fromUtc.Value);
+        if (untilUtc.HasValue) query = query.Where(item => item.CreatedAtUtc < untilUtc.Value);
+        if (search.Length > 0)
+            query = query.Where(item => item.ProductKey.Contains(search) || item.ProductName.Contains(search) ||
+                                        item.DisplayName.Contains(search) || item.Text.Contains(search));
+        int total = await query.CountAsync(cancellationToken);
+        var items = await query.OrderByDescending(item => item.CreatedAtUtc).ThenByDescending(item => item.Id)
+            .Skip(offset).Take(pageSize).ToListAsync(cancellationToken);
+        return (total, items);
+    }
+
+    public async Task<bool> ModerateAsync(long id, string type, int statusId, string? reply,
+        CancellationToken cancellationToken)
+    {
+        var feedback = await dbContext.ProductFeedback.SingleOrDefaultAsync(item => item.Id == id &&
+            item.FeedbackType == type, cancellationToken);
+        if (feedback is null) return false;
+        feedback.IdStatus = statusId;
+        feedback.AdminReply = reply;
+        feedback.RepliedAtUtc = reply is null ? null : DateTime.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     private Task<long?> ActiveProductIdAsync(int productId, CancellationToken cancellationToken) =>
         dbContext.Products.AsNoTracking().Where(x => x.Id == productId && x.IsStoreEnabled).Select(x => (long?)x.Id)
             .SingleOrDefaultAsync(cancellationToken);

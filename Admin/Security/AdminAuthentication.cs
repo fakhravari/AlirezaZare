@@ -4,42 +4,21 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Shop.Data.Domain.Admin.Entities;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Admin.Contracts;
 
 namespace Shop.Admin.Security;
 
-public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSystemUser> passwordHasher)
+public sealed class AdminAuthentication(IAdminIdentityData data)
 {
     public async Task<ClaimsPrincipal?> SignInAsync(string userName, string password,
         CancellationToken cancellationToken)
     {
         string normalizedName = userName.Trim().ToUpperInvariant();
-        AdminSystemUser? user = await db.AdminSystemUsers.Include(x => x.WarehouseAccess).Include(x => x.Roles)
-            .ThenInclude(x => x.Role).ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
-            .SingleOrDefaultAsync(x => x.NormalizedUserName == normalizedName && x.IsActive, cancellationToken);
-
-        if (user is null || passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) ==
-            PasswordVerificationResult.Failed)
-            return null;
-
-        user.LastLoginAtUtc = DateTime.UtcNow;
-        user.UpdatedAtUtc = DateTime.UtcNow;
-        await db.SaveChangesAsync(cancellationToken);
-
-        AdminPermission[] allPermissions = (await db.AdminPermissions
-            .AsNoTracking()
-            .Where(permission => permission.IsActive)
-            .ToListAsync(cancellationToken))
-            .ToArray();
-
-        return CreatePrincipal(user, allPermissions);
+        var identity = await data.AuthenticateAsync(normalizedName, password, cancellationToken);
+        return identity is null ? null : CreatePrincipal(identity);
     }
 
-    internal static ClaimsPrincipal CreatePrincipal(AdminSystemUser user,
-        IReadOnlyCollection<AdminPermission> allPermissions)
+    internal static ClaimsPrincipal CreatePrincipal(AdminIdentityState user)
     {
         var claims = new List<Claim>
         {
@@ -48,41 +27,42 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
             new("display_name", user.DisplayName),
             new("admin_security_stamp", user.SecurityStamp.ToString("D"))
         };
-        foreach (long warehouseId in user.WarehouseAccess.Select(x => x.IdWarehouse))
+        foreach (long warehouseId in user.WarehouseIds)
             claims.Add(new Claim("admin_warehouse", warehouseId.ToString()));
 
-        var children = allPermissions.GroupBy(x => x.ParentPermissionKey ?? "")
+        var children = user.AllPermissions.GroupBy(x => x.ParentPermissionKey ?? "")
             .ToDictionary(x => x.Key, x => x.ToArray(), StringComparer.OrdinalIgnoreCase);
-        var granted = new Dictionary<string, AdminPermission>(StringComparer.OrdinalIgnoreCase);
+        var granted = new Dictionary<string, AdminPermissionData>(StringComparer.OrdinalIgnoreCase);
 
-        void Grant(AdminPermission permission)
+        void Grant(AdminPermissionData permission)
         {
             if (!granted.TryAdd(permission.PermissionKey, permission)) return;
 
-            if (children.TryGetValue(permission.PermissionKey, out AdminPermission[]? descendants))
-                foreach (AdminPermission descendant in descendants)
+            if (children.TryGetValue(permission.PermissionKey, out AdminPermissionData[]? descendants))
+                foreach (AdminPermissionData descendant in descendants)
                     Grant(descendant);
         }
 
-        foreach (AdminRole role in user.Roles.Select(x => x.Role).Where(x => x.IsActive))
+        foreach (AdminRoleData role in user.Roles.Where(x => x.IsActive))
         {
             claims.Add(new Claim(ClaimTypes.Role, role.RoleKey));
             if (role.RoleKey == "system.full-access")
             {
-                foreach (AdminPermission permission in allPermissions)
+                foreach (AdminPermissionData permission in user.AllPermissions)
                     Grant(permission);
                 continue;
             }
 
-            foreach (AdminPermission permission in role.Permissions.Select(x => x.Permission).Where(x => x.IsActive))
-                Grant(permission);
+            foreach (AdminRolePermissionData permission in role.Permissions.Where(x => x.Permission.IsActive))
+                Grant(permission.Permission);
         }
 
-        foreach (AdminPermission permission in granted.Values.Where(x => !string.IsNullOrWhiteSpace(x.Area)
+        foreach (AdminPermissionData permission in granted.Values.Where(x => !string.IsNullOrWhiteSpace(x.Area)
                                                                          && !string.IsNullOrWhiteSpace(x.Controller) &&
                                                                          !string.IsNullOrWhiteSpace(x.Action)))
             claims.Add(new Claim("admin_permission",
-                RoutePermission(permission.Area, permission.Controller, permission.Action, permission.FeatureKey)));
+                RoutePermission(permission.Area ?? "", permission.Controller ?? "", permission.Action ?? "",
+                    permission.FeatureKey)));
 
         var identity = new ClaimsIdentity(claims, "AdminCookie");
 
@@ -117,40 +97,20 @@ public sealed class AdminBootstrapper(
         }
 
         using IServiceScope scope = scopeFactory.CreateScope();
-        ShopDbContext db = scope.ServiceProvider.GetRequiredService<ShopDbContext>();
-        if (await db.AdminSystemUsers.AnyAsync(cancellationToken))
-            return;
-
-        AdminRole? fullAccess =
-            await db.AdminRoles.SingleOrDefaultAsync(x => x.RoleKey == "system.full-access", cancellationToken);
-        if (fullAccess is null)
+        var data = scope.ServiceProvider.GetRequiredService<IAdminIdentityData>();
+        var result = await data.BootstrapAsync(userName, password, displayName, cancellationToken);
+        if (result == AdminBootstrapResult.SchemaMissing)
         {
             logger.LogError("Admin schema is not installed; the configured initial system user was not created.");
-
-            return;
         }
-
-        var user = new AdminSystemUser
-        {
-            UserName = userName.Trim(),
-            NormalizedUserName = userName.Trim().ToUpperInvariant(),
-            DisplayName = string.IsNullOrWhiteSpace(displayName) ? userName.Trim() : displayName.Trim(),
-            IsActive = true,
-            CreatedAtUtc = DateTime.UtcNow,
-            UpdatedAtUtc = DateTime.UtcNow
-        };
-        user.PasswordHash = new PasswordHasher<AdminSystemUser>().HashPassword(user, password);
-        db.AdminSystemUsers.Add(user);
-        db.AdminUserRoles.Add(new AdminUserRole { User = user, Role = fullAccess });
-        await db.SaveChangesAsync(cancellationToken);
-
-        logger.LogInformation("Created the initial system user from AdminBootstrap configuration.");
+        else if (result == AdminBootstrapResult.Created)
+            logger.LogInformation("Created the initial system user from AdminBootstrap configuration.");
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }
 
-public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEvents
+public sealed class AdminCookieEvents(IAdminIdentityData data) : CookieAuthenticationEvents
 {
     public override async Task RedirectToLogin(RedirectContext<CookieAuthenticationOptions> context)
     {
@@ -187,24 +147,16 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
             return;
         }
 
-        AdminSystemUser? user = await db.AdminSystemUsers.AsNoTracking().Include(x => x.WarehouseAccess)
-            .Include(x => x.Roles).ThenInclude(x => x.Role).ThenInclude(x => x.Permissions)
-            .ThenInclude(x => x.Permission)
-            .SingleOrDefaultAsync(x => x.Id == userId && x.IsActive, context.HttpContext.RequestAborted);
-        if (user is null || user.SecurityStamp != stamp)
+        var identity = await data.ReadActiveAsync(userId, context.HttpContext.RequestAborted);
+        if (identity is null || identity.SecurityStamp != stamp)
         {
             await RejectAsync(context);
 
             return;
         }
 
-        AdminPermission[] permissions = (await db.AdminPermissions
-            .AsNoTracking()
-            .Where(permission => permission.IsActive)
-            .ToListAsync(context.HttpContext.RequestAborted))
-            .ToArray();
         ClaimsPrincipal current = context.Principal!;
-        ClaimsPrincipal refreshed = AdminAuthentication.CreatePrincipal(user, permissions);
+        ClaimsPrincipal refreshed = AdminAuthentication.CreatePrincipal(identity);
         if (!ClaimsMatch(current, refreshed))
         {
             context.ReplacePrincipal(refreshed);

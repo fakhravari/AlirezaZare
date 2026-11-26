@@ -4,8 +4,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Account.Contracts;
 using Shop.Data.Application.Store;
 using Shop.Services;
 using Shop.Models;
@@ -21,11 +20,14 @@ public sealed class AccountCartController : AccountApiControllerBase
 {
     private readonly ISalesPlanSource plans;
     private readonly IProductPurchaseConfigurationSource purchaseConfigurations;
+    private readonly IAccountDataCommands data;
 
-    public AccountCartController(ShopDbContext context, ISalesPlanSource salesPlans, IProductPurchaseConfigurationSource configurations) : base(context)
+    public AccountCartController(ISalesPlanSource salesPlans, IProductPurchaseConfigurationSource configurations,
+        IAccountDataCommands accountData) : base(accountData)
     {
         plans = salesPlans;
         purchaseConfigurations = configurations;
+        data = accountData;
     }
     [HttpPut("cart")]
     public async Task<IActionResult> SaveCart([FromBody] CartRequest request, CancellationToken ct)
@@ -64,7 +66,7 @@ public sealed class AccountCartController : AccountApiControllerBase
                 return Conflict(new { code = "inventory-variant-required" });
 
             if (variants.Length == 0 && item.VariantId.HasValue || item.VariantId.HasValue &&
-                !await ProductVariantExistsAsync(item.ProductId, item.VariantId.Value, ct))
+                !await data.ProductVariantExistsAsync(item.ProductId, item.VariantId.Value, ct))
                 return Conflict(new { code = "product-variant-unavailable" });
 
             if (item.VariantId is { } selectedVariantId &&
@@ -84,91 +86,26 @@ public sealed class AccountCartController : AccountApiControllerBase
             if (accessoryIds.Distinct().Count() != accessoryIds.Length || accessoryIds.Any(id => id < 1))
                 return BadRequest(new { code = "invalid-product-options" });
 
-            var productAccessories = await db.StoreProductAccessories
-                .AsNoTracking()
-                .Join(
-                    db.StoreAccessories
-                        .AsNoTracking(),
-                    accessory => accessory.IdAccessory,
-                    definition => definition.Id,
-                    (accessory, definition) => new { accessory, definition })
-                .Where(accessoryDefinition =>
-                    accessoryDefinition.accessory.IdProduct == item.ProductId && accessoryDefinition.definition.IsActive)
-                .Select(accessoryDefinition => new
-                {
-                    accessoryDefinition.accessory.Id,
-                    accessoryDefinition.accessory.IsRequired,
-                    AccessoryId = accessoryDefinition.definition.Id
-                })
-                .ToListAsync(ct);
-            var selectedAccessories =
-                productAccessories.Where(accessory => accessoryIds.Contains(accessory.Id)).ToArray();
+            var productAccessories = await data.ReadCartAccessoriesAsync(item.ProductId, ct);
+            var selectedAccessories = productAccessories
+                .Where(accessory => accessoryIds.Contains(accessory.ProductAccessoryId)).ToArray();
             ProductSalesOffer? cartOffer = currentCatalog.Offers.SingleOrDefault(offer =>
                 offer.ProductId == item.ProductId && offer.SalesPlanId == item.SalesPlanId);
             if (cartOffer is null || selectedAccessories.Length != accessoryIds.Length ||
-                productAccessories.Any(accessory => accessory.IsRequired && !accessoryIds.Contains(accessory.Id)) ||
+                productAccessories.Any(accessory => accessory.Required &&
+                    !accessoryIds.Contains(accessory.ProductAccessoryId)) ||
                 selectedAccessories.Any(accessory => cartOffer.AccessoryIds is { } allowed &&
                                                      !allowed.Contains(
                                                          accessory.AccessoryId.ToString(System.Globalization.CultureInfo
-                                                             .InvariantCulture), StringComparer.Ordinal)) ||
+                    .InvariantCulture), StringComparer.Ordinal)) ||
                 item.Quantity > configuration.MaxPurchaseQuantity)
                 return Conflict(new { code = "invalid-product-options" });
         }
 
-        decimal[] productIds = request.Items.Select(x => x.ProductId).Distinct().ToArray();
-        string[] planKeys = request.Items.Select(x => x.SalesPlanId).Distinct(StringComparer.Ordinal).ToArray();
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
-        var availableProducts = await db.Products
-            .AsNoTracking()
-            .Where(x => productIds.Contains(x.Id) && x.IsStoreEnabled)
-            .Select(x => x.Id)
-            .ToHashSetAsync(ct);
-        var planIds = await db.SalesPlanReferences
-            .AsNoTracking()
-            .Where(x =>
-                planKeys.Contains(x.StoreSalesPlanKey) && x.IsActive && x.IdStockOwnerType == 1)
-            .ToDictionaryAsync(x => x.StoreSalesPlanKey, x => x.Id, ct);
-        if (availableProducts.Count != productIds.Length || planIds.Count != planKeys.Length)
+        var cartLines = request.Items.Select(line => new AccountCartLineData(line.ProductId, line.SalesPlanId,
+            line.VariantId, line.Quantity, line.AccessoryIds?.ToArray() ?? [])).ToArray();
+        if (!await data.SaveCartAsync(ProfileId, cartLines, ct))
             return Conflict(new { code = "product-or-plan-unavailable" });
-
-        var cart = await db.AccountCarts
-            .SingleOrDefaultAsync(x => x.IdProfile == ProfileId, ct);
-        if (cart is null)
-        {
-            cart = new AccountCart { IdProfile = ProfileId, UpdatedAtUtc = DateTime.UtcNow };
-            db.AccountCarts.Add(cart);
-            await db.SaveChangesAsync(ct);
-        }
-
-        await db.AccountCartItems
-            .Where(x => x.IdCart == cart.Id)
-            .ExecuteDeleteAsync(ct);
-        DateTime now = DateTime.UtcNow;
-        var cartItemEntities = request.Items.Select(item => new AccountCartItem
-        {
-            IdCart = cart.Id,
-            IdProduct = item.ProductId,
-            IdVariant = item.VariantId,
-            IdSalesPlan = planIds[item.SalesPlanId],
-            Quantity = item.Quantity,
-            UpdatedAtUtc = now
-        }).ToArray();
-        db.AccountCartItems.AddRange(cartItemEntities);
-        await db.SaveChangesAsync(ct);
-
-        for (var index = 0; index < request.Items.Count; index++)
-        {
-            CartLineRequest line = request.Items[index];
-            AccountCartItem savedItem = cartItemEntities[index];
-            db.AccountCartItemAccessories.AddRange((line.AccessoryIds ?? []).Select(id => new AccountCartItemAccessory
-                { IdCartItem = savedItem.Id, IdProductAccessory = id }));
-        }
-
-        cart.UpdatedAtUtc = now;
-        await db.SaveChangesAsync(ct);
-
-        await transaction.CommitAsync(ct);
 
         return Ok(new { saved = true });
     }

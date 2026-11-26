@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shop.Admin.Infrastructure;
-using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Application.Warehouse.Models;
-using Shop.Data.Infrastructure.Persistence;
 using Shop.Data.Helpers;
 
 namespace Shop.Admin.Areas.Warehouse.Controllers.Api;
@@ -12,7 +9,8 @@ namespace Shop.Admin.Areas.Warehouse.Controllers.Api;
 [Area("Warehouse")]
 [ApiController]
 [Route("api/admin/warehouse")]
-public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseReadService, ShopDbContext db)
+public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseReadService,
+    IWarehouseInventoryAdminService inventoryAdmin)
     : ControllerBase
 {
     [HttpGet("warehouses")]
@@ -40,39 +38,11 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
             return Forbid();
 
         decimal minimum = decimal.Truncate(input.MinimumQuantity * 1000m) / 1000m;
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        bool valid = await db.Warehouses.AnyAsync(x => x.Id == input.WarehouseId && x.IsActive, cancellationToken)
-                     && await db.InventoryItems.AnyAsync(
-                         x => x.Id == input.InventoryItemId && x.IsActive && x.Product.IsWarehouseEnabled,
-                         cancellationToken);
-        var regularPlan = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsRegular && x.IsActive)
-            .Select(x => new { x.Id }).SingleOrDefaultAsync(cancellationToken);
-        if (!valid || regularPlan is null)
+        bool saved = await inventoryAdmin.SetMinimumStockAsync(input.WarehouseId, input.InventoryItemId, minimum,
+            cancellationToken);
+        if (!saved)
             return ValidationProblem(detail: "انبار یا قلم موجودی فعال نیست یا طرح عادی تعریف نشده است.",
                 statusCode: 400);
-
-        var balance = await db.StockBalances.SingleOrDefaultAsync(x => x.IdWarehouse == input.WarehouseId
-                                                                       && x.IdInventoryItem == input.InventoryItemId &&
-                                                                       x.IdSalesPlanReference == regularPlan.Id,
-            cancellationToken);
-        if (balance is null)
-        {
-            balance = new StockBalance
-            {
-                IdWarehouse = input.WarehouseId,
-                IdInventoryItem = input.InventoryItemId,
-                IdSalesPlanReference = regularPlan.Id,
-                Quantity = 0,
-                MinimumQuantity = minimum
-            };
-            db.StockBalances.Add(balance);
-        }
-        else balance.MinimumQuantity = minimum;
-
-        await db.SaveChangesAsync(cancellationToken);
-
-        await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { minimumQuantity = minimum, message = "حداقل موجودی طرح عادی ذخیره شد." });
     }
@@ -89,8 +59,8 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
         CancellationToken cancellationToken = default)
     {
         if (Request.Path.Value?.EndsWith("/stock/plans", StringComparison.OrdinalIgnoreCase) == true)
-            return Ok(await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DisplayName)
-                .Select(x => new { id = x.StoreSalesPlanKey, name = x.DisplayName }).ToListAsync(cancellationToken));
+            return Ok((await inventoryAdmin.ReadActiveSalesPlansAsync(cancellationToken))
+                .Select(plan => new { id = plan.Id, name = plan.Name }));
 
         if (!AdminListQuery.TryCreate(page, pageSize, search, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Admin.Areas.Store.Controllers.Api;
 
@@ -9,15 +8,12 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [ApiController]
 [Authorize(Roles = "system.full-access")]
 [Route("api/admin/store/faq")]
-public sealed class StoreFaqAdminApiController(ShopDbContext db) : ControllerBase
+public sealed class StoreFaqAdminApiController(IStoreContentAdminData data) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List(CancellationToken cancellationToken) => Ok(await db.StoreFaqItems
-        .AsNoTracking()
-        .Where(x => db.StoreContentPages.Any(p => p.Id == x.IdContentPage && p.PageKey == "faq"))
-        .OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
-        .Select(x => new FaqRow(x.Id, x.Question, x.Answer, x.LinkText, x.LinkUrl, x.SortOrder, x.IsPublished))
-        .ToListAsync(cancellationToken));
+    public async Task<IActionResult> List(CancellationToken cancellationToken) =>
+        Ok((await data.ReadFaqItemsAsync(cancellationToken)).Select(item => new FaqRow(item.Id, item.Question,
+            item.Answer, item.LinkText, item.LinkUrl, item.SortOrder, item.Published)));
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -40,29 +36,12 @@ public sealed class StoreFaqAdminApiController(ShopDbContext db) : ControllerBas
              (!linkUrl.StartsWith('/') || !Url.IsLocalUrl(linkUrl) || linkUrl.Any(char.IsControl))))
             return BadRequest(new { title = "پرسش، پاسخ، ترتیب یا پیوند معتبر نیست." });
 
-        var item = id is null
-            ? null
-            : await db.StoreFaqItems.SingleOrDefaultAsync(
-                x => x.Id == id && db.StoreContentPages.Any(p => p.Id == x.IdContentPage && p.PageKey == "faq"),
-                cancellationToken);
-        if (id is not null && item is null) return NotFound();
-
-        if (id is null)
-        {
-            var page = await db.StoreContentPages.SingleOrDefaultAsync(p => p.PageKey == "faq", cancellationToken);
-            if (page is null) return Conflict(new { title = "صفحهٔ FAQ در دیتابیس تعریف نشده است." });
-
-            item = new Shop.Data.Domain.Store.Entities.StoreFaqItem { IdContentPage = page.Id };
-            db.StoreFaqItems.Add(item);
-        }
-
-        item!.Question = question;
-        item.Answer = answer;
-        item.LinkText = linkText.Length == 0 ? null : linkText;
-        item.LinkUrl = linkUrl.Length == 0 ? null : linkUrl;
-        item.SortOrder = input.SortOrder;
-        item.IsPublished = input.IsPublished;
-        await db.SaveChangesAsync(cancellationToken);
+        StoreFaqSaveResult result = await data.SaveFaqAsync(id, new StoreFaqAdminEdit(question, answer,
+            linkText.Length == 0 ? null : linkText, linkUrl.Length == 0 ? null : linkUrl, input.SortOrder,
+            input.IsPublished), cancellationToken);
+        if (result == StoreFaqSaveResult.NotFound) return NotFound();
+        if (result == StoreFaqSaveResult.FaqPageMissing)
+            return Conflict(new { title = "صفحهٔ FAQ در دیتابیس تعریف نشده است." });
 
         return Ok(new { message = "پرسش متداول ذخیره شد." });
     }
@@ -70,13 +49,7 @@ public sealed class StoreFaqAdminApiController(ShopDbContext db) : ControllerBas
     [HttpDelete("{id:long}"), ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
     {
-        var item = await db.StoreFaqItems.SingleOrDefaultAsync(
-            x => x.Id == id && db.StoreContentPages.Any(p => p.Id == x.IdContentPage && p.PageKey == "faq"),
-            cancellationToken);
-        if (item is null) return NotFound();
-
-        db.StoreFaqItems.Remove(item);
-        await db.SaveChangesAsync(cancellationToken);
+        if (!await data.DeleteFaqAsync(id, cancellationToken)) return NotFound();
 
         return Ok(new { message = "پرسش متداول حذف شد." });
     }

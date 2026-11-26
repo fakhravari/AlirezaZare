@@ -4,15 +4,14 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.EntityFrameworkCore;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Controllers;
 
 [ApiController]
 [Route("api/auth/password")]
 public sealed class PasswordLoginController(
-    ShopDbContext db,
+    IStorePublicPageData pageData,
     IPasswordHasher<string> passwordHasher) : ControllerBase
 {
     [HttpPost]
@@ -24,15 +23,7 @@ public sealed class PasswordLoginController(
         if (!IsValidEmail(email) || string.IsNullOrEmpty(password))
             return Unauthorized(new { code = "invalid-credentials", message = "ایمیل یا رمز عبور درست نیست." });
 
-        var profile = await db.AccountProfiles
-            .AsNoTracking()
-            .Where(x => x.Email == email)
-            .Select(x => new
-            {
-                x.Id,
-                x.Password
-            })
-            .SingleOrDefaultAsync(ct);
+        var profile = await pageData.ReadPasswordCredentialAsync(email, ct);
         if (string.IsNullOrWhiteSpace(profile?.Password) ||
             (!profile.Password.StartsWith("AQAAAA", StringComparison.Ordinal) && profile.Password != password) ||
             (profile.Password.StartsWith("AQAAAA", StringComparison.Ordinal) &&
@@ -42,7 +33,7 @@ public sealed class PasswordLoginController(
 
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, profile!.Id.ToString()), new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.NameIdentifier, profile!.ProfileId.ToString()), new Claim(ClaimTypes.Email, email),
             new Claim(ClaimTypes.Name, email)
         };
         await HttpContext.SignInAsync("ShopCookie", new ClaimsPrincipal(new ClaimsIdentity(claims, "ShopCookie")));

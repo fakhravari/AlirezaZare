@@ -1,15 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shop.Admin.Infrastructure;
-using Shop.Data.Infrastructure.Persistence;
 using Shop.Data.Helpers;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
 [ApiController]
 [Route("api/admin/store/newsletter-subscribers")]
-public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext db) : ControllerBase
+public sealed class StoreNewsletterSubscribersAdminApiController(IStoreNewsletterAdminData data) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(
@@ -22,17 +21,9 @@ public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext d
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
 
-        IQueryable<Shop.Data.Domain.Store.Entities.StoreNewsletterSubscriber> query =
-            db.StoreNewsletterSubscribers.AsNoTracking();
-        if (!includeUnsubscribed)
-            query = query.Where(x => x.UnsubscribedAtUtc == null);
-        if (paging.Search.Length > 0)
-            query = query.Where(x => x.Email.Contains(paging.Search));
-
-        int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.SubscribedAtUtc).ThenByDescending(x => x.Id)
-            .Skip(paging.Offset).Take(paging.PageSize)
-            .Select(x => new { x.Id, x.Email, x.SubscribedAtUtc, x.UnsubscribedAtUtc }).ToListAsync(cancellationToken);
+        int total = await data.CountAsync(paging.Search, includeUnsubscribed, cancellationToken);
+        var items = await data.ReadPageAsync(paging.Search, includeUnsubscribed, paging.Offset, paging.PageSize,
+            cancellationToken);
 
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
@@ -42,11 +33,7 @@ public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext d
     public async Task<IActionResult> Update(long id, [FromBody] NewsletterStatusInput input,
         CancellationToken cancellationToken)
     {
-        var item = await db.StoreNewsletterSubscribers.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (item is null) return NotFound();
-
-        item.UnsubscribedAtUtc = input.Subscribed ? null : DateTime.UtcNow;
-        await db.SaveChangesAsync(cancellationToken);
+        if (!await data.SetSubscribedAsync(id, input.Subscribed, cancellationToken)) return NotFound();
 
         return Ok(new { message = input.Subscribed ? "عضویت فعال شد." : "عضویت لغو شد." });
     }
@@ -59,13 +46,6 @@ public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext d
         if (search.Length > AdminListQuery.MaximumSearchLength || search.Any(char.IsControl))
             return ValidationProblem(detail: "عبارت جست‌وجو معتبر نیست.", statusCode: 400);
 
-        IQueryable<Shop.Data.Domain.Store.Entities.StoreNewsletterSubscriber> query =
-            db.StoreNewsletterSubscribers.AsNoTracking();
-        if (!includeUnsubscribed)
-            query = query.Where(x => x.UnsubscribedAtUtc == null);
-        if (search.Length > 0)
-            query = query.Where(x => x.Email.Contains(search));
-
         return new AdminExcelFileResult("newsletter-subscribers.xlsx", "اعضا", async (worksheet, ct) =>
         {
             await worksheet.WriteRowAsync(ct, "ایمیل", "تاریخ عضویت", "تاریخ لغو");
@@ -73,8 +53,8 @@ public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext d
             while (true)
             {
                 ct.ThrowIfCancellationRequested();
-                var rows = await query.Where(x => x.Id > lastId).OrderBy(x => x.Id).Take(AdminListQuery.ExportBatchSize)
-                    .Select(x => new { x.Id, x.Email, x.SubscribedAtUtc, x.UnsubscribedAtUtc }).ToListAsync(ct);
+                var rows = await data.ReadExportBatchAsync(search, includeUnsubscribed, lastId,
+                    AdminListQuery.ExportBatchSize, ct);
                 if (rows.Count == 0) break;
 
                 foreach (var row in rows)

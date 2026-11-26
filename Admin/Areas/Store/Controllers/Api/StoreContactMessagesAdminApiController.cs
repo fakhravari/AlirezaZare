@@ -1,10 +1,9 @@
 using System.Net.Mail;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shop.Admin.Infrastructure;
 using Shop.Data.Application.Email.Contracts;
 using Shop.Data.Application.Store;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Helpers;
 
 namespace Shop.Admin.Areas.Store.Controllers.Api;
@@ -13,14 +12,13 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [ApiController]
 [Route("api/admin/store/contact-messages")]
 public sealed class StoreContactMessagesAdminApiController(
-    ShopDbContext db,
+    IStoreContactMessageAdminData data,
     IEmailSender emailSender,
     ILogger<StoreContactMessagesAdminApiController> logger) : ControllerBase
 {
     [HttpGet("statuses")]
     public async Task<IActionResult> Statuses(CancellationToken cancellationToken) =>
-        Ok(await db.ContactMessageStatuses.AsNoTracking().OrderBy(x => x.Code)
-            .Select(x => new { x.Code, x.NameFa, x.NameEn }).ToListAsync(cancellationToken));
+        Ok(await data.ReadStatusesAsync(cancellationToken));
 
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] string? status, [FromQuery] string? q,
@@ -29,24 +27,11 @@ public sealed class StoreContactMessagesAdminApiController(
     {
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging)
             || (!string.IsNullOrEmpty(status) &&
-                !await db.ContactMessageStatuses.AnyAsync(x => x.Code == status, cancellationToken)))
+                !await data.StatusExistsAsync(status, cancellationToken)))
             return ValidationProblem(detail: "فیلتر یا صفحه‌بندی معتبر نیست.", statusCode: 400);
 
-        var query = db.StoreContactMessages.AsNoTracking().AsQueryable();
-        if (!string.IsNullOrEmpty(status)) query = query.Where(x => x.StatusReference.Code == status);
-        if (paging.Search.Length > 0)
-            query = query.Where(x =>
-                x.Name.Contains(paging.Search) || x.Phone.Contains(paging.Search) ||
-                (x.Email != null && x.Email.Contains(paging.Search)) || x.Message.Contains(paging.Search));
-        int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset)
-            .Take(paging.PageSize)
-            .Select(x => new
-            {
-                x.Id, x.Name, x.Phone, x.Email, x.SubjectKey, x.Message, Status = x.StatusReference.Code,
-                StatusName = x.StatusReference.NameFa, x.AdminReply, x.RepliedAtUtc, x.ReplyEmailSentAtUtc,
-                x.CreatedAtUtc
-            }).ToListAsync(cancellationToken);
+        var (total, items) = await data.ReadMessagesAsync(status, paging.Search, paging.Offset, paging.PageSize,
+            cancellationToken);
 
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
@@ -57,16 +42,9 @@ public sealed class StoreContactMessagesAdminApiController(
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(input.Status) ||
-            !await db.ContactMessageStatuses.AnyAsync(x => x.Code == input.Status, cancellationToken))
+            !await data.StatusExistsAsync(input.Status, cancellationToken))
             return ValidationProblem(detail: "وضعیت پیام معتبر نیست.", statusCode: 400);
-
-        var item = await db.StoreContactMessages.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (item is null) return NotFound();
-
-        item.IdStatus = await db.ContactMessageStatuses.Where(x => x.Code == input.Status).Select(x => x.Id)
-            .SingleAsync(cancellationToken);
-        item.UpdatedAtUtc = DateTime.UtcNow;
-        await db.SaveChangesAsync(cancellationToken);
+        if (!await data.SetStatusAsync(id, input.Status, cancellationToken)) return NotFound();
         return Ok(new { message = "وضعیت پیام ذخیره شد." });
     }
 
@@ -78,15 +56,8 @@ public sealed class StoreContactMessagesAdminApiController(
         if (reply.Length is < 2 or > 4000)
             return ValidationProblem(detail: "متن پاسخ باید بین ۲ تا ۴۰۰۰ نویسه باشد.", statusCode: 400);
 
-        var item = await db.StoreContactMessages.SingleOrDefaultAsync(x => x.Id == id, ct);
+        var item = await data.SaveReplyAsync(id, reply, ct);
         if (item is null) return NotFound();
-
-        item.AdminReply = StoreHtmlSanitizer.Sanitize(reply);
-        item.RepliedAtUtc = DateTime.UtcNow;
-        item.UpdatedAtUtc = DateTime.UtcNow;
-        item.IdStatus = await db.ContactMessageStatuses.Where(x => x.Code == "closed").Select(x => x.Id)
-            .SingleAsync(ct);
-        await db.SaveChangesAsync(ct);
 
         if (string.IsNullOrWhiteSpace(item.Email) || !MailAddress.TryCreate(item.Email, out var recipient))
             return Ok(new
@@ -100,10 +71,9 @@ public sealed class StoreContactMessagesAdminApiController(
                 "after-sales" => "پاسخ خدمات پس از فروش", "business" => "پاسخ همکاری سازمانی", _ => "پاسخ پیام شما"
             };
             await emailSender.SendAsync(recipient.Address, subject,
-                $"سلام {item.Name}\n\n{System.Text.RegularExpressions.Regex.Replace(item.AdminReply, "<[^>]+>", " ")}\n\nبا احترام\nپشتیبانی فروشگاه",
+                $"سلام {item.Name}\n\n{System.Text.RegularExpressions.Regex.Replace(item.AdminReply ?? string.Empty, "<[^>]+>", " ")}\n\nبا احترام\nپشتیبانی فروشگاه",
                 ct);
-            item.ReplyEmailSentAtUtc = DateTime.UtcNow;
-            await db.SaveChangesAsync(ct);
+            await data.MarkReplyEmailSentAsync(item.Id, ct);
             return Ok(new { saved = true, emailSent = true, message = "پاسخ ثبت و ایمیل ارسال شد." });
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

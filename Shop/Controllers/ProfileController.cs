@@ -1,13 +1,12 @@
 using Shop.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Shop.Data.Infrastructure.Persistence;
 using System.Security.Claims;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Controllers;
 
 [Route("Profile")]
-public sealed class ProfileController(Shop.Services.IAccountDataSource accountDataSource, ShopDbContext db)
+public sealed class ProfileController(Shop.Services.IAccountDataSource accountDataSource, IStorePublicPageData pageData)
     : PageController
 {
     [HttpGet("/account")]
@@ -52,20 +51,12 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
             var account = await accountDataSource.ReadAsync(HttpContext.RequestAborted);
             long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out long profileId);
             var assignedCoupons = profileId > 0
-                ? await db.AccountCoupons
-                    .AsNoTracking()
-                    .Where(coupon => coupon.IdProfile == profileId)
-                    .Select(coupon => new
-                    {
-                        coupon.CouponKey, coupon.Code, coupon.DiscountPercent, coupon.Enabled, coupon.ExpiresOn,
-                        coupon.UsageLimit
-                    })
-                    .ToListAsync(HttpContext.RequestAborted)
+                ? await pageData.ReadAssignedCouponsAsync(profileId, HttpContext.RequestAborted)
                 : [];
             var ordersById = account.Orders.ToDictionary(order => order.Id, StringComparer.Ordinal);
             DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
             var accountCoupons = account.Coupons.Concat(assignedCoupons.Select(coupon =>
-                new Shop.Models.AccountCoupon(coupon.CouponKey, coupon.Code, coupon.DiscountPercent, coupon.Enabled,
+                new Shop.Models.AccountCoupon(coupon.Id, coupon.Code, coupon.DiscountPercent, coupon.Enabled,
                     coupon.ExpiresOn, coupon.UsageLimit, Array.Empty<string>())));
             coupons = accountCoupons.Select(coupon => new ProfileCouponViewModel(
                 coupon.Id,
@@ -82,11 +73,8 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
                     .ToArray())).ToArray();
         }
 
-        var genders = await db.AccountGenders
-            .AsNoTracking()
-            .OrderBy(x => x.Id)
-            .Select(x => new ProfileGenderOption(x.Id, x.Code, x.NameFa))
-            .ToListAsync(HttpContext.RequestAborted);
+        var genders = (await pageData.ReadProfileGendersAsync(HttpContext.RequestAborted))
+            .Select(gender => new ProfileGenderOption(gender.Id, gender.Code, gender.Name)).ToArray();
         PageModel<ProfilePageViewModel> model = new(
             new ProfilePageViewModel(section, title, description, icon, Array.Empty<AccountOrder>(), coupons, genders),
             new SeoModel($"{title} | ندا اولیائی", description, Robots: "noindex, nofollow"),

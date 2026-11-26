@@ -4,8 +4,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Account.Contracts;
 using Shop.Data.Application.Store;
 using Shop.Services;
 using Shop.Models;
@@ -21,9 +20,13 @@ public sealed class AccountProfileController : AccountApiControllerBase
 {
     private readonly IPasswordHasher<string> passwordHasher;
 
-    public AccountProfileController(ShopDbContext context, IPasswordHasher<string> hasher) : base(context)
+    private readonly IAccountDataCommands data;
+
+    public AccountProfileController(IPasswordHasher<string> hasher, IAccountDataCommands accountData) :
+        base(accountData)
     {
         passwordHasher = hasher;
+        data = accountData;
     }
 [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfile(ProfileRequest request, CancellationToken ct)
@@ -32,22 +35,11 @@ public sealed class AccountProfileController : AccountApiControllerBase
             request.FirstName.Length > 100 || request.LastName.Length > 100 || (request.Phone?.Length ?? 0) > 30 ||
             request.IdGender is <= 0) return BadRequest(new { code = "invalid-profile" });
 
-        if (request.IdGender.HasValue && !await db.AccountGenders
-                .AsNoTracking()
-                .AnyAsync(x => x.Id == request.IdGender.Value, ct))
+        if (request.IdGender.HasValue && !await data.GenderExistsAsync(request.IdGender.Value, ct))
             return BadRequest(new { code = "invalid-profile" });
-
-        var profile = await db.AccountProfiles
-            .SingleOrDefaultAsync(x => x.Id == ProfileId, ct);
-        if (profile is null) return Unauthorized();
-
-        profile.FirstName = request.FirstName.Trim();
-        profile.LastName = request.LastName.Trim();
-        profile.Phone = request.Phone;
-        profile.IdGender = request.IdGender;
-        profile.NewsletterEnabled = request.Newsletter;
-        profile.UpdatedAtUtc = DateTime.UtcNow;
-        await db.SaveChangesAsync(ct);
+        if (!await data.UpdateProfileAsync(ProfileId, new AccountProfileUpdate(request.FirstName.Trim(),
+                request.LastName.Trim(), request.Phone, request.IdGender, request.Newsletter), ct))
+            return Unauthorized();
 
         return Ok(new { saved = true });
     }
@@ -62,11 +54,8 @@ public sealed class AccountProfileController : AccountApiControllerBase
                 { code = "invalid-new-password", message = "رمز جدید را وارد کنید و تکرار آن را مطابق بنویسید." });
 
         string email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
-        var profile = await db.AccountProfiles
-            .SingleOrDefaultAsync(x => x.Id == ProfileId, ct);
-        if (string.IsNullOrWhiteSpace(email) || profile is null) return Unauthorized();
-
-        string? currentPassword = profile.Password;
+        if (string.IsNullOrWhiteSpace(email)) return Unauthorized();
+        string? currentPassword = await data.ReadPasswordAsync(ProfileId, ct);
         if (currentPassword is not null &&
             (string.IsNullOrEmpty(request.CurrentPassword) ||
              (currentPassword.StartsWith("AQAAAA", StringComparison.Ordinal)
@@ -78,9 +67,7 @@ public sealed class AccountProfileController : AccountApiControllerBase
         if (currentPassword is null && !string.IsNullOrEmpty(request.CurrentPassword))
             return BadRequest(new { code = "invalid-current-password", message = "این حساب هنوز رمز عبور ندارد." });
 
-        profile.Password = request.NewPassword;
-        profile.UpdatedAtUtc = DateTime.UtcNow;
-        await db.SaveChangesAsync(ct);
+        if (!await data.SetPasswordAsync(ProfileId, request.NewPassword, ct)) return Unauthorized();
 
         return Ok(new { changed = true });
     }
@@ -96,45 +83,19 @@ public sealed class AccountProfileController : AccountApiControllerBase
             a.CityId is null or < 1)
             return BadRequest(new { code = "invalid-address" });
 
-        if (!await IsAddressGeographyValidAsync(a.CountryId.Value, a.ProvinceId.Value, a.CityId.Value, ct))
+        if (!await data.IsAddressLocationValidAsync(a.CountryId.Value, a.ProvinceId.Value, a.CityId.Value, ct))
             return BadRequest(new { code = "invalid-address-location" });
-
-        var address = new AccountAddress
-        {
-            IdProfile = ProfileId,
-            Title = a.Title!.Trim(),
-            Recipient = a.Recipient!.Trim(),
-            Phone = a.Phone!.Trim(),
-            IdCountry = a.CountryId.Value,
-            IdProvince = a.ProvinceId.Value,
-            IdCity = a.CityId.Value,
-            Street = a.Street!.Trim(),
-            PostalCode = a.Postal!.Trim(),
-            CreatedAtUtc = DateTime.UtcNow
-        };
-        db.AccountAddresses.Add(address);
-        await db.SaveChangesAsync(ct);
-
-        return Ok(new { saved = true, id = address.Id.ToString(System.Globalization.CultureInfo.InvariantCulture) });
+        decimal id = await data.AddAddressAsync(ProfileId, MapAddress(a), ct);
+        return Ok(new { saved = true, id = id.ToString(System.Globalization.CultureInfo.InvariantCulture) });
     }
 
     [HttpDelete("addresses/{id:long}")]
     public async Task<IActionResult> DeleteAddress(long id, CancellationToken ct)
     {
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
-        var address = await db.AccountAddresses
-            .SingleOrDefaultAsync(x => x.Id == id && x.IdProfile == ProfileId, ct);
-        if (address is not null && await db.StoreCustomerOrders
-                .AsNoTracking()
-                .AnyAsync(x => x.IdAddress == id, ct))
+        var result = await data.DeleteAddressAsync(ProfileId, id, ct);
+        if (result == AccountAddressDeleteResult.HasOrders)
             return Conflict(new { code = "address-has-orders" });
-        if (address is not null) db.AccountAddresses.Remove(address);
-        await db.SaveChangesAsync(ct);
-
-        await transaction.CommitAsync(ct);
-
-        return Ok(new { deleted = address is not null });
+        return Ok(new { deleted = result == AccountAddressDeleteResult.Deleted });
     }
 
     [HttpPut("addresses/{id:long}")]
@@ -148,35 +109,15 @@ public sealed class AccountProfileController : AccountApiControllerBase
             a.CityId is null or < 1)
             return BadRequest(new { code = "invalid-address" });
 
-        if (!await IsAddressGeographyValidAsync(a.CountryId.Value, a.ProvinceId.Value, a.CityId.Value, ct))
+        if (!await data.IsAddressLocationValidAsync(a.CountryId.Value, a.ProvinceId.Value, a.CityId.Value, ct))
             return BadRequest(new { code = "invalid-address-location" });
-
-        var address = await db.AccountAddresses
-            .SingleOrDefaultAsync(x => x.Id == id && x.IdProfile == ProfileId, ct);
-        if (address is null) return NotFound(new { code = "address-not-found" });
-
-        address.Title = a.Title!.Trim();
-        address.Recipient = a.Recipient!.Trim();
-        address.Phone = a.Phone!.Trim();
-        address.IdCountry = a.CountryId.Value;
-        address.IdProvince = a.ProvinceId.Value;
-        address.IdCity = a.CityId.Value;
-        address.Street = a.Street!.Trim();
-        address.PostalCode = a.Postal!.Trim();
-        await db.SaveChangesAsync(ct);
+        if (!await data.UpdateAddressAsync(ProfileId, id, MapAddress(a), ct))
+            return NotFound(new { code = "address-not-found" });
 
         return Ok(new { saved = true, id });
     }
 
-    private async Task<bool> IsAddressGeographyValidAsync(long countryId, long provinceId, long cityId,
-        CancellationToken cancellationToken) =>
-        await db.GeoCities
-            .AsNoTracking()
-            .AnyAsync(city =>
-                    city.Id == cityId && city.IdProvince == provinceId && city.IdCountry == countryId &&
-                    db.GeoProvinces
-                        .AsNoTracking()
-                        .Any(province =>
-                            province.Id == city.IdProvince && province.IdCountry == city.IdCountry),
-                cancellationToken);
+    private static AccountAddressUpdate MapAddress(AddressRequest request) => new(request.Title!.Trim(),
+        request.Recipient!.Trim(), request.Phone!.Trim(), request.CountryId!.Value, request.ProvinceId!.Value,
+        request.CityId!.Value, request.Street!.Trim(), request.Postal!.Trim());
 }

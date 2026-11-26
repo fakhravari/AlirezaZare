@@ -1,14 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Shop.Data.Domain.Account.Entities;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Admin.Areas.Store.Controllers;
 
 [Area("Store")]
 [Authorize(Roles = "system.full-access")]
-public sealed class CouponsController(ShopDbContext db) : Controller
+public sealed class CouponsController(IStoreCouponAdminData data) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(string? q, string? status, int page = 1,
@@ -21,105 +19,38 @@ public sealed class CouponsController(ShopDbContext db) : Controller
         status = (status ?? "").Trim().ToLowerInvariant();
         if (q.Length > 32 || page is < 1 or > 100000 ||
             status is not ("" or "active" or "disabled" or "expired" or "exhausted")) return BadRequest();
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var query = db.AccountCoupons.AsNoTracking().Where(item => q == "" || item.Code.Contains(q));
-        query = status switch
-        {
-            "disabled" => query.Where(item => !item.Enabled),
-            "expired" => query.Where(item => item.Enabled && item.ExpiresOn < today),
-            "exhausted" => query.Where(item =>
-                item.Enabled && item.ExpiresOn >= today &&
-                db.StoreCouponUsages.Count(usage => usage.IdCoupon == item.Id) >= item.UsageLimit),
-            "active" => query.Where(item =>
-                item.Enabled && item.ExpiresOn >= today &&
-                db.StoreCouponUsages.Count(usage => usage.IdCoupon == item.Id) < item.UsageLimit),
-            _ => query
-        };
-        int total = await query.CountAsync(cancellationToken);
-        page = Math.Min(page, Math.Max(1, (int)Math.Ceiling(total / 25d)));
-        int uses = await db.StoreCouponUsages.CountAsync(usage => query.Any(item => item.Id == usage.IdCoupon),
-            cancellationToken);
-        decimal discount = await db.StoreCustomerOrders
-            .Where(order => order.IdCoupon != null && query.Any(item => item.Id == order.IdCoupon))
-            .SumAsync(order => (decimal?)order.CouponDiscountAmount, cancellationToken) ?? 0;
-        var coupons = await query.OrderByDescending(item => item.Id).Skip((page - 1) * 25).Take(25)
-            .Select(item => new CouponRow(item.Id, item.Code, item.DiscountPercent, item.UsageLimit, item.Enabled,
-                item.ExpiresOn,
-                db.StoreCouponUsages.Count(usage => usage.IdCoupon == item.Id),
-                db.StoreCustomerOrders.Where(order => order.IdCoupon == item.Id)
-                    .Sum(order => (decimal?)order.CouponDiscountAmount) ?? 0,
-                db.StoreCustomerOrders.Any(order => order.IdCoupon == item.Id), item.IdProfile,
-                db.AccountProfiles.Where(profile => profile.Id == item.IdProfile).Select(profile => profile.Email)
-                    .FirstOrDefault())).ToListAsync(cancellationToken);
-        return View(new CouponIndexModel(coupons, q, status, page, total, uses, discount, today));
+        var result = await data.ReadAsync(q, status, page, DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
+        return View(new CouponIndexModel(result.Coupons.Select(x => new CouponRow(x.Id, x.Code, x.DiscountPercent,
+            x.UsageLimit, x.Enabled, x.ExpiresOn, x.Uses, x.Discount, x.HasOrders, x.IdProfile, x.CustomerEmail)).ToList(),
+            result.Query, result.Status, result.Page, result.Total, result.Uses, result.Discount, result.Today));
     }
 
     [HttpGet]
     public async Task<IActionResult> Report(decimal id, int page = 1, CancellationToken cancellationToken = default)
     {
         if (id <= 0 || page is < 1 or > 100000) return BadRequest();
-        var coupon = await db.AccountCoupons.AsNoTracking()
-            .SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
-        if (coupon is null) return NotFound();
+        var report = await data.ReadReportAsync(id, page, cancellationToken);
+        if (report is null) return NotFound();
         ViewData["Title"] = "گزارش مصرف کد تخفیف";
         ViewData["AreaTitle"] = "مدیریت فروشگاه";
         ViewData["FeatureId"] = "coupons";
-        var orders = db.StoreCouponUsages
-            .AsNoTracking()
-            .Join(
-                db.StoreCustomerOrders.AsNoTracking(),
-                usage => usage.IdCustomerOrder,
-                order => order.Id,
-                (usage, order) => new { usage, order })
-            .Join(
-                db.AccountProfiles.AsNoTracking(),
-                usageOrder => usageOrder.order.IdProfile,
-                profile => profile.Id,
-                (usageOrder, profile) => new { usageOrder.usage, usageOrder.order, profile })
-            .Join(
-                db.OrderStatuses.AsNoTracking(),
-                usageOrderProfile => usageOrderProfile.order.IdStatus,
-                orderStatus => orderStatus.Id,
-                (usageOrderProfile, orderStatus) => new { usageOrderProfile.usage, usageOrderProfile.order,
-                    usageOrderProfile.profile, orderStatus })
-            .Where(orderDetails => orderDetails.usage.IdCoupon == id)
-            .Select(orderDetails => new CouponOrderRow(
-                orderDetails.order.Id,
-                orderDetails.order.OrderNumber,
-                orderDetails.profile.FirstName + " " + orderDetails.profile.LastName,
-                orderDetails.orderStatus.NameFa,
-                orderDetails.order.CreatedAtUtc,
-                orderDetails.order.SubtotalAmount,
-                orderDetails.order.CouponDiscountAmount,
-                orderDetails.order.TotalAmount));
-        int total = await orders.CountAsync(cancellationToken);
-        decimal discount = await orders.SumAsync(order => (decimal?)order.Discount, cancellationToken) ?? 0;
-        decimal subtotal = await orders.SumAsync(order => (decimal?)order.Subtotal, cancellationToken) ?? 0;
-        decimal payable = await orders.SumAsync(order => (decimal?)order.Total, cancellationToken) ?? 0;
-        var rows = await orders.OrderByDescending(order => order.CreatedAtUtc).ThenByDescending(order => order.Id)
-            .Skip((page - 1) * 25).Take(25).ToListAsync(cancellationToken);
-        return View(new CouponReportModel(coupon.Id, coupon.Code, coupon.UsageLimit, total, subtotal, discount, payable,
-            page, rows));
+        return View(new CouponReportModel(report.Id, report.Code, report.UsageLimit, report.Uses, report.Subtotal,
+            report.Discount, report.Total, report.Page,
+            report.Orders.Select(x => new CouponOrderRow(x.Id, x.OrderNumber, x.Customer, x.Status, x.CreatedAtUtc,
+                x.Subtotal, x.Discount, x.Total)).ToList()));
     }
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(decimal id, CancellationToken cancellationToken)
     {
         if (id <= 0) return BadRequest();
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        var coupon = await db.AccountCoupons.SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
-        if (coupon is null) return NotFound();
-        if (await db.StoreCouponUsages.AnyAsync(usage => usage.IdCoupon == id, cancellationToken) ||
-            await db.StoreCustomerOrders.AnyAsync(order => order.IdCoupon == id, cancellationToken))
+        var result = await data.DeleteAsync(id, cancellationToken);
+        if (result == CouponMutationResult.NotFound) return NotFound();
+        if (result == CouponMutationResult.HasHistory)
         {
             TempData["CouponError"] = "این کوپن سابقهٔ سفارش دارد و حذف نمی‌شود؛ می‌توانید آن را غیرفعال کنید.";
             return RedirectToAction(nameof(Index));
         }
-
-        db.AccountCoupons.Remove(coupon);
-        await db.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
         TempData["CouponMessage"] = "کد تخفیف حذف شد.";
         return RedirectToAction(nameof(Index));
     }
@@ -138,64 +69,20 @@ public sealed class CouponsController(ShopDbContext db) : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        long? profileId = null;
-        if (audience == "personal")
+        var result = await data.SaveAsync(id, code, discountPercent, usageLimit, expiresOn, enabled, audience,
+            customerEmail, cancellationToken);
+        switch (result)
         {
-            string email = (customerEmail ?? "").Trim().ToLowerInvariant();
-            profileId = email.Length is > 0 and <= 254
-                ? await db.AccountProfiles.Where(profile => profile.Email == email).Select(profile => (long?)profile.Id)
-                    .SingleOrDefaultAsync(cancellationToken)
-                : null;
-            if (profileId is null)
-            {
-                TempData["CouponError"] = "کاربری با ایمیل واردشده پیدا نشد.";
-                return RedirectToAction(nameof(Index));
-            }
+            case CouponMutationResult.NotFound: return NotFound();
+            case CouponMutationResult.CustomerNotFound:
+                TempData["CouponError"] = "کاربری با ایمیل واردشده پیدا نشد."; return RedirectToAction(nameof(Index));
+            case CouponMutationResult.DuplicateCode:
+                TempData["CouponError"] = "این کد تخفیف قبلاً تعریف شده است."; return RedirectToAction(nameof(Index));
+            case CouponMutationResult.UsedCode:
+                TempData["CouponError"] = "کد کوپن مصرف‌شده برای حفظ سابقهٔ سفارش قابل تغییر نیست."; return RedirectToAction(nameof(Index));
+            case CouponMutationResult.UsageLimitTooLow:
+                TempData["CouponError"] = "سقف استفاده نمی‌تواند کمتر از تعداد مصرف ثبت‌شده باشد."; return RedirectToAction(nameof(Index));
         }
-
-        var item = id is null
-            ? null
-            : await db.AccountCoupons.SingleOrDefaultAsync(coupon => coupon.Id == id, cancellationToken);
-        if (id is not null && item is null) return NotFound();
-        if (await db.AccountCoupons.AnyAsync(coupon => coupon.Code == code && coupon.Id != id, cancellationToken))
-        {
-            TempData["CouponError"] = "این کد تخفیف قبلاً تعریف شده است.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        int uses = item is null
-            ? 0
-            : await db.StoreCouponUsages.CountAsync(usage => usage.IdCoupon == item.Id, cancellationToken);
-        if (item is not null && item.Code != code && (uses > 0 ||
-                                                      await db.StoreCustomerOrders.AnyAsync(
-                                                          order => order.IdCoupon == item.Id, cancellationToken)))
-        {
-            TempData["CouponError"] = "کد کوپن مصرف‌شده برای حفظ سابقهٔ سفارش قابل تغییر نیست.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        if (usageLimit < uses)
-        {
-            TempData["CouponError"] = "سقف استفاده نمی‌تواند کمتر از تعداد مصرف ثبت‌شده باشد.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        if (item is null)
-        {
-            item = new AccountCoupon { CouponKey = Guid.NewGuid().ToString("N") };
-            db.AccountCoupons.Add(item);
-        }
-
-        item.Code = code;
-        item.IdProfile = profileId;
-        item.DiscountPercent = discountPercent;
-        item.UsageLimit = usageLimit;
-        item.ExpiresOn = expiresOn;
-        item.Enabled = enabled;
-        await db.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
         TempData["CouponMessage"] = "کد تخفیف ذخیره شد.";
         return RedirectToAction(nameof(Index));
     }

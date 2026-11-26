@@ -3,16 +3,14 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.EntityFrameworkCore;
-using Shop.Data.Domain.Store.Entities;
-using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Controllers.Api;
 
 [ApiController]
 [AllowAnonymous]
 [Route("api/store/newsletter")]
-public sealed class StoreNewsletterApiController(ShopDbContext db) : ControllerBase
+public sealed class StoreNewsletterApiController(IStorePublicPageData pageData) : ControllerBase
 {
     [HttpPost]
     [EnableRateLimiting("newsletter")]
@@ -23,13 +21,7 @@ public sealed class StoreNewsletterApiController(ShopDbContext db) : ControllerB
             if (!long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out long profileId))
                 return Unauthorized();
 
-            var profile = await db.AccountProfiles
-                .SingleOrDefaultAsync(x => x.Id == profileId, ct);
-            if (profile is null) return Unauthorized();
-
-            profile.NewsletterEnabled = true;
-            profile.UpdatedAtUtc = DateTime.UtcNow;
-            await db.SaveChangesAsync(ct);
+            if (!await pageData.EnableAccountNewsletterAsync(profileId, ct)) return Unauthorized();
 
             return Ok(new { subscribed = true, forAccount = true });
         }
@@ -38,28 +30,9 @@ public sealed class StoreNewsletterApiController(ShopDbContext db) : ControllerB
         if (!IsValidEmail(email))
             return BadRequest(new { code = "invalid-email", message = "نشانی ایمیل معتبر نیست." });
 
-        if (await db.StoreNewsletterSubscribers
-                .AsNoTracking()
-                .AnyAsync(x => x.Email == email, ct))
-            return Ok(new { subscribed = true, alreadySubscribed = true });
+        bool created = await pageData.SubscribeNewsletterAsync(email, ct);
 
-        var subscriber = new StoreNewsletterSubscriber { Email = email, SubscribedAtUtc = DateTime.UtcNow };
-        db.StoreNewsletterSubscribers.Add(subscriber);
-        try
-        {
-            await db.SaveChangesAsync(ct);
-        }
-        catch (DbUpdateException)
-        {
-            db.Entry(subscriber).State = EntityState.Detached;
-            if (!await db.StoreNewsletterSubscribers
-                    .AsNoTracking()
-                    .AnyAsync(x => x.Email == email, ct)) throw;
-
-            return Ok(new { subscribed = true, alreadySubscribed = true });
-        }
-
-        return Ok(new { subscribed = true, alreadySubscribed = false });
+        return Ok(new { subscribed = true, alreadySubscribed = !created });
     }
 
     private static string NormalizeEmail(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant();
