@@ -8,7 +8,7 @@
 
 پس از اجرای migration ۱۱۵، نام فارسی و لاتین کالا در ستون‌های `Warehouse.Product.NameFa` و `NameEn` قرار می‌گیرند. نگاشت برنامه قرارداد موجود نام و نام انگلیسی را برای صفحات کاتالوگ و ویرایش حفظ می‌کند؛ وضعیت اجرای تغییر نام در [راهنمای دیتابیس](../architecture/database.md) ثبت می‌شود.
 
-ورود صفحهٔ جست‌وجو `GET /Search` در `Shop/Controllers/ProductController.cs` است. دادهٔ کاتالوگ از `ICatalogSource` و پیاده‌سازی `CatalogRepository` می‌آید؛ Viewهای فهرست در `Shop/Views/Product/` و رفتار سمت مرورگر در `Shop/wwwroot/shop/js/pages/search.js` و `js/store/catalog.js` است.
+ورود صفحهٔ جست‌وجو `GET /Search` در `Shop/Controllers/ProductController.cs` است. دادهٔ کاتالوگ از `ICatalogSource` و پیاده‌سازی `DatabaseCatalogSource` در `Shop/Services/DatabaseCatalogSource.cs` می‌آید؛ Viewهای فهرست در `Shop/Views/Product/` و رفتار سمت مرورگر در `Shop/wwwroot/shop/js/pages/search.js` و `js/store/catalog.js` است.
 
 وضعیت انتشار کالا تنها در `Warehouse.Product.IsStoreEnabled` است: مقدار صحیح برای کاتالوگ عمومی و مقدار نادرست برای فهرست پیش‌نویس مدیریت است. ثبت کالا با پیش‌نویس آغاز می‌شود و انتشار پس از اعتبارسنجی اطلاعات و تصویر انجام می‌شود؛ خروج از انتشار آن را به پیش‌نویس برمی‌گرداند. فعال‌بودن برند و دسته و شرایط قیمت و موجودی همچنان در دسترس‌بودن کالا اثر دارند. جزئیات انتقال داده و ترتیب استقرار در [دیتابیس](../architecture/database.md) است.
 

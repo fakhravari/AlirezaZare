@@ -91,30 +91,30 @@ builder.Services
     .AddScoped<Shop.Data.Application.Store.Contracts.IPaymentGateway, Shop.Services.UnconfiguredPaymentGateway>();
 builder.Services.AddScoped<Shop.Data.Infrastructure.Payments.PaymentService>();
 builder.Services.AddScoped<Shop.Services.IMagazineContentSource, Shop.Services.DatabaseMagazineContentSource>();
-builder.Services.AddScoped<Shop.Services.CatalogRepository>();
+builder.Services.AddScoped<Shop.Services.DatabaseCatalogSource>();
 builder.Services.AddScoped<Shop.Services.ICatalogSource>(services =>
-    services.GetRequiredService<Shop.Services.CatalogRepository>());
+    services.GetRequiredService<Shop.Services.DatabaseCatalogSource>());
 builder.Services.AddScoped<Shop.Services.DatabaseSalesPlanSource>();
-builder.Services.AddScoped<Shop.Services.ISalesPlanSource>(services =>
+builder.Services.AddScoped<Shop.Data.Application.Store.Contracts.ICheckoutSalesPlans>(services =>
     services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
 builder.Services.AddScoped<Shop.Services.IProductPurchaseConfigurationSource>(services =>
     services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
-builder.Services.AddScoped<Shop.Services.DatabaseAccountDataSource>();
-builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services =>
-    services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
+builder.Services.AddScoped<Shop.Services.DatabaseProfilePageDataSource>();
+builder.Services.AddScoped<Shop.Services.IProfilePageDataSource>(services =>
+    services.GetRequiredService<Shop.Services.DatabaseProfilePageDataSource>());
 builder.Services.AddScoped<Shop.Data.Application.Account.Contracts.IAccountStateQueryService,
     Shop.Data.Infrastructure.Account.AccountStateQueryService>();
-builder.Services.AddScoped<Shop.Services.AccountCheckoutService>();
+builder.Services.AddScoped<Shop.Data.Application.Account.Contracts.IAccountCheckoutData, Shop.Data.Infrastructure.Account.AccountCheckoutData>();
 var persianHtmlEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Arabic);
 persianHtmlEncoderSettings.AllowCharacter('\u200C');
 builder.Services.AddWebEncoders(options => options.TextEncoderSettings = persianHtmlEncoderSettings);
 builder.Services.Configure<Shop.Models.SeoMetadataOptions>(builder.Configuration.GetSection("Seo"));
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<Shop.Services.DatabaseSiteIdentitySource>();
-builder.Services.AddScoped<Shop.Services.SiteIdentityRequestContext>();
+builder.Services.AddScoped<Shop.Middleware.SiteIdentityRequestContext>();
 builder.Services
     .AddScoped<Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions>,
-        Shop.Services.RequestSiteIdentityOptions>();
+        Shop.Middleware.RequestSiteIdentityOptions>();
 builder.Services.AddOptions<Shop.Models.ApiClientOptions>().BindConfiguration("ApiClient").Validate(options =>
         options.BasePath.StartsWith("~/", StringComparison.Ordinal)
         && options.BasePath.EndsWith("/", StringComparison.Ordinal)
@@ -178,7 +178,7 @@ app.UseStaticFiles(new StaticFileOptions
     }
 });
 app.UseRouting();
-app.UseMiddleware<Shop.Services.SiteIdentityRequestMiddleware>();
+app.UseMiddleware<Shop.Middleware.SiteIdentityRequestMiddleware>();
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/api"))

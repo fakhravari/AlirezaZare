@@ -51,7 +51,7 @@ public sealed class StoreCouponAdminData(ShopDbContext db) : IStoreCouponAdminDa
             .Join(db.OrderStatuses.AsNoTracking(), row => row.order.IdStatus, status => status.Id,
                 (row, status) => new { row.usage, row.order, row.profile, status })
             .Where(row => row.usage.IdCoupon == id)
-            .Select(row => new CouponOrderRowData(row.order.Id, row.order.OrderNumber,
+            .Select(row => new CouponOrderRowData(row.order.Id, "",
                 row.profile.FirstName + " " + row.profile.LastName, row.status.NameFa, row.order.CreatedAtUtc,
                 row.order.SubtotalAmount, row.order.CouponDiscountAmount, row.order.TotalAmount));
         int total = await orders.CountAsync(ct);
@@ -60,6 +60,10 @@ public sealed class StoreCouponAdminData(ShopDbContext db) : IStoreCouponAdminDa
         decimal payable = await orders.SumAsync(order => (decimal?)order.Total, ct) ?? 0;
         var rows = await orders.OrderByDescending(order => order.CreatedAtUtc).ThenByDescending(order => order.Id)
             .Skip((page - 1) * 25).Take(25).ToListAsync(ct);
+        rows = rows.Select(row => row with
+        {
+            OrderNumber = row.Id.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        }).ToList();
         return new CouponReportData(coupon.Id, coupon.Code, coupon.UsageLimit, total, subtotal, discount, payable,
             page, rows);
     }

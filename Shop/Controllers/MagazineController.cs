@@ -1,5 +1,6 @@
 using Shop.Models;
 using Shop.Services;
+using Shop.Seo;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc;
 

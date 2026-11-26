@@ -5,7 +5,9 @@
 ## لایه‌ها
 
 - `Shop/Controllers/` و `Admin/Controllers/`: HTTP، route و پاسخ.
-- `Shop/Services/`: adapterهای دادهٔ سمت فروشگاه و هماهنگی جریان‌ها.
+- `Shop/Services/`: adapterهای داده و sourceهای مخصوص فروشگاه؛ مانند `DatabaseCatalogSource`، `DatabaseSalesPlanSource` و `DatabaseProfilePageDataSource`.
+- `Shop/Middleware/`: middleware و contextهای وابسته به چرخهٔ درخواست وب.
+- `Shop/Seo/`: ابزارهای ساخت URL و قراردادهای کمکی SEO که وابسته به HTTP هستند.
 - `Data/Application/`: قراردادها و use caseهای داده.
 - `Data/Infrastructure/Persistence/`: EF Core، DbContext و repositoryهای SQL.
 - `Data/Application/Email/` و `Data/Infrastructure/Email/`: قرارداد و فرستندهٔ مشترک SMTP که در هر دو برنامه از `AddShopDatabase` ثبت می‌شود.
@@ -16,7 +18,7 @@
 
 صفحه‌ها و controllerهای `Shop/` و `Admin/` نباید `ShopDbContext` را تزریق یا resolve کنند و نباید query، تغییر entity، ذخیره یا تراکنش EF را اجرا کنند. آن‌ها باید قراردادهای کاربردی `Data/Application/` را مصرف کنند؛ پیاده‌سازی SQL و جزئیات `ShopDbContext` در `Data/Infrastructure/` می‌ماند. برای تغییرات چندمرحله‌ای، use case داده باید تراکنش و قواعد یکپارچگی را در همان لایه نگه دارد و controller فقط ورودی HTTP را اعتبارسنجی و نتیجه را به پاسخ تبدیل کند.
 
-این مرز هنوز به‌طور کامل در کد اعمال نشده است: ممیزی فعلی در ۱۳ فایل C# از `Shop/` و `Admin/` ارجاع مستقیم به `ShopDbContext` پیدا می‌کند؛ شامل checkout، کاربران ادمین، کاتالوگ و سفارش، گزارش‌ها و گردش انبار. علاوه بر endpointهای حساب و فروشگاه، احراز هویت ادمین، تنظیمات سایت، کوپن‌ها، تصاویر کالا، بازخورد ویترین، مشتریان، مجموعهٔ صفحهٔ نخست و dispatch سفارش پرداخت‌شده به قراردادهای Data منتقل شده‌اند. حوزه‌های باقی‌مانده هنوز نیاز به انتقال دارند. پیش از توسعهٔ هر حوزه، همهٔ دسترسی‌های همان حوزه را به قرارداد و implementation در Data منتقل کنید؛ ارجاع مستقیم جدید اضافه نکنید. جست‌وجوی ممیزی از ریشه: `rg -l "ShopDbContext" Shop Admin -g '*.cs' -g '!**/obj/**' -g '!**/bin/**'`.
+این مرز برای کد جاری اعمال شده است: ممیزی `rg -l "ShopDbContext" Shop Admin -g '*.cs' -g '!**/obj/**' -g '!**/bin/**'` هیچ فایل C# از این دو برنامه پیدا نمی‌کند. checkout حساب از `IAccountCheckoutData`، مدیریت کاربران از `IAdminUsersData`، کاتالوگ از `IStoreCatalogAdminData`، قیمت طرح و تنوع از `IStoreVariantPricesAdminData` و endpointهای تعریف، سند و گردش انبار از قراردادهای `Data/Application/` استفاده می‌کنند. queryها، تغییر entity و تراکنش‌ها در implementationهای `Data/Infrastructure/` قرار دارند؛ controller فقط ورودی/هویت HTTP و نگاشت نتیجه را نگه می‌دارد. سایر حوزه‌های منتقل‌شده شامل احراز هویت ادمین، تنظیمات سایت، کوپن‌ها، تصاویر کالا، ویژگی‌های مرجع کاتالوگ، مدیریت upload رسانه و اسلایدها، سفارش، بازخورد ویترین، مشتریان، جغرافیا، مجموعهٔ صفحهٔ نخست، dispatch سفارش پرداخت‌شده، مشکلات سیستمی و گزارش‌های فروش است. برای تغییرهای بعدی همین ممیزی را اجرا و هر دسترسی جدید را به قرارداد و implementation در Data اضافه کنید.
 
 قراردادهای موجود در `Data/Application/` نقطهٔ شروع‌اند، اما پوشش همهٔ عملیات فعلی Shop و Admin را ندارند. پیش از حذف هر دسترسی از controller، قرارداد و implementation متناظر را اضافه کنید و هم‌زمان رفتار مجوز، اعتبارسنجی، تراکنش و پاسخ API را حفظ کنید. برای نمای کلی لایه‌ها [نمای معماری](overview.md) و برای قراردادهای هر قابلیت راهنمای حوزهٔ مربوط را ببینید.
 
@@ -25,6 +27,8 @@
 سبد مرورگر می‌تواند برای تعامل سریع state نگه دارد؛ سرور باید quote و سفارش را اعتبارسنجی کند. تاریخچهٔ قیمت از نسخه‌های قیمت ثبت‌شده در `Store.PriceVersion` خوانده می‌شود؛ migration snapshot نمی‌تواند تاریخچهٔ قبل از زمان اجرای خودش بازسازی کند. سفارش‌های نمونه یا seed برای تست نمایشی‌اند و نباید به‌عنوان خرید واقعی معرفی شوند. درگاه پرداخت در ثبت DI فعلی `UnconfiguredPaymentGateway` است؛ بنابراین وجود صفحه/endpoint پرداخت به معنی اتصال درگاه واقعی نیست.
 
 برای مسیر دقیق صفحه‌ها از [routing](routing.md)، schema و migration از [database](database.md)، و قابلیت قیمت از [محصول](../store/product.md) و [طرح‌های فروش](../store/sales-plans.md) شروع کنید.
+
+قرارداد خواندن طرح‌های فروش در `Data/Application/Store/Contracts/ICheckoutSalesPlans.cs` است و `Shop/Services/DatabaseSalesPlanSource.cs` آن را برای فروشگاه پیاده می‌کند. دادهٔ صفحهٔ پروفایل از `IProfilePageDataSource` می‌آید؛ این قرارداد مخصوص dataset صفحه است و با use caseهای نشست‌محور حساب در `Data/Application/Account/` یکی نیست.
 
 ارسال کد ورود و اعلان فرم تماس در Shop از `IEmailSender` مشترک Data استفاده می‌کند؛ پیام فرم تماس پیش از تلاش SMTP در `Store.ContactFormMessage` ذخیره می‌شود. `AddShopDatabase` همین فرستنده را در DI ادمین نیز ثبت می‌کند؛ در کد فعلی پنل فقط تنظیمات SMTP مدیریت می‌شود و ارسال ایمیل از Admin انجام نمی‌گیرد. خبرنامهٔ مهمان در `Store.NewsletterSubscriber` و خبرنامهٔ حساب‌دار در `Account.Profile.NewsletterEnabled` می‌رود. پیام مدیر به مشتری در `Account.Message` ذخیره و از endpointهای پروفایل بر اساس شناسهٔ نشست خوانده می‌شود.
 

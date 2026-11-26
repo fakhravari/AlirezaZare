@@ -1,10 +1,10 @@
 using Shop.Data.Application.Store.Contracts;
-using Shop.Models;
+using Shop.Data.Application.Store.Models;
 
 namespace Shop.Services;
 
 public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository)
-    : ISalesPlanSource, IProductPurchaseConfigurationSource
+    : ICheckoutSalesPlans, IProductPurchaseConfigurationSource
 {
     private SalesPlanCatalog? requestSnapshot;
 
@@ -42,17 +42,7 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
         };
     }
 
-    public async Task<ProductPurchaseConfiguration?> ReadAsync(int productId, string salesPlanId,
-        CancellationToken cancellationToken = default)
-    {
-        var configuration =
-            await repository.ReadProductPurchaseConfigurationAsync(productId, salesPlanId, cancellationToken);
-
-        return configuration is null
-            ? null
-            : new ProductPurchaseConfiguration(
-                configuration.MaxPurchaseQuantity,
-                configuration.Accessories.Select(accessory => new ProductAccessory(accessory.Key, accessory.IsRequired))
-                    .ToArray());
-    }
+    public Task<ProductPurchaseConfiguration?> ReadAsync(int productId, string salesPlanId,
+        CancellationToken cancellationToken = default) =>
+        repository.ReadProductPurchaseConfigurationAsync(productId, salesPlanId, cancellationToken);
 }

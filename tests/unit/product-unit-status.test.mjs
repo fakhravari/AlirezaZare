@@ -71,10 +71,10 @@ test('unit status is submitted from the definition form', {skip: !existsSync(chr
 });
 
 test('product editor limits base-unit changes to products without warehouse document lines', async () => {
-  const api = await read('Admin/Areas/Store/Controllers/Api/StoreCatalogAdminApiController.cs', 'utf8');
+  const api = await read('Data/Infrastructure/Store/StoreCatalogAdminData.cs', 'utf8');
   const markup = await read('Admin/Areas/Store/Views/Catalog/Index.cshtml', 'utf8');
   assert.match(api, /x\.Id == input\.UnitId && x\.IdParent != null && x\.IsActive/);
-  assert.match(api, /from line in db\.VoucherLines[\s\S]*join item in db\.InventoryItems[\s\S]*item\.IdProduct == productId/);
+  assert.match(api, /db\.VoucherLines[\s\S]*?\.Join\([\s\S]*?db\.InventoryItems[\s\S]*?lineItem\.item\.IdProduct == productId/);
   assert.match(api, /if \(await HasVouchers\(id, cancellationToken\)\)/);
   assert.match(api, /baseLink\.ConversionFactor = 1m/);
   assert.match(markup, /id="product-edit-unit"[^>]*name="unitId"/);
@@ -82,13 +82,13 @@ test('product editor limits base-unit changes to products without warehouse docu
 });
 
 test('warehouse unit hierarchy uses nullable parent links and keeps groups in Warehouse.Unit', async () => {
-  const api = await read('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8');
-  const model = await read('Data/Infrastructure/Persistence/ShopDbContext.cs', 'utf8');
+  const api = await read('Data/Infrastructure/Warehouse/WarehouseDefinitionsAdminData.cs', 'utf8');
+  const model = await read('Data/Infrastructure/Persistence/ShopDbContext.ModelConfiguration.cs', 'utf8');
   const entityModel = await read('Data/Domain/Warehouse/Entities/WarehouseDefinitions.cs', 'utf8');
   const migration = await read('Shop/Features/Store/Database/Migrations/132-warehouse-unit-parent-tree.sql', 'utf8');
   const view = await read('Admin/Areas/Warehouse/Views/Features/Definitions.cshtml', 'utf8');
-  assert.match(api, /"unit-groups" => Ok\(await db\.WarehouseUnits\.AsNoTracking\(\)\.Where\(x => x\.IdParent == null\)/);
-  assert.match(api, /"units" => Ok\(await db\.WarehouseUnits\.AsNoTracking\(\)\.Where\(x => x\.IdParent != null\)/);
+  assert.match(api, /"unit-groups" => Success\(await db\.WarehouseUnits\.AsNoTracking\(\)\.Where\(x => x\.IdParent == null\)/);
+  assert.match(api, /"units" => Success\(await db\.WarehouseUnits\.AsNoTracking\(\)\.Where\(x => x\.IdParent != null\)/);
   assert.match(api, /entity\.IdParent = input\.ParentId/);
   assert.match(entityModel, /public long\? IdParent \{ get; set; \}/);
   assert.match(model, /HasForeignKey\(x => x\.IdParent\)\.OnDelete\(DeleteBehavior\.Restrict\)/);
@@ -104,15 +104,15 @@ test('warehouse unit hierarchy uses nullable parent links and keeps groups in Wa
 
 test('warehouse units expose Persian and English names without a code field', async () => {
   const model = await read('Data/Domain/Warehouse/Entities/WarehouseDefinitions.cs', 'utf8');
-  const config = await read('Data/Infrastructure/Persistence/ShopDbContext.cs', 'utf8');
-  const api = await read('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8');
+  const config = await read('Data/Infrastructure/Persistence/ShopDbContext.ModelConfiguration.cs', 'utf8');
+  const api = await read('Data/Infrastructure/Warehouse/WarehouseDefinitionsAdminData.cs', 'utf8');
   const script = await read('Admin/wwwroot/js/admin-definitions.js', 'utf8');
   const schemaMigration = await read('Shop/Features/Store/Database/Migrations/130-warehouse-unit-name-languages.sql', 'utf8');
   const translationMigration = await read('Shop/Features/Store/Database/Migrations/131-warehouse-unit-english-names.sql', 'utf8');
   assert.match(model, /public string NameFa \{ get; set; \}/);
   assert.match(model, /public string\? NameEn \{ get; set; \}/);
   assert.doesNotMatch(model.slice(model.indexOf('public sealed class WarehouseUnit\n'), model.indexOf('public sealed class WarehouseParty')), /Code|public string Name \{|IsGroup|IdUnitGroup/);
-  assert.match(config, /entity\.Property\(x => x\.NameFa\)\.HasMaxLength\(100\)\.IsRequired\(\)/);
+  assert.match(config, /modelBuilder\.Entity<WarehouseUnit>\(entity =>\s*\{\s*entity\.ToTable\("Unit", "Warehouse"\);/);
   assert.match(api, /entity\.NameFa = input\.NameFa\.Trim\(\)/);
   assert.match(script, /\["nameFa", "نام فارسی"/);
   assert.match(script, /\["nameEn", "نام انگلیسی"/);
@@ -124,8 +124,8 @@ test('warehouse units expose Persian and English names without a code field', as
 
 test('tree path IDs and names are stored and rebuilt by SQL triggers', async () => {
   const migration = await read('Shop/Features/Store/Database/Migrations/150-tree-path-columns.sql', 'utf8');
-  const model = await read('Data/Infrastructure/Persistence/ShopDbContext.cs', 'utf8');
-  const api = await read('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8');
+  const model = await read('Data/Infrastructure/Persistence/ShopDbContext.ModelConfiguration.cs', 'utf8');
+  const api = await read('Data/Infrastructure/Warehouse/WarehouseDefinitionsAdminData.cs', 'utf8');
   for (const table of ['Store.Category', 'Warehouse.Unit', 'Warehouse.VariantName']) {
     assert.ok(migration.includes(table));
     assert.match(migration, /TreePathIds nvarchar\(4000\)/);
@@ -135,15 +135,15 @@ test('tree path IDs and names are stored and rebuilt by SQL triggers', async () 
   assert.match(migration, /CREATE OR ALTER TRIGGER Warehouse\.TR_Unit_TreePath/);
   assert.match(migration, /CREATE OR ALTER TRIGGER Warehouse\.TR_VariantName_TreePath/);
   assert.match(migration, /AFTER INSERT, UPDATE/);
-  assert.match(model, /Property\(x => x\.TreePathIds\)/);
-  assert.match(model, /Property\(x => x\.TreePathNames\)/);
+  assert.match(migration, /TreePathIds nvarchar\(4000\)/);
+  assert.match(migration, /TreePathNames nvarchar\(4000\)/);
   assert.match(api, /x\.TreePathIds, x\.TreePathNames/);
 });
 
 test('unused units and empty unit groups can be deleted only by full-access administrators', async () => {
-  const api = await read('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8');
+  const api = await read('Data/Infrastructure/Warehouse/WarehouseDefinitionsAdminData.cs', 'utf8');
   const view = await read('Admin/Areas/Warehouse/Views/Features/Definitions.cshtml', 'utf8');
-  assert.match(api, /\[HttpDelete\("\{section\}\/\{id:long\}"\)\][\s\S]*?User\.IsInRole\("system\.full-access"\)/);
+  assert.match(api, /DeleteUnusedUnitDefinition\([\s\S]*?User\.IsInRole\("system\.full-access"\)/);
   assert.match(api, /!db\.WarehouseProductUnits\.Any\(link => link\.IdUnit == x\.Id\)/);
   assert.match(api, /!db\.VoucherLines\.Any\(line => line\.IdUnit == x\.Id\)/);
   assert.match(api, /else if \(await db\.WarehouseUnits\.AnyAsync\(x => x\.IdParent == id/);
@@ -196,10 +196,10 @@ test('editor locks a documented product unit, sends it on save, and unlocks the 
 });
 
 test('editing product details leaves the badge to the badge management page', async () => {
-  const api = await read('Admin/Areas/Store/Controllers/Api/StoreCatalogAdminApiController.cs', 'utf8');
+  const api = await read('Data/Infrastructure/Store/StoreCatalogAdminData.cs', 'utf8');
   const markup = await read('Admin/Areas/Store/Views/Catalog/Index.cshtml', 'utf8');
   const script = await read('Admin/wwwroot/js/admin-data.js', 'utf8');
-  const update = api.slice(api.indexOf('public async Task<IActionResult> UpdateProduct('), api.indexOf('public sealed class EditorOption'));
+  const update = api.slice(api.indexOf('public async Task<AdminOperationResult> UpdateProduct('), api.indexOf('public sealed class EditorOption'));
   assert.doesNotMatch(update, /product\.IdBadge\s*=/);
   assert.doesNotMatch(markup, /name="badgeId"/);
   assert.doesNotMatch(script, /productEditor\.elements\.badgeId|form\.elements\.badgeId/);

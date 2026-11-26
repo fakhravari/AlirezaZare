@@ -6,7 +6,7 @@ using Shop.Data.Application.Store.Contracts;
 namespace Shop.Controllers;
 
 [Route("Profile")]
-public sealed class ProfileController(Shop.Services.IAccountDataSource accountDataSource, IStorePublicPageData pageData)
+public sealed class ProfileController(Shop.Services.IProfilePageDataSource accountDataSource, IStorePublicPageData pageData)
     : PageController
 {
     [HttpGet("/account")]

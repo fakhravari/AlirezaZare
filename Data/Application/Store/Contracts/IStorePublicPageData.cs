@@ -5,9 +5,7 @@ public interface IStorePublicPageData
     Task<IReadOnlyList<PaymentInstitutionData>> ReadPaymentInstitutionsAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<PaymentInstitutionAdminData>> ReadPaymentInstitutionAdminRowsAsync(CancellationToken cancellationToken);
     Task<ManagedPageData?> ReadPublishedPageAsync(string pageKey, CancellationToken cancellationToken);
-    Task<IReadOnlyList<OrderTrackingData>> FindOrderTrackingCandidatesAsync(string orderNumber,
-        CancellationToken cancellationToken);
-    Task<IReadOnlyList<OrderTrackingHistoryData>> ReadOrderTrackingHistoryAsync(decimal orderId,
+    Task<IReadOnlyList<OrderTrackingData>> FindOrderTrackingCandidatesAsync(decimal orderId,
         CancellationToken cancellationToken);
     Task<IReadOnlyList<AssignedCouponData>> ReadAssignedCouponsAsync(long profileId,
         CancellationToken cancellationToken);
@@ -31,9 +29,8 @@ public sealed record PaymentInstitutionAdminData(long Id, string Code, string Na
 public sealed record ManagedPageData(long Id, string PageKey, string RoutePath, string Title, string? Description,
     IReadOnlyList<ManagedPageSectionData> Sections);
 public sealed record ManagedPageSectionData(long Id, string SectionKey, string? Heading, string? Body, int SortOrder);
-public sealed record OrderTrackingData(decimal Id, string OrderNumber, string Status, string StatusName,
-    DateTime CreatedAtUtc, string? ShippingCarrier, string? ShippingTrackingCode, string AddressSnapshotJson);
-public sealed record OrderTrackingHistoryData(string? Carrier, string? TrackingCode, DateTime ChangedAtUtc);
+public sealed record OrderTrackingData(decimal Id, string StatusNameEn, string StatusName,
+    DateTime CreatedAtUtc, string? ShippingCarrier, string? ShippingTrackingCode, string Phone);
 public sealed record AssignedCouponData(string Id, string Code, int DiscountPercent, bool Enabled, DateOnly ExpiresOn,
     int UsageLimit);
 public sealed record ProfileGenderData(int Id, string Code, string Name);

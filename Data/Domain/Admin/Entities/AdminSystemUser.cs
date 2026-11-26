@@ -13,7 +13,7 @@ public sealed class AdminSystemUser
     public DateTime UpdatedAtUtc { get; set; }
     public DateTime? LastLoginAtUtc { get; set; }
     public ICollection<AdminUserRole> Roles { get; set; } = [];
-    public ICollection<AdminUserWarehouseAccess> WarehouseAccess { get; set; } = [];
+    public ICollection<AdminSystemUserWarehouse> Warehouses { get; set; } = [];
 }
 
 public sealed class AdminRole
@@ -57,8 +57,9 @@ public sealed class AdminRolePermission
     public AdminPermission Permission { get; set; } = null!;
 }
 
-public sealed class AdminUserWarehouseAccess
+public sealed class AdminSystemUserWarehouse
 {
+    public long Id { get; set; }
     public long IdUser { get; set; }
     public long IdWarehouse { get; set; }
     public AdminSystemUser User { get; set; } = null!;

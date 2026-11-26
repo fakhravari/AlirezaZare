@@ -39,9 +39,15 @@ public sealed class StoreCustomersAdminData(ShopDbContext db) : IStoreCustomersA
             .Select(x => new { x.address.Title, x.address.Recipient, x.address.Phone, Country = x.country.NameFa,
                 Province = x.province.NameFa, City = x.city.NameFa, x.address.Street, x.address.PostalCode,
                 x.address.IsDefault }).ToListAsync(ct);
-        var orders = await db.StoreCustomerOrders.AsNoTracking().Where(x => x.IdProfile == id).OrderByDescending(x => x.Id)
-            .Take(50).Select(x => new { x.OrderNumber, Status = x.StatusReference.NameFa, x.TotalAmount, x.CreatedAtUtc })
+        var orderRows = await db.StoreCustomerOrders.AsNoTracking().Where(x => x.IdProfile == id)
+            .OrderByDescending(x => x.Id).Take(50)
+            .Select(x => new { x.Id, Status = x.StatusReference.NameFa, x.TotalAmount, x.CreatedAtUtc })
             .ToListAsync(ct);
+        var orders = orderRows.Select(x => new
+        {
+            OrderNumber = x.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            x.Status, x.TotalAmount, x.CreatedAtUtc
+        });
         var feedback = await db.ProductFeedback.AsNoTracking().Where(x => x.IdProfile == id).OrderByDescending(x => x.Id)
             .Take(50).Select(x => new { x.FeedbackType, x.FeedbackText, Status = x.Status.Name, x.CreatedAtUtc,
                 ProductName = x.Product.NameFa }).ToListAsync(ct);

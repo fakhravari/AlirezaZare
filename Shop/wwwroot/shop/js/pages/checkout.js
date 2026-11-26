@@ -456,8 +456,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                     warning.textContent = "جمع جزئیات این سفارش با مبلغ ثبت‌شده اختلاف دارد. برای بررسی با پشتیبانی تماس بگیرید.";
                     summary.append(warning);
                 }
-                let address = null;
-                try { address = JSON.parse(savedOrder.addressSnapshotJson || "null"); } catch { /* Older orders may not have a readable snapshot. */ }
+                const address = savedOrder.address || null;
                 checkoutPreview.replaceChildren();
                 if (address) checkoutPreview.append(addressMarkup(address));
                 else checkoutPreview.textContent = "نشانی ثبت‌شده در دسترس نیست.";

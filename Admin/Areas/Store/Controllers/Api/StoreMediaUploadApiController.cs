@@ -2,13 +2,9 @@ using FluentFTP;
 using ImageMagick;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Store;
 using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Infrastructure.Ftp;
-using Shop.Data.Infrastructure.Persistence;
-using Shop.Data.Domain.Store.Entities;
-using Shop.Data.Domain.Warehouse.Entities;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
@@ -20,7 +16,8 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [Authorize(Roles = "system.full-access")]
 [Route("api/admin/store/media")]
 public sealed class StoreMediaUploadApiController(
-    ShopDbContext db,
+    IStoreMediaUploadAdminData mediaData,
+    IStoreProductImageAdminData productImages,
     FtpMediaUploadService storage,
     IMediaCdnBaseUrlProvider mediaCdn,
     ILogger<StoreMediaUploadApiController> logger) : ControllerBase
@@ -157,9 +154,8 @@ public sealed class StoreMediaUploadApiController(
             if (string.IsNullOrEmpty(countryCode) || countryCode.Length > 8)
                 return BadRequest(new { title = "کشور را انتخاب کنید." });
 
-            var country =
-                await db.GeoCountries.SingleOrDefaultAsync(x => x.CountryCode == countryCode, cancellationToken);
-            if (country is null) return NotFound(new { title = "کشور پیدا نشد." });
+            if (!await mediaData.CountryExistsAsync(countryCode, cancellationToken))
+                return NotFound(new { title = "کشور پیدا نشد." });
         }
         else if (!string.IsNullOrEmpty(countryCode))
             return BadRequest(new { title = "کشور برای این نوع رسانه معتبر نیست." });
@@ -170,9 +166,8 @@ public sealed class StoreMediaUploadApiController(
             if (string.IsNullOrEmpty(articleKey) || articleKey.Length > 150)
                 return BadRequest(new { title = "مقاله را انتخاب کنید." });
 
-            var article =
-                await db.MagazineArticles.SingleOrDefaultAsync(x => x.ArticleKey == articleKey, cancellationToken);
-            if (article is null) return NotFound(new { title = "مقاله پیدا نشد." });
+            if (!await mediaData.ArticleExistsAsync(articleKey, cancellationToken))
+                return NotFound(new { title = "مقاله پیدا نشد." });
         }
         else if (!string.IsNullOrEmpty(articleKey))
             return BadRequest(new { title = "مقاله برای این نوع رسانه معتبر نیست." });
@@ -182,8 +177,8 @@ public sealed class StoreMediaUploadApiController(
         {
             if (kind != "brand" || brandKey.Length > 100) return BadRequest(new { title = "برند نامعتبر است." });
 
-            var brand = await db.StoreBrands.SingleOrDefaultAsync(x => x.BrandKey == brandKey, cancellationToken);
-            if (brand is null) return NotFound(new { title = "برند پیدا نشد." });
+            if (!await mediaData.BrandExistsAsync(brandKey, cancellationToken))
+                return NotFound(new { title = "برند پیدا نشد." });
         }
 
         paymentInstitutionCode = paymentInstitutionCode?.Trim();
@@ -194,7 +189,7 @@ public sealed class StoreMediaUploadApiController(
             return BadRequest(new { title = "شناسهٔ درگاه پرداخت معتبر نیست." });
 
         if (!string.IsNullOrEmpty(paymentInstitutionCode) &&
-            !await db.StoreBanks.AnyAsync(x => x.Code == paymentInstitutionCode, cancellationToken))
+            !await mediaData.BankExistsAsync(paymentInstitutionCode, cancellationToken))
             return NotFound(new { title = "درگاه پرداخت پیدا نشد." });
 
         string? productName = null;
@@ -206,18 +201,15 @@ public sealed class StoreMediaUploadApiController(
             if (title?.Length > 300)
                 return BadRequest(new { title = "عنوان فایل نباید بیشتر از ۳۰۰ نویسه باشد." });
 
-            var product = await db.Products.AsNoTracking()
-                .SingleOrDefaultAsync(x => x.Id == productId, cancellationToken);
-            if (product is null) return NotFound(new { title = "کالای فروشگاهی پیدا نشد." });
-            productName = product.NameFa;
+            productName = await productImages.ReadProductNameAsync(productId.Value, cancellationToken);
+            if (productName is null) return NotFound(new { title = "کالای فروشگاهی پیدا نشد." });
             if (string.IsNullOrEmpty(title)) title = productName;
 
             if (video)
             {
-                var media = await db.StoreProductAssets.AsNoTracking().FirstOrDefaultAsync(
-                    x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image && x.IsDefault,
-                    cancellationToken);
-                if (media is null) return Conflict(new { title = "ابتدا تصویر اصلی کالا را ثبت کنید." });
+                var images = await productImages.ReadImagesAsync(productId.Value, cancellationToken);
+                if (!images.Any(item => item.IsDefault))
+                    return Conflict(new { title = "ابتدا تصویر اصلی کالا را ثبت کنید." });
             }
         }
 
@@ -305,99 +297,18 @@ public sealed class StoreMediaUploadApiController(
             if (kind == "slider" || document || video || !string.IsNullOrEmpty(brandKey) ||
                 !string.IsNullOrEmpty(paymentInstitutionCode) || kind == "country" || kind == "article")
             {
-                if (kind == "slider")
-                    db.StoreSliders.Add(new StoreSlider
-                    {
-                        Title = title!.Trim(), Url = sliderUrl!, ImagePath = path,
-                        ShowOnMobile = Request.Form["showOnMobile"] == "true",
-                        ShowOnDesktop = Request.Form["showOnDesktop"] == "true"
-                    });
-                else if (document)
-                    db.StoreProductAssets.Add(new StoreProductAsset
-                    {
-                        IdProduct = productId!.Value, IdMediaType = ProductMediaTypes.Document, Title = title!,
-                        Path = path, CreatedAtUtc = DateTime.UtcNow
-                    });
-                else if (video)
-                {
-                    var media = await db.StoreProductAssets.FirstOrDefaultAsync(
-                        x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image && x.IsDefault,
-                        cancellationToken);
-                    if (media is null)
-                    {
-                        await CleanupUploadedAsync(ftp, uploaded);
-
-                        return Conflict(new { title = "رسانهٔ کالا دیگر وجود ندارد؛ دوباره تلاش کنید." });
-                    }
-
-                    int nextOrder = (await db.StoreProductAssets
-                        .Where(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Video)
-                        .MaxAsync(x => (int?)x.SortOrder, cancellationToken) ?? 0) + 1;
-                    db.StoreProductAssets.Add(new StoreProductAsset
-                    {
-                        IdProduct = productId!.Value, IdMediaType = ProductMediaTypes.Video, Path = path,
-                        Title = title ?? productName!, SortOrder = nextOrder, CreatedAtUtc = DateTime.UtcNow
-                    });
-                }
-                else if (!string.IsNullOrEmpty(paymentInstitutionCode))
-                {
-                    var institution =
-                        await db.StoreBanks.SingleOrDefaultAsync(x => x.Code == paymentInstitutionCode,
-                            cancellationToken);
-                    if (institution is null)
-                    {
-                        await CleanupUploadedAsync(ftp, uploaded);
-
-                        return Conflict(new { title = "درگاه دیگر وجود ندارد؛ دوباره تلاش کنید." });
-                    }
-
-                    institution.LogoPath = path;
-                }
-                else if (kind == "country" || kind == "article")
-                {
-                    bool updated;
-                    if (kind == "country")
-                    {
-                        var country = await db.GeoCountries.SingleOrDefaultAsync(x => x.CountryCode == countryCode,
-                            cancellationToken);
-                        updated = country is not null;
-                        if (country is not null) country.FlagPath = path;
-                    }
-                    else
-                    {
-                        var article = await db.MagazineArticles.SingleOrDefaultAsync(x => x.ArticleKey == articleKey,
-                            cancellationToken);
-                        updated = article is not null;
-                        if (article is not null)
-                        {
-                            article.HeroImagePath = path;
-                            article.ContentImagePath = path;
-                            article.UpdatedAtUtc = DateTime.UtcNow;
-                        }
-                    }
-
-                    if (!updated)
-                    {
-                        await CleanupUploadedAsync(ftp, uploaded);
-
-                        return Conflict(new { title = "رکورد دیگر وجود ندارد؛ دوباره تلاش کنید." });
-                    }
-                }
-                else
-                {
-                    var brand = await db.StoreBrands.SingleOrDefaultAsync(x => x.BrandKey == brandKey,
-                        cancellationToken);
-                    if (brand is null)
-                    {
-                        await CleanupUploadedAsync(ftp, uploaded);
-
-                        return Conflict(new { title = "برند دیگر وجود ندارد؛ دوباره تلاش کنید." });
-                    }
-
-                    brand.LogoPath = path;
-                }
-
-                await db.SaveChangesAsync(cancellationToken);
+            var registration = new MediaUploadRegistration(kind ?? string.Empty, path, productId, title, sliderUrl,
+                Request.Form["showOnMobile"] == "true", Request.Form["showOnDesktop"] == "true", brandKey,
+                countryCode, articleKey, paymentInstitutionCode, document, video);
+            if (!await mediaData.SaveUploadAsync(registration, cancellationToken))
+            {
+                await CleanupUploadedAsync(ftp, uploaded);
+                string error = video ? "رسانهٔ کالا دیگر وجود ندارد؛ دوباره تلاش کنید." :
+                    !string.IsNullOrEmpty(paymentInstitutionCode) ? "درگاه دیگر وجود ندارد؛ دوباره تلاش کنید." :
+                    !string.IsNullOrEmpty(brandKey) ? "برند دیگر وجود ندارد؛ دوباره تلاش کنید." :
+                    "رکورد دیگر وجود ندارد؛ دوباره تلاش کنید.";
+                return Conflict(new { title = error });
+            }
 
                 databaseStarted = true;
             }
@@ -451,7 +362,7 @@ public sealed class StoreMediaUploadApiController(
     [HttpGet("sliders")]
     public async Task<IActionResult> Sliders(CancellationToken ct)
     {
-        var slides = await db.StoreSliders.AsNoTracking().OrderBy(x => x.Id).ToListAsync(ct);
+        var slides = await mediaData.ReadSlidersAsync(ct);
         string cdn = await mediaCdn.GetBaseUrlAsync(ct);
 
         return Ok(slides.Select(x => new
@@ -469,14 +380,8 @@ public sealed class StoreMediaUploadApiController(
         url = url?.Trim();
         if (!ValidSlider(title, url)) return BadRequest(new { title = "عنوان و نشانی معتبر برای اسلاید وارد کنید." });
 
-        var slide = await db.StoreSliders.FindAsync([id], ct);
-        if (slide is null) return NotFound();
-
-        slide.Title = title!.Trim();
-        slide.Url = url!;
-        slide.ShowOnMobile = showOnMobile;
-        slide.ShowOnDesktop = showOnDesktop;
-        await db.SaveChangesAsync(ct);
+        if (!await mediaData.UpdateSliderAsync(id, title!.Trim(), url!, showOnMobile, showOnDesktop, ct))
+            return NotFound();
 
         return Ok(new { message = "اسلاید ذخیره شد." });
     }
@@ -485,11 +390,7 @@ public sealed class StoreMediaUploadApiController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteSlider(long id, CancellationToken ct)
     {
-        var slide = await db.StoreSliders.FindAsync([id], ct);
-        if (slide is null) return NotFound();
-
-        db.StoreSliders.Remove(slide);
-        await db.SaveChangesAsync(ct);
+        if (!await mediaData.DeleteSliderAsync(id, ct)) return NotFound();
 
         return Ok(new { message = "اسلاید از فروشگاه حذف شد." });
     }

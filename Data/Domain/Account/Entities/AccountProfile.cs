@@ -112,17 +112,10 @@ public sealed class AccountArticleFeedback
     public DateTime CreatedAtUtc { get; set; }
 }
 
-public sealed class StoreOrderPreviousNumber
-{
-    public decimal IdOrder { get; set; }
-    public string PreviousNumber { get; set; } = string.Empty;
-}
-
 public sealed class StoreCustomerOrderReference
 {
     public decimal Id { get; set; }
     public decimal IdProfile { get; set; }
-    public string OrderNumber { get; set; } = string.Empty;
     public int IdStatus { get; set; }
     public OrderStatusReference StatusReference { get; set; } = null!;
     public decimal TotalAmount { get; set; }
@@ -130,28 +123,14 @@ public sealed class StoreCustomerOrderReference
     public decimal? IdCoupon { get; set; }
     public decimal CouponDiscountAmount { get; set; }
     public decimal IdAddress { get; set; }
-    public string PaymentMethod { get; set; } = "";
+    public AccountAddress Address { get; set; } = null!;
     public long IdBank { get; set; }
     public StoreBank Bank { get; set; } = null!;
     public string? ShippingCarrier { get; set; }
     public string? ShippingTrackingCode { get; set; }
     public DateTime CreatedAtUtc { get; set; }
-    public int ItemCount { get; set; }
-    public string AddressSnapshotJson { get; set; } = "{}";
     public decimal? IdVoucher { get; set; }
     public ICollection<StoreCustomerOrderItem> Items { get; set; } = new List<StoreCustomerOrderItem>();
-}
-
-public sealed class StoreOrderShipmentTrackingHistory
-{
-    public long Id { get; set; }
-    public decimal IdOrder { get; set; }
-    public string? PreviousCarrier { get; set; }
-    public string? PreviousTrackingCode { get; set; }
-    public string Carrier { get; set; } = "";
-    public string TrackingCode { get; set; } = "";
-    public string ActorUserKey { get; set; } = "";
-    public DateTime ChangedAtUtc { get; set; }
 }
 
 public sealed class StoreCustomerOrderItem

@@ -2176,7 +2176,7 @@
             if (item && page.dataset.adminPage === "orders") {
                 detailButton.disabled = true;
                 void ui.getJson(`/api/admin/store/orders/${encodeURIComponent(item.id)}`).then(order => {
-                    const address = JSON.parse(order.addressSnapshotJson || "{}");
+                    const address = JSON.parse(order.addressJson || "{}");
                     const components = JSON.parse(order.componentsJson || "[]");
                     const componentsTotal = components.reduce((sum, component) => sum + Number(component.lineTotal || 0), 0);
                     const componentsTotalAfterCoupon = componentsTotal - Number(order.couponDiscountAmount || 0);

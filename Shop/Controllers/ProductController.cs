@@ -1,5 +1,8 @@
+using Shop.Data.Application.Store.Models;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Models;
 using Shop.Services;
+using Shop.Seo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -8,10 +11,10 @@ namespace Shop.Controllers;
 public sealed class ProductController : PageController
 {
     private readonly ICatalogSource _catalog;
-    private readonly ISalesPlanSource _salesPlans;
+    private readonly ICheckoutSalesPlans _salesPlans;
     private readonly SeoMetadataOptions _seoOptions;
 
-    public ProductController(ICatalogSource catalog, ISalesPlanSource salesPlans,
+    public ProductController(ICatalogSource catalog, ICheckoutSalesPlans salesPlans,
         IOptions<SeoMetadataOptions> seoOptions)
     {
         _catalog = catalog;

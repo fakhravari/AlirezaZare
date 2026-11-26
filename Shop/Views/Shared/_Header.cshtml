@@ -1,5 +1,5 @@
 ﻿@inject Shop.Services.ICatalogSource StoreCatalog
-@inject Shop.Services.ISalesPlanSource SalesPlans
+@inject Shop.Data.Application.Store.Contracts.ICheckoutSalesPlans SalesPlans
 @{
     string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? "";
     var headerCatalog = await StoreCatalog.ReadAsync(Context.RequestAborted);

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Shop.Models;
 using Shop.Services;
+using Shop.Seo;
 
 namespace Shop.Controllers;
 

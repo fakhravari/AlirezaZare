@@ -35,9 +35,10 @@ test("store reports cover four views and restrict inventory to allowed warehouse
         assert.match(client, new RegExp(`${reportType}: \\{`));
     }
     assert.match(controller, /AllowedWarehouseIds\(\)/);
-    assert.match(controller, /fullAccess \|\| allowed\.Contains\(x\.IdWarehouse\)/);
-    assert.match(controller, /fullAccess \|\| allowed\.Contains\(movement\.IdWarehouse\)/);
-    assert.match(controller, /SalesStatuses\.Contains\(order\.StatusReference\.Code\)/);
-    assert.match(controller, /PaidOrders\(\)[\s\S]*?SalesStatuses\.Contains\(order\.StatusReference\.Code\)[\s\S]*?payment\.StatusReference\.Code == "verified"[\s\S]*?payment\.Amount == order\.TotalAmount/);
-    assert.match(controller, /payment\.StatusReference\.Code == "verified"/);
+    const data = await source("Data/Infrastructure/Store/StoreReportsAdminData.cs");
+    assert.match(data, /fullAccess \|\| allowedWarehouseIds\.Contains\(x\.IdWarehouse\)/);
+    assert.match(data, /fullAccess \|\| allowedWarehouseIds\.Contains\(movementDetails\.movement\.IdWarehouse\)/);
+    assert.match(data, /SalesStatuses\.Contains\(order\.StatusReference\.NameEn\)/);
+    assert.match(data, /PaidOrders\(\)[\s\S]*?SalesStatuses\.Contains\(order\.StatusReference\.NameEn\)[\s\S]*?payment\.StatusReference\.Code == "verified"[\s\S]*?payment\.Amount == order\.TotalAmount/);
+    assert.match(data, /payment\.StatusReference\.Code == "verified"/);
 });

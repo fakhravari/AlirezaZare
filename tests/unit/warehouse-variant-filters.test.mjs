@@ -34,8 +34,9 @@ test('variant filters combine product and status and retain date order', {skip: 
 });
 
 test('variant API returns newest creation dates first with stable ordering', () => {
-  const source = readFileSync('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs','utf8');
-  assert.ok(source.includes('orderby variant.CreatedAtUtc descending, variant.Id descending'));
-  assert.ok(source.includes('x.IsActive, x.CreatedAtUtc'));
-  assert.ok(source.includes('entity.CreatedAtUtc = DateTime.UtcNow;')); 
+  const source = readFileSync('Data/Infrastructure/Warehouse/WarehouseDefinitionsAdminData.cs','utf8');
+  assert.ok(source.includes('.OrderByDescending(variantProduct => variantProduct.variant.CreatedAtUtc)'));
+  assert.ok(source.includes('.ThenByDescending(variantProduct => variantProduct.variant.Id)'));
+  assert.match(source, /variantProduct\.variant\.IsActive,[\s\S]*?variantProduct\.variant\.CreatedAtUtc/);
+  assert.ok(source.includes('entity.CreatedAtUtc = DateTime.UtcNow;'));
 });

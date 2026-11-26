@@ -4,27 +4,27 @@ import test from "node:test";
 
 const read = path => readFile(new URL(`../../${path}`, import.meta.url), "utf8");
 const method = (source, name, next) => {
-    const start = source.indexOf(`Task<IActionResult> ${name}(`);
+    const start = source.indexOf(`Task<AdminOperationResult> ${name}(`);
     const end = source.indexOf(next, start);
     assert.ok(start >= 0 && end > start, `Missing method ${name}`);
     return source.slice(start, end);
 };
 
 test("product drafts stay manageable while publication uses one flag", async () => {
-    const controller = await read("Admin/Areas/Store/Controllers/Api/StoreCatalogAdminApiController.cs");
-    const drafts = method(controller, "ProductDrafts", '[HttpGet("products/create-options")]');
-    const create = method(controller, "CreateProduct", '[HttpPost("products/manage/{id:long}/publish")]');
-    const publish = method(controller, "PublishProduct", '[HttpPost("products/manage/{id:long}/unpublish")]');
-    const unpublish = method(controller, "UnpublishProduct", "private static bool IsJson");
-    assert.match(drafts, /where\s+!product\.IsStoreEnabled/);
+    const controller = await read("Data/Infrastructure/Store/StoreCatalogAdminData.cs");
+    const drafts = method(controller, "ProductDrafts", "public async Task<AdminOperationResult> ProductCreateOptions");
+    const create = method(controller, "CreateProduct", "public async Task<AdminOperationResult> PublishProduct");
+    const publish = method(controller, "PublishProduct", "public async Task<AdminOperationResult> UnpublishProduct");
+    const unpublish = method(controller, "UnpublishProduct", "public async Task<AdminOperationResult> BrandCountries");
+    assert.match(drafts, /Where\(product\s*=>\s*!product\.IsStoreEnabled\)/);
     assert.match(create, /IsStoreEnabled\s*=\s*false/);
     assert.match(publish, /x\.Id\s*==\s*id\s*&&\s*!x\.IsStoreEnabled/);
     assert.match(publish, /product\.IsStoreEnabled\s*=\s*true/);
     assert.match(unpublish, /x\.Id\s*==\s*id\s*&&\s*x\.IsStoreEnabled/);
     assert.match(unpublish, /product\.IsStoreEnabled\s*=\s*false/);
     for (const name of ["ProductEditor", "ProductDetails", "UpdateProduct", "ProductBenefits", "CreateProductAccessory"]) {
-        const start = controller.indexOf(`Task<IActionResult> ${name}(`);
-        const end = controller.indexOf("\n    [Http", start);
+        const start = controller.indexOf(`Task<AdminOperationResult> ${name}(`);
+        const end = controller.indexOf("public async Task<AdminOperationResult>", start + 1);
         assert.ok(start >= 0 && end > start);
         assert.doesNotMatch(controller.slice(start, end), /x\.Id\s*==\s*id\s*&&\s*x\.IsStoreEnabled/, name);
     }

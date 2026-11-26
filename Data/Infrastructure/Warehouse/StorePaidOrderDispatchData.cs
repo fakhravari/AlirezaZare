@@ -2,6 +2,7 @@ using System.Data;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Warehouse.Contracts;
+using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
@@ -19,14 +20,17 @@ public sealed class StorePaidOrderDispatchData(ShopDbContext db, IWarehouseStock
         var eligible = db.StoreCustomerOrders.AsNoTracking()
             .Join(db.AccountProfiles.AsNoTracking(), order => order.IdProfile, profile => profile.Id,
                 (order, profile) => new { order, profile })
-            .Where(x => x.order.StatusReference.Code == "payment-confirmed" && x.order.IdVoucher == null &&
+            .Where(x => x.order.StatusReference.NameEn == StoreOrderStatusNames.PaymentConfirmed &&
+                x.order.IdVoucher == null &&
                 db.StorePaymentAttempts.Any(payment => payment.IdOrder == x.order.Id &&
                     payment.StatusReference.Code == "verified" && payment.Amount == x.order.TotalAmount &&
                     payment.PaidAtUtc != null) && db.StoreCustomerOrderItems.Any(item => item.IdOrder == x.order.Id));
-        if (search.Length > 0) eligible = eligible.Where(x => x.order.OrderNumber.Contains(search) ||
-            (x.profile.FirstName + " " + x.profile.LastName).Contains(search));
+        decimal? orderIdSearch = decimal.TryParse(search, System.Globalization.NumberStyles.None,
+            System.Globalization.CultureInfo.InvariantCulture, out decimal parsedOrderId) ? parsedOrderId : null;
+        if (search.Length > 0) eligible = eligible.Where(x => (orderIdSearch.HasValue &&
+            x.order.Id == orderIdSearch.Value) || (x.profile.FirstName + " " + x.profile.LastName).Contains(search));
         int total = await eligible.CountAsync(ct);
-        var rows = await eligible.Select(x => new
+        var rawRows = await eligible.Select(x => new
             {
                 x.order, x.profile,
                 PaidAtUtc = db.StorePaymentAttempts.AsNoTracking().Where(payment => payment.IdOrder == x.order.Id &&
@@ -34,8 +38,17 @@ public sealed class StorePaidOrderDispatchData(ShopDbContext db, IWarehouseStock
                     payment.PaidAtUtc != null).OrderBy(payment => payment.PaidAtUtc)
                     .Select(payment => payment.PaidAtUtc).FirstOrDefault() ?? x.order.CreatedAtUtc
             }).OrderBy(x => x.PaidAtUtc).ThenBy(x => x.order.Id).Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(x => new PaidOrderData(x.order.Id, x.order.OrderNumber, x.order.TotalAmount, x.order.ItemCount,
-                x.PaidAtUtc, (x.profile.FirstName + " " + x.profile.LastName).Trim())).ToListAsync(ct);
+            .Select(x => new
+            {
+                x.order.Id, x.order.TotalAmount,
+                ItemCount = db.StoreCustomerOrderItems.Where(item => item.IdOrder == x.order.Id)
+                    .Sum(item => (int?)item.Quantity) ?? 0,
+                x.PaidAtUtc,
+                CustomerName = (x.profile.FirstName + " " + x.profile.LastName).Trim()
+            }).ToListAsync(ct);
+        var rows = rawRows.Select(x => new PaidOrderData(x.Id,
+            x.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), x.TotalAmount, x.ItemCount,
+            x.PaidAtUtc, x.CustomerName)).ToArray();
         return new PaidOrderPageData(rows, total, page, pageSize);
     }
 
@@ -52,7 +65,8 @@ public sealed class StorePaidOrderDispatchData(ShopDbContext db, IWarehouseStock
                 x.StatusReference.Code == "verified" && x.PaidAtUtc != null).ToListAsync(ct);
             var orderItems = await db.StoreCustomerOrderItems.AsNoTracking().Where(x => orderIds.Contains(x.IdOrder))
                 .ToListAsync(ct);
-            if (orders.Any(order => order.StatusReference.Code != "payment-confirmed" || order.IdVoucher is not null ||
+            if (orders.Any(order => order.StatusReference.NameEn != StoreOrderStatusNames.PaymentConfirmed ||
+                order.IdVoucher is not null ||
                 !payments.Any(payment => payment.IdOrder == order.Id && payment.Amount == order.TotalAmount) ||
                 !orderItems.Any(item => item.IdOrder == order.Id))) return Fail("orders-changed");
 
@@ -116,7 +130,8 @@ public sealed class StorePaidOrderDispatchData(ShopDbContext db, IWarehouseStock
                     VariantNameSnapshot = group.Key.VariantName, UnitNameSnapshot = group.Key.UnitName });
             await db.SaveChangesAsync(ct);
             await stockLedger.RebuildVoucherAsync(document.Id, ct);
-            int confirmed = await db.OrderStatuses.Where(x => x.Code == "warehouse-confirmed").Select(x => x.Id).SingleAsync(ct);
+            int confirmed = await db.OrderStatuses.Where(x => x.NameEn == StoreOrderStatusNames.WarehouseConfirmed)
+                .Select(x => x.Id).SingleAsync(ct);
             foreach (var order in orders) { order.IdVoucher = document.Id; order.IdStatus = confirmed; }
             db.VoucherAudits.Add(new VoucherAudit { VoucherId = checked((long)document.Id), VoucherNumber = document.VoucherNumber,
                 WarehouseId = warehouse.Id, Action = "Created", ActorUserKey = actor, OccurredAtUtc = DateTime.UtcNow,

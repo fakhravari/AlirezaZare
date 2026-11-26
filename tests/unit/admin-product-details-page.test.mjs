@@ -40,6 +40,6 @@ test('product list uses a new-tab link and detail route uses existing catalog pe
   assert.match(script, /details\.rel = "noopener noreferrer"/);
   assert.match(auth, /string\.Equals\(action, "ProductDetails"[\s\S]*?action = "Products"/);
   assert.match(auth, /string\.Equals\(controller, "StoreCatalogAdminApi", StringComparison\.OrdinalIgnoreCase\)[\s\S]*?controller = "Catalog"/);
-  const api = readFileSync('Admin/Areas/Store/Controllers/Api/StoreCatalogAdminApiController.cs', 'utf8');
-  assert.match(api, /fullAccess \|\| allowedWarehouseIds\.Contains\(balance\.IdWarehouse\)/);
+  const api = readFileSync('Data/Infrastructure/Store/StoreCatalogAdminData.cs', 'utf8');
+  assert.match(api, /fullAccess \|\| allowedWarehouseIds\.Contains\(balanceDetails\.balance\.IdWarehouse\)/);
 });

@@ -12,7 +12,7 @@ public sealed class AdminIdentityData(ShopDbContext db, PasswordHasher<AdminSyst
     public async Task<AdminIdentityState?> AuthenticateAsync(string normalizedUserName, string password,
         CancellationToken cancellationToken)
     {
-        var user = await db.AdminSystemUsers.Include(x => x.WarehouseAccess).Include(x => x.Roles)
+        var user = await db.AdminSystemUsers.Include(x => x.Warehouses).Include(x => x.Roles)
             .ThenInclude(x => x.Role).ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
             .SingleOrDefaultAsync(x => x.NormalizedUserName == normalizedUserName && x.IsActive, cancellationToken);
         if (user is null || passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) ==
@@ -25,7 +25,7 @@ public sealed class AdminIdentityData(ShopDbContext db, PasswordHasher<AdminSyst
 
     public async Task<AdminIdentityState?> ReadActiveAsync(long userId, CancellationToken cancellationToken)
     {
-        var user = await db.AdminSystemUsers.AsNoTracking().Include(x => x.WarehouseAccess).Include(x => x.Roles)
+        var user = await db.AdminSystemUsers.AsNoTracking().Include(x => x.Warehouses).Include(x => x.Roles)
             .ThenInclude(x => x.Role).ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
             .SingleOrDefaultAsync(x => x.Id == userId && x.IsActive, cancellationToken);
         return user is null ? null : await ProjectAsync(user, cancellationToken);
@@ -38,7 +38,7 @@ public sealed class AdminIdentityData(ShopDbContext db, PasswordHasher<AdminSyst
         var roles = user.Roles.Select(link => new AdminRoleData(link.Role.RoleKey, link.Role.IsActive,
             link.Role.Permissions.Select(p => new AdminRolePermissionData(Project(p.Permission))).ToArray())).ToArray();
         return new AdminIdentityState(user.Id, user.UserName, user.DisplayName, user.SecurityStamp,
-            user.WarehouseAccess.Select(x => x.IdWarehouse).ToArray(), roles, permissions);
+            user.Warehouses.Select(x => x.IdWarehouse).ToArray(), roles, permissions);
     }
 
     private static AdminPermissionData Project(AdminPermission x) => new(x.Id, x.PermissionKey,

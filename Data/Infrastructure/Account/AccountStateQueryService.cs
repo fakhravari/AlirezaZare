@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Account.Contracts;
 using Shop.Data.Infrastructure.Persistence;
@@ -263,7 +264,7 @@ public sealed class AccountStateQueryService(ShopDbContext db) : IAccountStateQu
             .Select(x => new
             {
                 selectedAddressId = x.IdAddress,
-                paymentMethod = x.PaymentMethod
+                paymentMethod = x.Bank.Code
             })
             .FirstOrDefaultAsync(ct);
 
@@ -274,15 +275,24 @@ public sealed class AccountStateQueryService(ShopDbContext db) : IAccountStateQu
             .Select(x => new
             {
                 x.Id,
-                x.OrderNumber,
-                Status = x.StatusReference.Code,
+                StatusNameEn = x.StatusReference.NameEn,
                 StatusName = x.StatusReference.NameFa,
                 x.ShippingCarrier,
                 ShippingTrackingCode = x.ShippingTrackingCode,
-                x.PaymentMethod,
-                x.AddressSnapshotJson,
+                PaymentMethod = x.Bank.Code,
+                Address = new
+                {
+                    recipient = x.Address.Recipient,
+                    phone = x.Address.Phone,
+                    street = x.Address.Street,
+                    postal = x.Address.PostalCode,
+                    province = db.GeoProvinces.Where(row => row.Id == x.Address.IdProvince)
+                        .Select(row => row.NameFa).FirstOrDefault(),
+                    city = db.GeoCities.Where(row => row.Id == x.Address.IdCity)
+                        .Select(row => row.NameFa).FirstOrDefault()
+                },
                 x.CreatedAtUtc,
-                x.ItemCount,
+                ItemCount = x.Items.Sum(item => item.Quantity),
                 x.TotalAmount,
                 x.SubtotalAmount,
                 x.IdCoupon,
@@ -356,30 +366,15 @@ public sealed class AccountStateQueryService(ShopDbContext db) : IAccountStateQu
                     referenceVersion.reference.IdPriceVersion,
                     referenceVersion.version.IdVariant,
                     referenceVersion.reference.IdAccessory,
-                    PriceAmount = referenceVersion.reference.UnitAmountSnapshot,
+                    PriceAmount = referenceVersion.version.FinalPriceAmount,
                     referenceVersion.version.PriceBeforeDiscountAmount,
                     referenceVersion.version.DiscountPercent,
                     referenceVersion.version.FinalPriceAmount,
-                    AccessoryName = referenceVersion.reference.AccessoryNameSnapshot
+                    AccessoryName = referenceVersion.reference.Accessory.Name
                 })
                 .ToListAsync(ct);
         var orderItemsById = orderItemRows.GroupBy(x => x.IdOrder)
             .ToDictionary(group => group.Key, group => group.ToArray());
-        var trackingHistory = orderIds.Length == 0
-            ? []
-            : await db.StoreOrderShipmentTrackingHistories
-                .AsNoTracking()
-                .Where(x => orderIds.Contains(x.IdOrder))
-                .OrderBy(x => x.Id)
-                .Select(x => new
-                {
-                    x.IdOrder,
-                    x.Carrier,
-                    x.TrackingCode,
-                    x.ChangedAtUtc
-                })
-                .ToListAsync(ct);
-
         var state = new Dictionary<string, object?>
         {
             ["id"] = profile.Id,
@@ -460,11 +455,11 @@ public sealed class AccountStateQueryService(ShopDbContext db) : IAccountStateQu
             ["orders"] = orderRows.Select(order => new
             {
                 id = order.Id,
-                number = order.OrderNumber,
-                order.Status,
+                number = order.Id.ToString(CultureInfo.InvariantCulture),
+                Status = StoreOrderStatusNames.CodeFromNameEn(order.StatusNameEn),
                 order.StatusName,
                 order.PaymentMethod,
-                order.AddressSnapshotJson,
+                order.Address,
                 order.ShippingCarrier,
                 shippingTrackingCode = order.ShippingTrackingCode,
                 createdAtUtc = AsUtc(order.CreatedAtUtc),
@@ -517,9 +512,7 @@ public sealed class AccountStateQueryService(ShopDbContext db) : IAccountStateQu
                         priceBeforeDiscountAmount = (decimal?)item.PriceAmount,
                         discountPercent = (decimal?)item.DiscountPercent
                     }).ToArray()
-                }).ToArray(),
-                trackingHistory = trackingHistory.Where(entry => entry.IdOrder == order.Id).Select(entry =>
-                    new { entry.Carrier, entry.TrackingCode, changedAtUtc = AsUtc(entry.ChangedAtUtc) }).ToArray()
+                }).ToArray()
             }).ToArray()
         };
 

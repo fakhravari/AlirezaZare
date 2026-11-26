@@ -1,4 +1,5 @@
-using System.Text.Json;
+using System.Globalization;
+using Shop.Data.Domain.Store.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -16,50 +17,29 @@ public sealed class OrderTrackingApiController(IStorePublicPageData pageData) : 
     [EnableRateLimiting("order-tracking")]
     public async Task<IActionResult> Lookup([FromBody] TrackingRequest request, CancellationToken ct)
     {
-        string orderNumber = (request.OrderNumber ?? string.Empty).Trim().ToUpperInvariant();
+        string orderNumber = (request.OrderNumber ?? string.Empty).Trim().Fa2En();
         string phone = NormalizePhone(request.Phone);
-        if (orderNumber.Length is < 8 or > 32 ||
-            orderNumber.Any(character => !char.IsAsciiLetterOrDigit(character) && character != '-') ||
+        if (orderNumber.Length is < 1 or > 29 ||
+            orderNumber.Any(character => !char.IsAsciiDigit(character)) ||
+            !decimal.TryParse(orderNumber, NumberStyles.None, CultureInfo.InvariantCulture, out decimal orderId) ||
             phone.Length != 11 || !phone.StartsWith("09", StringComparison.Ordinal))
             return BadRequest(new
-                { code = "invalid-tracking-request", message = "کد سفارش یا شمارهٔ همراه معتبر نیست." });
+                { code = "invalid-tracking-request", message = "شمارهٔ سفارش یا شمارهٔ همراه معتبر نیست." });
 
-        var candidates = await pageData.FindOrderTrackingCandidatesAsync(orderNumber, ct);
-        var order = candidates.FirstOrDefault(x => SnapshotPhoneMatches(x.AddressSnapshotJson, phone));
+        var candidates = await pageData.FindOrderTrackingCandidatesAsync(orderId, ct);
+        var order = candidates.FirstOrDefault(x => NormalizePhone(x.Phone) == phone);
         if (order is null)
-            return NotFound(new { code = "order-not-found", message = "سفارشی با این کد و شمارهٔ همراه پیدا نشد." });
-
-        var trackingRows = await pageData.ReadOrderTrackingHistoryAsync(order.Id, ct);
-        var trackingHistory = trackingRows.Select(x => new
-                { x.Carrier, x.TrackingCode, changedAtUtc = DateTime.SpecifyKind(x.ChangedAtUtc, DateTimeKind.Utc) })
-            .ToArray();
+            return NotFound(new { code = "order-not-found", message = "سفارشی با این شماره و شمارهٔ همراه پیدا نشد." });
 
         return Ok(new
         {
-            orderNumber = order.OrderNumber,
-            status = order.Status,
+            orderNumber = order.Id.ToString(CultureInfo.InvariantCulture),
+            status = StoreOrderStatusNames.CodeFromNameEn(order.StatusNameEn),
             statusName = order.StatusName,
             createdAtUtc = DateTime.SpecifyKind(order.CreatedAtUtc, DateTimeKind.Utc),
             shippingCarrier = order.ShippingCarrier,
-            shippingTrackingCode = order.ShippingTrackingCode,
-            trackingHistory
+            shippingTrackingCode = order.ShippingTrackingCode
         });
-    }
-
-    private static bool SnapshotPhoneMatches(string addressSnapshot, string phone)
-    {
-        try
-        {
-            using JsonDocument document = JsonDocument.Parse(addressSnapshot);
-            if (!document.RootElement.TryGetProperty("phone", out var phoneValue) &&
-                !document.RootElement.TryGetProperty("Phone", out phoneValue)) return false;
-
-            return phoneValue.ValueKind == JsonValueKind.String && NormalizePhone(phoneValue.GetString()) == phone;
-        }
-        catch (JsonException)
-        {
-            return false;
-        }
     }
 
     private static string NormalizePhone(string? value)

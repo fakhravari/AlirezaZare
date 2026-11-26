@@ -1,32 +1,31 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shop.Models.Account;
-using Shop.Services;
+using Shop.Data.Application.Account.Contracts;
 
 namespace Shop.Controllers;
 
 [ApiController]
 [Authorize(AuthenticationSchemes = "ShopCookie")]
 [Route("api/account")]
-public sealed class AccountCheckoutController(AccountCheckoutService checkoutService) : ControllerBase
+public sealed class AccountCheckoutController(IAccountCheckoutData checkoutService) : ControllerBase
 {
     [HttpPost("coupon/quote")]
     public async Task<IActionResult> QuoteCoupon([FromBody] CouponRequest request, CancellationToken cancellationToken) =>
-        ToActionResult(await checkoutService.QuoteCouponAsync(ProfileId, request, cancellationToken));
+        ToActionResult(await checkoutService.QuoteCouponAsync(ProfileId, request.Code, cancellationToken));
 
     [HttpPost("checkout")]
     public async Task<IActionResult> Checkout([FromBody] CheckoutRequest request, CancellationToken cancellationToken) =>
-        ToActionResult(await checkoutService.CheckoutAsync(ProfileId, request, cancellationToken));
+        ToActionResult(await checkoutService.CheckoutAsync(ProfileId, request.AddressId, request.PaymentMethod, request.CouponCode, cancellationToken));
 
     private long ProfileId => long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : 0;
 
-    private IActionResult ToActionResult(AccountUseCaseResult result) => result.Status switch
+    private IActionResult ToActionResult(CheckoutResult result) => result.Status switch
     {
-        AccountUseCaseStatus.Ok => Ok(result.Body),
-        AccountUseCaseStatus.BadRequest => BadRequest(result.Body),
-        AccountUseCaseStatus.NotFound => NotFound(result.Body),
-        AccountUseCaseStatus.Conflict => Conflict(result.Body),
+        CheckoutStatus.Ok => Ok(result.Body),
+        CheckoutStatus.BadRequest => BadRequest(result.Body),
+        CheckoutStatus.NotFound => NotFound(result.Body),
+        CheckoutStatus.Conflict => Conflict(result.Body),
         _ => StatusCode(StatusCodes.Status500InternalServerError)
     };
 }

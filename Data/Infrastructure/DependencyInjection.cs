@@ -22,6 +22,17 @@ namespace Shop.Data.Infrastructure;
 
 public static class DependencyInjection
 {
+    public static IServiceCollection AddAdminDataOperations(this IServiceCollection services)
+    {
+        services.AddScoped<IAdminUsersData, AdminUsersDataService>();
+        services.AddScoped<IWarehouseMovementsAdminData, WarehouseMovementsAdminData>();
+        services.AddScoped<IWarehouseDefinitionsAdminData, WarehouseDefinitionsAdminData>();
+        services.AddScoped<IWarehouseVouchersAdminData, WarehouseVouchersAdminData>();
+        services.AddScoped<IStoreCatalogAdminData, StoreCatalogAdminData>();
+        services.AddScoped<IStoreVariantPricesAdminData, StoreVariantPricesAdminData>();
+        return services;
+    }
+
     public static IServiceCollection AddShopDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -33,6 +44,7 @@ public static class DependencyInjection
         services.AddScoped<IEmailVerificationCodeStore, DatabaseEmailVerificationCodeStore>();
         services.AddScoped<IAccountDataCommands, AccountDataCommands>();
         services.AddScoped<IAdminIdentityData, AdminIdentityData>();
+        services.AddScoped<ISystemProblemsData, SystemProblemsDataService>();
         services.AddScoped<IWarehouseStockLedger, WarehouseStockLedger>();
         services.AddScoped<IVoucherNumberGenerator, VoucherNumberGenerator>();
 
@@ -76,6 +88,10 @@ public static class DependencyInjection
         services.AddScoped<IStoreSiteIdentityRepository, StoreSiteIdentityRepository>();
         services.AddScoped<IProductFeedbackRepository, StoreProductFeedbackRepository>();
         services.AddScoped<IStorePriceVersionService, StorePriceVersionService>();
+        services.AddScoped<IStoreCatalogFeaturesAdminData, StoreCatalogFeaturesAdminData>();
+        services.AddScoped<IStoreMediaUploadAdminData, StoreMediaUploadAdminData>();
+        services.AddScoped<IStoreOrdersAdminData, StoreOrdersAdminData>();
+        services.AddScoped<IStoreReportsAdminData, StoreReportsAdminData>();
 
         return services;
     }

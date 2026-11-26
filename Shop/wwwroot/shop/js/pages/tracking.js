@@ -33,31 +33,13 @@ window.HNUI.mount("pages-order-tracking", document, () => {
     heading.textContent = "وضعیت سفارش";
     const fields = document.createElement("div");
     fields.className = "tracking-result-fields";
-    addField(fields, "کد سفارش", data.orderNumber, "ltr");
+    addField(fields, "شماره سفارش", data.orderNumber, "ltr");
     addField(fields, "وضعیت", data.statusName || data.status || "ثبت‌شده");
     addField(fields, "زمان ثبت", formatDate(data.createdAtUtc));
     addField(fields, "شرکت حمل", data.shippingCarrier);
     addField(fields, "کد رهگیری", data.shippingTrackingCode, "ltr");
     resultHost.append(heading, fields);
 
-    const trackingEvents = Array.isArray(data.trackingHistory) ? data.trackingHistory : [];
-    if (trackingEvents.length) {
-      const historyHeading = document.createElement("h4");
-      historyHeading.textContent = "تغییرهای کد رهگیری";
-      const list = document.createElement("ol");
-      list.className = "tracking-history-list";
-      trackingEvents.forEach((item) => {
-        const entry = document.createElement("li");
-        const details = document.createElement("strong");
-        details.textContent = `${item.carrier}: ${item.trackingCode}`;
-        details.dir = "auto";
-        const time = document.createElement("time");
-        time.textContent = formatDate(item.changedAtUtc);
-        entry.append(details, time);
-        list.append(entry);
-      });
-      resultHost.append(historyHeading, list);
-    }
     resultHost.hidden = false;
   };
 

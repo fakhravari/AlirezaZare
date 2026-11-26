@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Domain.Account.Entities;
+using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Data.Infrastructure.Payments;
@@ -22,8 +23,7 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
                 .SingleOrDefaultAsync(x => x.Id == orderId && x.IdProfile == profileId, ct);
             if (order is null) return new("not-found");
 
-            if (order.StatusReference.Code != "pending-payment" || order.TotalAmount <= 0 ||
-                order.PaymentMethod != "zarinpal" ||
+            if (order.StatusReference.NameEn != StoreOrderStatusNames.PendingPayment || order.TotalAmount <= 0 ||
                 order.Bank is not { Code: "zarinpal", IsActive: true }) return new("invalid-order");
 
             bool hasItems = await db.StoreCustomerOrderItems.AnyAsync(x => x.IdOrder == orderId, ct);
@@ -31,13 +31,15 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
 
             decimal itemSubtotal = await db.StoreCustomerOrderItems
                 .AsNoTracking()
-                .Join(
-                    db.StoreOrderItemAmounts.AsNoTracking(),
-                    item => item.Id,
-                    price => price.IdOrderItem,
-                    (item, price) => new { item, price })
-                .Where(itemPrice => itemPrice.item.IdOrder == orderId)
-                .Select(itemPrice => itemPrice.price.UnitAmount * itemPrice.item.Quantity)
+                .Where(item => item.IdOrder == orderId)
+                .Select(item =>
+                    (item.PriceVersion.FinalPriceAmount +
+                     (db.StoreOrderAccessories
+                         .Where(accessory => accessory.IdOrder == item.IdOrder &&
+                                             accessory.IdProduct == item.IdProduct &&
+                                             accessory.IdSalesPlan == item.IdSalesPlan)
+                         .Select(accessory => (decimal?)accessory.PriceVersion.FinalPriceAmount)
+                         .Sum() ?? 0m)) * item.Quantity)
                 .SumAsync(ct);
             if (itemSubtotal != order.SubtotalAmount) return new("amount-mismatch");
 
@@ -164,7 +166,8 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
 
         var order = await db.StoreCustomerOrders.Include(x => x.StatusReference)
             .SingleOrDefaultAsync(x => x.Id == locked.IdOrder, ct);
-        if (order is null || order.StatusReference.Code != "pending-payment" || order.TotalAmount != locked.Amount)
+        if (order is null || order.StatusReference.NameEn != StoreOrderStatusNames.PendingPayment ||
+            order.TotalAmount != locked.Amount)
             return "order-conflict";
 
         var items = await db.StoreCustomerOrderItems.Where(x => x.IdOrder == order.Id).ToListAsync(ct);
@@ -172,7 +175,8 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
 
         DateTime now = DateTime.UtcNow;
         DateTime paidAtUtc = verification.PaidAtUtc!.Value.UtcDateTime;
-        order.IdStatus = await db.OrderStatuses.Where(x => x.Code == "payment-confirmed").Select(x => x.Id)
+        order.IdStatus = await db.OrderStatuses.Where(x => x.NameEn == StoreOrderStatusNames.PaymentConfirmed)
+            .Select(x => x.Id)
             .SingleAsync(ct);
         locked.IdStatus = await db.PaymentAttemptStatuses.Where(x => x.Code == "verified").Select(x => x.Id)
             .SingleAsync(ct);

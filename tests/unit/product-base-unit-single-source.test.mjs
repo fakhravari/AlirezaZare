@@ -5,8 +5,8 @@ import {readFile} from 'node:fs/promises';
 test('product unit link is the only persisted base-unit source', async () => {
   const [product, catalogApi, warehouseApi, migration] = await Promise.all([
     readFile('Data/Domain/Warehouse/Entities/WarehouseProduct.cs', 'utf8'),
-    readFile('Admin/Areas/Store/Controllers/Api/StoreCatalogAdminApiController.cs', 'utf8'),
-    readFile('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8'),
+    readFile('Data/Infrastructure/Store/StoreCatalogAdminData.cs', 'utf8'),
+    readFile('Data/Infrastructure/Warehouse/WarehouseDefinitionsAdminData.cs', 'utf8'),
     readFile('Shop/Features/Store/Database/Migrations/128-product-unit-single-base-source.sql', 'utf8')
   ]);
 

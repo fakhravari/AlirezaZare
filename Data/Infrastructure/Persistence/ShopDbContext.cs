@@ -22,7 +22,7 @@ public sealed partial class ShopDbContext(DbContextOptions<ShopDbContext> option
     public DbSet<AdminPermission> AdminPermissions => Set<AdminPermission>();
     public DbSet<AdminUserRole> AdminUserRoles => Set<AdminUserRole>();
     public DbSet<AdminRolePermission> AdminRolePermissions => Set<AdminRolePermission>();
-    public DbSet<AdminUserWarehouseAccess> AdminUserWarehouseAccesses => Set<AdminUserWarehouseAccess>();
+    public DbSet<AdminSystemUserWarehouse> AdminSystemUserWarehouses => Set<AdminSystemUserWarehouse>();
     public DbSet<VoucherType> VoucherTypes => Set<VoucherType>();
     public DbSet<WarehouseUnit> WarehouseUnits => Set<WarehouseUnit>();
     public DbSet<WarehouseParty> WarehouseParties => Set<WarehouseParty>();
@@ -95,7 +95,6 @@ public sealed partial class ShopDbContext(DbContextOptions<ShopDbContext> option
     public DbSet<StoreProductSalesPlanOfferSpecificationOverride> StoreProductSalesPlanOfferSpecificationOverrides => Set<StoreProductSalesPlanOfferSpecificationOverride>();
     public DbSet<StorePriceVersion> StorePriceVersions => Set<StorePriceVersion>();
     public DbSet<StoreOrderAccessory> StoreOrderAccessories => Set<StoreOrderAccessory>();
-    public DbSet<StoreOrderItemAmount> StoreOrderItemAmounts => Set<StoreOrderItemAmount>();
     public DbSet<GeoCountry> GeoCountries => Set<GeoCountry>();
     public DbSet<GeoProvince> GeoProvinces => Set<GeoProvince>();
     public DbSet<GeoCity> GeoCities => Set<GeoCity>();
@@ -122,9 +121,7 @@ public sealed partial class ShopDbContext(DbContextOptions<ShopDbContext> option
     public DbSet<ContactMessageStatusReference> ContactMessageStatuses => Set<ContactMessageStatusReference>();
     public DbSet<ArticleFeedbackStatusReference> ArticleFeedbackStatuses => Set<ArticleFeedbackStatusReference>();
     public DbSet<VoucherStatus> VoucherStatuses => Set<VoucherStatus>();
-    public DbSet<StoreOrderPreviousNumber> StoreOrderPreviousNumbers => Set<StoreOrderPreviousNumber>();
     public DbSet<StoreNewsletterSubscriber> StoreNewsletterSubscribers => Set<StoreNewsletterSubscriber>();
     public DbSet<StoreContactMessage> StoreContactMessages => Set<StoreContactMessage>();
-    public DbSet<StoreOrderShipmentTrackingHistory> StoreOrderShipmentTrackingHistories => Set<StoreOrderShipmentTrackingHistory>();
     public DbSet<StoreSchemaMigration> StoreSchemaMigrations => Set<StoreSchemaMigration>();
 }

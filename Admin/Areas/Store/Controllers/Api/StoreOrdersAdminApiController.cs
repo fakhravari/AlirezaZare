@@ -1,12 +1,7 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shop.Admin.Infrastructure;
-using System.Text.Json;
-using Shop.Data.Domain.Account.Entities;
-using Shop.Data.Domain.Store.Entities;
-using Shop.Data.Infrastructure.Persistence;
-using System.Security.Claims;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Helpers;
 
 namespace Shop.Admin.Areas.Store.Controllers.Api;
@@ -15,12 +10,11 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [ApiController]
 [Authorize(Roles = "system.full-access")]
 [Route("api/admin/store/orders")]
-public sealed class StoreOrdersAdminApiController(ShopDbContext db) : ControllerBase
+public sealed class StoreOrdersAdminApiController(IStoreOrdersAdminData orderData) : ControllerBase
 {
     [HttpGet("statuses")]
     public async Task<IActionResult> Statuses(CancellationToken cancellationToken) =>
-        Ok(await db.OrderStatuses.AsNoTracking().OrderBy(x => x.Code)
-            .Select(x => new { x.Id, x.Code, x.NameFa, x.NameEn }).ToListAsync(cancellationToken));
+        Ok(await orderData.ReadStatusesAsync(cancellationToken));
 
     [HttpPut("{id:long}/tracking")]
     [ValidateAntiForgeryToken]
@@ -33,39 +27,10 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
             (input.ExpectedCarrier?.Length ?? 0) > 100 || (input.ExpectedTrackingCode?.Length ?? 0) > 100)
             return BadRequest(new { title = "شرکت حمل یا کد رهگیری معتبر نیست." });
 
-        string actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "system";
-        if (actor.Length > 256) return BadRequest(new { title = "شناسهٔ مدیر نامعتبر است." });
-
-        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-        var order = await db.StoreCustomerOrders.Include(x => x.StatusReference)
-            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (order is null ||
-            order.StatusReference.Code is not ("warehouse-confirmed" or "in-transit" or "shipped-to-post" or "delivered"
-                ) ||
-            order.IdVoucher is null ||
-            !await db.StorePaymentAttempts.AnyAsync(
-                p => p.IdOrder == id && p.StatusReference.Code == "verified" && p.Amount == order.TotalAmount,
-                cancellationToken) ||
-            order.ShippingCarrier != input.ExpectedCarrier || order.ShippingTrackingCode != input.ExpectedTrackingCode)
+        bool updated = await orderData.UpdateTrackingAsync(id, carrier, code, input.ExpectedCarrier,
+            input.ExpectedTrackingCode, cancellationToken);
+        if (!updated)
             return Conflict(new { title = "اطلاعات سفارش تغییر کرده یا سفارش شرایط ثبت رهگیری را ندارد." });
-
-        var previousCarrier = order.ShippingCarrier;
-        var previousTrackingCode = order.ShippingTrackingCode;
-        order.ShippingCarrier = carrier;
-        order.ShippingTrackingCode = code;
-        db.StoreOrderShipmentTrackingHistories.Add(new StoreOrderShipmentTrackingHistory
-        {
-            IdOrder = id,
-            PreviousCarrier = previousCarrier,
-            PreviousTrackingCode = previousTrackingCode,
-            Carrier = carrier,
-            TrackingCode = code,
-            ActorUserKey = actor,
-            ChangedAtUtc = DateTime.UtcNow
-        });
-        await db.SaveChangesAsync(cancellationToken);
-
-        await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { message = "اطلاعات رهگیری ثبت شد." });
     }
@@ -80,21 +45,12 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
               (input.ExpectedStatus is "in-transit" or "shipped-to-post" && input.Status == "delivered")))
             return BadRequest(new { title = "تغییر وضعیت ارسال مجاز نیست." });
 
-        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-        var order = await db.StoreCustomerOrders.Include(x => x.StatusReference)
-            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (order is null || order.StatusReference.Code != input.ExpectedStatus || order.IdVoucher is null ||
-            !await db.StorePaymentAttempts.AnyAsync(
-                p => p.IdOrder == id && p.StatusReference.Code == "verified" && p.Amount == order.TotalAmount,
-                cancellationToken))
+        var update = await orderData.UpdateShippingStatusAsync(id, input.ExpectedStatus, input.Status,
+            cancellationToken);
+        if (update == ShippingStatusUpdateStatus.Conflict)
             return Conflict(new { title = "وضعیت سفارش تغییر کرده یا پرداخت و حوالهٔ معتبر ندارد." });
-
-        var nextStatus = await db.OrderStatuses.SingleOrDefaultAsync(x => x.Code == input.Status, cancellationToken);
-        if (nextStatus is null) return BadRequest(new { title = "وضعیت سفارش در جدول مرجع پیدا نشد." });
-        order.IdStatus = nextStatus.Id;
-        await db.SaveChangesAsync(cancellationToken);
-
-        await transaction.CommitAsync(cancellationToken);
+        if (update == ShippingStatusUpdateStatus.MissingStatus)
+            return BadRequest(new { title = "وضعیت سفارش در جدول مرجع پیدا نشد." });
 
         return Ok(new { message = "وضعیت ارسال ثبت شد." });
     }
@@ -131,283 +87,18 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         DateTime? untilUtc = to.HasValue
             ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
             : null;
-        var query = db.StoreCustomerOrders
-            .AsNoTracking()
-            .Join(
-                db.AccountProfiles.AsNoTracking(),
-                order => order.IdProfile,
-                profile => profile.Id,
-                (order, profile) => new { order, profile })
-            .Where(orderProfile =>
-                (q == "" || orderProfile.order.OrderNumber.Contains(q) ||
-                 (orderProfile.profile.FirstName + " " + orderProfile.profile.LastName).Contains(q)) &&
-                (normalizedStatus == "" || orderProfile.order.StatusReference.Code == normalizedStatus) &&
-                (!fromUtc.HasValue || orderProfile.order.CreatedAtUtc >= fromUtc.Value) &&
-                (!untilUtc.HasValue || orderProfile.order.CreatedAtUtc < untilUtc.Value))
-            .OrderByDescending(orderProfile => orderProfile.order.Id)
-            .Select(orderProfile => new OrderRow
-            {
-                Id = orderProfile.order.Id,
-                IdStatus = orderProfile.order.IdStatus,
-                OrderNumber = orderProfile.order.OrderNumber,
-                Status = orderProfile.order.StatusReference.Code,
-                StatusName = orderProfile.order.StatusReference.NameFa,
-                PaymentMethod = orderProfile.order.PaymentMethod,
-                IdBank = orderProfile.order.IdBank,
-                BankName = orderProfile.order.Bank == null ? null : orderProfile.order.Bank.NameFa,
-                ItemCount = orderProfile.order.ItemCount,
-                TotalAmount = orderProfile.order.TotalAmount,
-                CreatedAtUtc = orderProfile.order.CreatedAtUtc,
-                CustomerName = (orderProfile.profile.FirstName + " " + orderProfile.profile.LastName).Trim()
-            });
-        int total = await query.CountAsync(cancellationToken);
-        var rows = await query.Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
-
-        return Ok(AdminListQuery.CreateResult(rows, total, paging));
+        var rows = await orderData.ReadOrdersAsync(q ?? "", normalizedStatus, fromUtc, untilUtc,
+            paging.Offset, paging.PageSize, cancellationToken);
+        return Ok(AdminListQuery.CreateResult(rows.Items, rows.Total, paging));
     }
 
     [HttpGet("{id:long}")]
     public async Task<IActionResult> Details(long id, CancellationToken cancellationToken)
     {
         if (id <= 0) return NotFound();
-
-        var order = await db.StoreCustomerOrders
-            .AsNoTracking()
-            .Where(order => order.Id == id)
-            .Join(
-                db.AccountProfiles.AsNoTracking(),
-                order => order.IdProfile,
-                profile => profile.Id,
-                (order, profile) => new OrderDetailsRow
-            {
-                Id = order.Id,
-                IdStatus = order.IdStatus,
-                OrderNumber = order.OrderNumber,
-                Status = order.StatusReference.Code,
-                StatusName = order.StatusReference.NameFa,
-                PaymentMethod = order.PaymentMethod,
-                IdBank = order.IdBank,
-                BankName = order.Bank == null ? null : order.Bank.NameFa,
-                ItemCount = order.ItemCount,
-                TotalAmount = order.TotalAmount,
-                SubtotalAmount = order.SubtotalAmount,
-                CouponDiscountAmount = order.CouponDiscountAmount,
-                CreatedAtUtc = order.CreatedAtUtc,
-                CustomerName = (profile.FirstName + " " + profile.LastName).Trim(),
-                IdVoucher = order.IdVoucher,
-                ShippingCarrier = order.ShippingCarrier,
-                ShippingTrackingCode = order.ShippingTrackingCode,
-                AddressSnapshotJson = order.AddressSnapshotJson
-            })
-            .SingleOrDefaultAsync(cancellationToken);
-        if (order is not null)
-        {
-            var itemRows = await db.StoreCustomerOrderItems
-                .AsNoTracking()
-                .Where(item => item.IdOrder == id)
-                .Join(
-                    db.SalesPlanReferences.AsNoTracking(),
-                    item => item.IdSalesPlan,
-                    salesPlan => salesPlan.Id,
-                    (item, salesPlan) => new { item, salesPlan })
-                .Join(
-                    db.Products.AsNoTracking(),
-                    itemPlan => itemPlan.item.IdProduct,
-                    product => product.Id,
-                    (itemPlan, product) => new { itemPlan.item, itemPlan.salesPlan, product })
-                .OrderBy(itemPlanProduct => itemPlanProduct.item.Id)
-                .Select(itemPlanProduct => new
-                    {
-                        itemPlanProduct.item.Id,
-                        itemPlanProduct.item.IdOrder,
-                        itemPlanProduct.item.IdProduct,
-                        itemPlanProduct.item.IdSalesPlan,
-                        ProductName = itemPlanProduct.product.NameFa,
-                        VariantName = db.ProductVariants
-                            .Where(variant => variant.Id == itemPlanProduct.item.IdVariant)
-                            .Select(variant => variant.VariantName.TreePathNames)
-                            .FirstOrDefault(),
-                        itemPlanProduct.item.Quantity,
-                        itemPlanProduct.item.IdVariant,
-                        itemPlanProduct.item.IdPriceVersion,
-                        PriceAmount = itemPlanProduct.item.PriceVersion.PriceBeforeDiscountAmount,
-                        itemPlanProduct.item.PriceVersion.DiscountPercent,
-                        itemPlanProduct.item.PriceVersion.FinalPriceAmount,
-                        itemPlanProduct.item.PriceVersion.IsActive,
-                        itemPlanProduct.item.PriceVersion.CreatedAtUtc,
-                        itemPlanProduct.item.PriceVersion.ChangeReason,
-                        SalesPlanName = itemPlanProduct.salesPlan.DisplayName
-                    })
-                .ToListAsync(cancellationToken);
-            var references = await db.StoreOrderAccessories
-                .AsNoTracking()
-                .Join(
-                    db.StorePriceVersions.AsNoTracking(),
-                    reference => reference.IdPriceVersion,
-                    version => version.Id,
-                    (reference, version) => new { reference, version })
-                .Where(referenceVersion => referenceVersion.reference.IdOrder == id)
-                .OrderBy(referenceVersion => referenceVersion.reference.IdProduct)
-                .ThenBy(referenceVersion => referenceVersion.reference.IdSalesPlan)
-                .ThenBy(referenceVersion => referenceVersion.reference.IdAccessory)
-                .Select(referenceVersion => new
-                    {
-                        referenceVersion.reference.IdOrder,
-                        referenceVersion.reference.IdProduct,
-                        referenceVersion.reference.IdSalesPlan,
-                        referenceVersion.reference.IdPriceVersion,
-                        referenceVersion.version.IdVariant,
-                        referenceVersion.reference.IdAccessory,
-                        PriceAmount = referenceVersion.reference.UnitAmountSnapshot,
-                        BaseAmount = referenceVersion.version.PriceBeforeDiscountAmount,
-                        referenceVersion.version.DiscountPercent,
-                        referenceVersion.version.FinalPriceAmount,
-                        referenceVersion.version.IsActive,
-                        referenceVersion.version.CreatedAtUtc,
-                        referenceVersion.version.ChangeReason,
-                        AccessoryName = referenceVersion.reference.AccessoryNameSnapshot
-                    })
-                .ToListAsync(cancellationToken);
-            var accessoryProductIds = references.Select(reference => reference.IdProduct).Distinct().ToArray();
-            var accessoryIds = references.Select(reference => reference.IdAccessory).Distinct().ToArray();
-            var accessoryRequirementRows = accessoryIds.Length == 0
-                ? []
-                : await db.StoreProductAccessories.AsNoTracking()
-                    .Where(link =>
-                        accessoryProductIds.Contains(link.IdProduct) && accessoryIds.Contains(link.IdAccessory))
-                    .Select(link => new { link.IdProduct, link.IdAccessory, link.IsRequired })
-                    .ToListAsync(cancellationToken);
-            var accessoryRequirements =
-                accessoryRequirementRows.ToDictionary(link => (link.IdProduct, link.IdAccessory),
-                    link => link.IsRequired);
-            var components = new List<object>();
-            foreach (var item in itemRows)
-            {
-                components.Add(new
-                {
-                    productName = item.ProductName,
-                    componentType = item.IdVariant.HasValue ? "تنوع" : "کالا",
-                    accessoryRequirement = (string?)null,
-                    componentId = item.IdVariant ?? item.IdProduct,
-                    priceVersionId = item.IdPriceVersion,
-                    treePathNames = item.IdVariant.HasValue ? item.VariantName : null,
-                    accessoryName = (string?)null,
-                    salesPlan = item.SalesPlanName,
-                    quantity = item.Quantity,
-                    baseAmount = item.PriceAmount,
-                    discountPercent = item.DiscountPercent,
-                    discountAmount = item.PriceAmount - item.FinalPriceAmount,
-                    finalUnitAmount = item.FinalPriceAmount,
-                    lineTotal = item.FinalPriceAmount * item.Quantity
-                });
-            }
-
-            foreach (var accessory in references.GroupBy(reference =>
-                         new { reference.IdProduct, reference.IdSalesPlan, reference.IdAccessory }))
-            {
-                var matchingItems = itemRows.Where(item =>
-                        item.IdProduct == accessory.Key.IdProduct && item.IdSalesPlan == accessory.Key.IdSalesPlan)
-                    .ToArray();
-                var accessoryPrice = accessory.First();
-                var hasRequirement =
-                    accessoryRequirements.TryGetValue((accessory.Key.IdProduct, accessory.Key.IdAccessory),
-                        out bool isRequired);
-                components.Add(new
-                {
-                    productName = matchingItems.FirstOrDefault()?.ProductName,
-                    componentType = "متعلقه",
-                    accessoryRequirement =
-                        hasRequirement ? isRequired ? "الزامی (تعریف فعلی)" : "اختیاری (تعریف فعلی)" : null,
-                    componentId = accessory.Key.IdAccessory,
-                    priceVersionId = accessoryPrice.IdPriceVersion,
-                    treePathNames = (string?)null,
-                    accessoryName = accessoryPrice.AccessoryName,
-                    salesPlan = matchingItems.FirstOrDefault()?.SalesPlanName,
-                    quantity = matchingItems.Sum(item => item.Quantity),
-                    baseAmount = accessoryPrice.BaseAmount,
-                    discountPercent = accessoryPrice.DiscountPercent,
-                    discountAmount = accessoryPrice.BaseAmount - accessoryPrice.PriceAmount,
-                    finalUnitAmount = accessoryPrice.PriceAmount,
-                    lineTotal = accessoryPrice.PriceAmount * matchingItems.Sum(item => item.Quantity)
-                });
-            }
-
-            var items = itemRows.Select(i => new
-            {
-                name = i.ProductName,
-                variantName = i.VariantName,
-                quantity = i.Quantity,
-                unitAmount = i.FinalPriceAmount + references.Where(r =>
-                        r.IdOrder == i.IdOrder && r.IdProduct == i.IdProduct && r.IdSalesPlan == i.IdSalesPlan)
-                    .Sum(r => r.PriceAmount),
-                salesPlan = i.SalesPlanName,
-                options = new
-                {
-                    accessories = references
-                        .Where(r => r.IdOrder == i.IdOrder && r.IdProduct == i.IdProduct &&
-                                    r.IdSalesPlan == i.IdSalesPlan)
-                        .Select(r => new { id = r.IdAccessory.ToString(), selected = true }).ToArray()
-                },
-                priceReferences = references.Where(r =>
-                    r.IdOrder == i.IdOrder && r.IdProduct == i.IdProduct && r.IdSalesPlan == i.IdSalesPlan).Select(r =>
-                    new
-                    {
-                        priceVersionId = r.IdPriceVersion,
-                        component = StorePriceVersionReference.GetComponent(r.IdVariant, r.IdAccessory),
-                        name = r.AccessoryName,
-                        calculatedUnitAmount = r.PriceAmount,
-                        recordedPriceAmount = r.PriceAmount,
-                        discountPercent = r.DiscountPercent,
-                        isCurrent = r.IsActive,
-                        recordedAtUtc = r.CreatedAtUtc,
-                        reason = r.ChangeReason
-                    }).Prepend(new
-                {
-                    priceVersionId = i.IdPriceVersion, component = i.IdVariant.HasValue ? "variant" : "product",
-                    name = i.VariantName ?? i.ProductName, calculatedUnitAmount = i.FinalPriceAmount,
-                    recordedPriceAmount = i.PriceAmount, discountPercent = i.DiscountPercent, isCurrent = i.IsActive,
-                    recordedAtUtc = i.CreatedAtUtc, reason = i.ChangeReason
-                }).ToArray()
-            }).ToList();
-            order.CalculatedItemSubtotal = items.Sum(item => item.unitAmount * item.quantity);
-            order.HasItemSubtotalMismatch = items.Count > 0 && order.CalculatedItemSubtotal != order.SubtotalAmount;
-            order.ItemsJson = System.Text.Json.JsonSerializer.Serialize(items);
-            order.ComponentsJson = System.Text.Json.JsonSerializer.Serialize(components);
-        }
-
+        var order = await orderData.ReadOrderDetailsAsync(id, cancellationToken);
         return order is null ? NotFound() : Ok(order);
     }
-
-    public class OrderRow
-    {
-        public decimal Id { get; set; }
-        public int IdStatus { get; set; }
-        public string OrderNumber { get; set; } = "";
-        public string Status { get; set; } = "";
-        public string StatusName { get; set; } = "";
-        public string PaymentMethod { get; set; } = "";
-        public long IdBank { get; set; }
-        public string? BankName { get; set; }
-        public int ItemCount { get; set; }
-        public decimal TotalAmount { get; set; }
-        public DateTime CreatedAtUtc { get; set; }
-        public string CustomerName { get; set; } = "";
-    }
-
-    public sealed class OrderDetailsRow : OrderRow
-    {
-        public decimal SubtotalAmount { get; set; }
-        public decimal CouponDiscountAmount { get; set; }
-        public decimal CalculatedItemSubtotal { get; set; }
-        public bool HasItemSubtotalMismatch { get; set; }
-        public decimal? IdVoucher { get; set; }
-        public string? ShippingCarrier { get; set; }
-        public string? ShippingTrackingCode { get; set; }
-        public string AddressSnapshotJson { get; set; } = "{}";
-        public string ItemsJson { get; set; } = "[]";
-        public string ComponentsJson { get; set; } = "[]";
-    }
-
     public sealed record ShippingStatusInput(string? ExpectedStatus, string? Status);
 
     public sealed record TrackingInput(

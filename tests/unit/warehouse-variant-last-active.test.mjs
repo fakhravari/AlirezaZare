@@ -27,12 +27,12 @@ test('last active variant action is disabled using all variants, even when filte
 });
 
 test('deactivation and update endpoints both guard the last active variant', () => {
-  const source=readFileSync('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs','utf8');
-  assert.ok(source.includes('variant.IsActive && !await db.ProductVariants.AnyAsync(x => x.IdProduct == variant.IdProduct && x.Id != variant.Id && x.IsActive'));
+  const source=readFileSync('Data/Infrastructure/Warehouse/WarehouseDefinitionsAdminData.cs','utf8');
+  assert.match(source, /variant\.IsActive && !await db\.ProductVariants\.AnyAsync\(\s*x => x\.IdProduct == variant\.IdProduct && x\.Id != variant\.Id && x\.IsActive/);
   assert.ok(source.includes('id.HasValue && entity.IsActive && !input.IsActive'));
   assert.ok(source.includes('x.IdProduct == productId && x.Id != entity.Id && x.IsActive'));
   assert.equal((source.match(/آخرین تنوع فعال را نمی‌توان غیرفعال کرد/g) || []).length, 2);
   assert.ok(source.includes('if (variant.IsDefault)'));
   assert.ok(source.includes('if (entity.IsDefault && !input.IsActive)'));
-  assert.ok(source.includes('if (section is not ("units" or "unit-groups")) return NotFound()')); 
+  assert.ok(source.includes('if (section is not ("units" or "unit-groups")) return Missing()'));
 });

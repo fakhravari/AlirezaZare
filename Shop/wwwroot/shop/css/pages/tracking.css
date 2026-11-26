@@ -189,18 +189,12 @@
   font-weight: 800;
 }
 
-.tracking-result h4 {
-  margin-top: 20px;
-  font-size: 15px;
-}
-
 .tracking-result-fields {
   display: grid;
   gap: 9px;
 }
 
-.tracking-result-field,
-.tracking-history-list li {
+.tracking-result-field {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -211,19 +205,8 @@
   font-size: 14px;
 }
 
-.tracking-result-field strong,
-.tracking-history-list strong {
+.tracking-result-field strong {
   color: var(--tracking-navy-deep);
-}
-
-.tracking-history-list {
-  margin: 0;
-  padding-inline-start: 22px;
-}
-
-.tracking-history-list time {
-  color: var(--industrial-muted);
-  font-size: 12px;
 }
 
 .tracking-submit:disabled {

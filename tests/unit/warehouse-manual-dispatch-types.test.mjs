@@ -31,8 +31,8 @@ for (const [feature, expected] of [['dispatches', 'حواله دستی'], ['retu
 });
 
 test('manual documents reject the sales dispatch type without changing the order dispatch path', () => {
-  const api = readFileSync('Admin/Areas/Warehouse/Controllers/Api/VouchersApiController.cs', 'utf8');
-  const dispatch = readFileSync('Admin/Areas/Store/Controllers/Api/StorePaidOrdersDispatchApiController.cs', 'utf8');
+  const api = readFileSync('Data/Infrastructure/Warehouse/WarehouseVouchersAdminData.cs', 'utf8');
+  const dispatch = readFileSync('Data/Infrastructure/Warehouse/StorePaidOrderDispatchData.cs', 'utf8');
   assert.ok(api.includes('x.IsActive && !x.IsSystemSalesDispatch'));
   assert.ok(api.includes('if (selectedType.IsSystemSalesDispatch)'));
   assert.ok(dispatch.includes('x.IsSystemSalesDispatch && x.IsActive'));

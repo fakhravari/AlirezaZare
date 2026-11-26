@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 test('product creation and editing use a unique product key, with ID as the creation fallback', async () => {
-  const api = await readFile('Admin/Areas/Store/Controllers/Api/StoreCatalogAdminApiController.cs', 'utf8');
+  const api = await readFile('Data/Infrastructure/Store/StoreCatalogAdminData.cs', 'utf8');
   const markup = await readFile('Admin/Areas/Store/Views/Catalog/Index.cshtml', 'utf8');
   const model = await readFile('Data/Domain/Warehouse/Entities/WarehouseProduct.cs', 'utf8');
   assert.match(api, /if \(key\.Length == 0\) key = id\.ToString/);

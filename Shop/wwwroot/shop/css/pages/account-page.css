@@ -1119,9 +1119,6 @@
 .order-invoice-item__variant, .order-invoice-item__plan { color: var(--industrial-steel); line-height: 1.8; }
 .order-invoice-quantity, .order-invoice-unit-amount, .order-invoice-line-total { padding-top: 3px; }
 .order-invoice-row-summary { background: #fafbfc; color: var(--industrial-steel); font-weight: 700; }
-.order-invoice-history { margin-top: 22px; padding-top: 18px; border-top: 1px solid #e7ebee; }
-.order-invoice-history h4 { margin: 0 0 10px; font-size: 15px; font-weight: 700; }
-.order-invoice-history ol { margin: 0; padding-inline-start: 20px; color: var(--industrial-steel); line-height: 1.9; }
 .order-invoice-totals-title { margin: 22px 0 0; padding-top: 18px; border-top: 1px solid #e7ebee; font-size: 15px; font-weight: 700; }
 .order-invoice-payable {
   display: flex;

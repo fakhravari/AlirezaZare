@@ -4,7 +4,7 @@ Solution فعلی در `Shop.sln` سازمان‌دهی شده است. `Shop/` �
 
 ## مسیر درخواست
 
-در فروشگاه، ثبت سرویس‌ها و middleware از `Shop/Program.cs` شروع می‌شود؛ route پیش‌فرض MVC به Controller و سپس View/partial می‌رسد. دادهٔ فروشگاه از سرویس‌ها و repositoryهای `Shop/Services/` و قراردادهای برنامه در `Data/Application/` عبور می‌کند. EF Core و نگاشت‌ها در `Data/Infrastructure/Persistence/` و entityها در `Data/Domain/` قرار دارند.
+در فروشگاه، ثبت سرویس‌ها و middleware از `Shop/Program.cs` شروع می‌شود؛ route پیش‌فرض MVC به Controller و سپس View/partial می‌رسد. adapterهای فروشگاه در `Shop/Services/`، middlewareهای درخواست در `Shop/Middleware/` و ابزارهای URL مربوط به SEO در `Shop/Seo/` قرار دارند. قراردادهای برنامه در `Data/Application/`، EF Core و نگاشت‌ها در `Data/Infrastructure/Persistence/` و entityها در `Data/Domain/` هستند.
 
 پنل `Admin/` یک برنامهٔ وب با Areas/Views و APIهای مدیریتی است. UI و routeهای پنل را از همان کد جاری ردیابی کنید؛ شباهت domain به معنای اشتراک layout یا route نیست.
 

@@ -597,12 +597,6 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 const lineTotal = document.createElement("strong"); lineTotal.className = "order-invoice-line-total"; lineTotal.setAttribute("role", "cell"); lineTotal.textContent = formatToman(Number(item.unitAmount) * Number(item.quantity));
                 row.append(description, quantity, amount, lineTotal); group.append(row);
             }
-            const history = invoiceDialog.querySelector("[data-invoice-history]"); history?.replaceChildren();
-            const events = [
-                ...(details.trackingHistory || []).map(entry => ({ when: entry.changedAtUtc, text: `رهگیری: ${entry.carrier}، ${entry.trackingCode}` }))
-            ].sort((a, b) => new Date(a.when) - new Date(b.when));
-            for (const entry of events) { const li = document.createElement("li"); li.textContent = `${ui.formatDateTime(entry.when)} — ${entry.text}`; history?.append(li); }
-            if (!events.length && history) { const li = document.createElement("li"); li.textContent = "هنوز رویدادی برای این سفارش ثبت نشده است."; history.append(li); }
             if (!invoiceDialog.open) invoiceDialog.showModal();
     });
     invoiceDialog?.querySelector("[data-close-order-invoice]")?.addEventListener("click", () => invoiceDialog.close());

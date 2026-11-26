@@ -1,4 +1,4 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
@@ -38,8 +38,8 @@ test('variant name reference and variant definitions have separate pages and per
   const view = await readFile('Admin/Areas/Warehouse/Views/Features/Definitions.cshtml', 'utf8');
   assert.match(view, /Model\.FeatureId == "variant-names"[\s\S]*data-variant-name-tree/);
   assert.match(view, /Model\.FeatureId != "variant-names"[\s\S]*data-admin-datatable/);
-  const api = await readFile('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8');
-  assert.match(api, /private async Task<IActionResult> SaveVariantName[\s\S]*?if \(!CanAccessVariantNames\(\)\) return Forbid\(\)/);
+  const api = await readFile('Data/Infrastructure/Warehouse/WarehouseDefinitionsAdminData.cs', 'utf8');
+  assert.match(api, /SaveVariantName[\s\S]*?if \(!CanAccessVariantNames\(\)\) return Denied\(\)/);
   assert.match(api, /private bool CanAccessVariantNames\(\)[\s\S]*Warehouse:Features:Index:variant-names/);
   const migration = await readFile('Shop/Features/Store/Database/Migrations/143-split-variant-definition-pages.sql', 'utf8');
   assert.match(migration, /warehouse\.variant-names/);

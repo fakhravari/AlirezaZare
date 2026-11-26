@@ -356,7 +356,7 @@
           "server": [
             "Shop/Controllers/ProductController.cs",
             "Shop/Controllers/SalesPlansController.cs",
-            "Shop/Models/SalesPlanData.cs",
+            "Data/Application/Store/Models/SalesPlanData.cs",
             "Shop/Services/CatalogRepository.cs",
             "Shop/Services/ISalesPlanSource.cs",
             "Shop/Services/DatabaseSalesPlanSource.cs"

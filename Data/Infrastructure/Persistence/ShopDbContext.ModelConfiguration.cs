@@ -168,10 +168,12 @@ public sealed partial class ShopDbContext
             entity.HasKey(x => new { x.IdRole, x.IdPermission });
         });
 
-        modelBuilder.Entity<AdminUserWarehouseAccess>(entity =>
+        modelBuilder.Entity<AdminSystemUserWarehouse>(entity =>
         {
-            entity.ToTable("SystemUserWarehouseAccess", "Admin");
-            entity.HasKey(x => new { x.IdUser, x.IdWarehouse });
+            entity.ToTable("SystemUserWarehouse", "Admin");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => new { x.IdUser, x.IdWarehouse })
+                .IsUnique().HasDatabaseName("UQ_Admin_SystemUserWarehouse_User_Warehouse");
         });
 
         modelBuilder.Entity<WarehouseEntity>(entity =>
@@ -327,12 +329,6 @@ public sealed partial class ShopDbContext
             entity.ToTable("Gender", "Account");
         });
 
-        modelBuilder.Entity<StoreOrderPreviousNumber>(entity =>
-        {
-            entity.ToTable("OrderPreviousNumber", "Store");
-            entity.HasKey(x => x.IdOrder);
-        });
-
         modelBuilder.Entity<StoreCustomerOrderReference>(entity =>
         {
             entity.ToTable("Order", "Store");
@@ -358,21 +354,14 @@ public sealed partial class ShopDbContext
             entity.ToTable("PriceVersion", "Store");
         });
 
-        modelBuilder.Entity<StoreOrderItemAmount>(entity =>
-        {
-            entity.HasNoKey();
-            entity.ToView("OrderItemAmount", "Store");
-        });
-
         modelBuilder.Entity<StoreOrderAccessory>(entity =>
         {
             entity.ToTable("OrderAccessory", "Store");
-            entity.HasKey(x => new { x.IdOrder, x.IdProduct, x.IdSalesPlan, x.IdAccessory });
-        });
-
-        modelBuilder.Entity<StoreOrderShipmentTrackingHistory>(entity =>
-        {
-            entity.ToTable("OrderShipmentTrackingHistory", "Store");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => new
+            {
+                x.IdOrder, x.IdProduct, x.IdSalesPlan, x.IdAccessory, x.IdPriceVersion
+            }).IsUnique().HasDatabaseName("UQ_Store_OrderAccessory_Order_Product_Plan_Accessory_PriceVersion");
         });
 
         modelBuilder.Entity<StorePaymentAttempt>(entity =>
@@ -612,10 +601,9 @@ public sealed partial class ShopDbContext
         modelBuilder.Entity<StoreCustomerOrderReference>().HasOne<Voucher>().WithMany().HasForeignKey(x => x.IdVoucher).OnDelete(DeleteBehavior.NoAction); // Store.Order -> Warehouse.Voucher
         modelBuilder.Entity<StoreProductCollectionItem>().HasOne<StoreProductCollection>().WithMany().HasForeignKey(x => x.IdCollection).OnDelete(DeleteBehavior.NoAction); // Store.ProductCollectionItem -> Store.ProductCollection
         modelBuilder.Entity<StoreCustomerOrderReference>().HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile).OnDelete(DeleteBehavior.NoAction); // Store.Order -> Account.Profile
-        modelBuilder.Entity<StoreCustomerOrderReference>().HasOne<AccountAddress>().WithMany().HasForeignKey(x => x.IdAddress).OnDelete(DeleteBehavior.NoAction); // Store.Order -> Account.Address
+        modelBuilder.Entity<StoreCustomerOrderReference>().HasOne(x => x.Address).WithMany().HasForeignKey(x => x.IdAddress).OnDelete(DeleteBehavior.NoAction); // Store.Order -> Account.Address
         modelBuilder.Entity<StorePaymentAttempt>().HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdOrder).OnDelete(DeleteBehavior.NoAction); // Store.PaymentAttempt -> Store.Order
         modelBuilder.Entity<AccountCartItem>().HasOne<SalesPlanReference>().WithMany().HasForeignKey(x => x.IdSalesPlan).OnDelete(DeleteBehavior.NoAction); // Account.CartItem -> Warehouse.SalesPlanReference
-        modelBuilder.Entity<StoreOrderShipmentTrackingHistory>().HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdOrder).OnDelete(DeleteBehavior.NoAction); // Store.OrderShipmentTrackingHistory -> Store.Order
         modelBuilder.Entity<AccountCartItem>().HasOne<ProductVariant>().WithMany().HasForeignKey(x => new { x.IdProduct, x.IdVariant }).HasPrincipalKey(x => new { x.IdProduct, x.Id }).OnDelete(DeleteBehavior.NoAction); // Account.CartItem -> Warehouse.ProductVariant
         modelBuilder.Entity<WarehouseStockOwner>().HasOne<Domain.Warehouse.Entities.Warehouse>().WithMany().HasForeignKey(x => x.IdWarehouse).OnDelete(DeleteBehavior.NoAction); // Warehouse.WarehouseStockOwner -> Warehouse.Warehouse
         modelBuilder.Entity<WarehouseStockOwner>().HasOne<SalesPlanReference>().WithMany().HasForeignKey(x => x.IdStockOwner).OnDelete(DeleteBehavior.NoAction); // Warehouse.WarehouseStockOwner -> Warehouse.SalesPlanReference
@@ -644,7 +632,7 @@ public sealed partial class ShopDbContext
         modelBuilder.Entity<MagazineArticleSource>().HasOne<MagazineArticle>().WithMany().HasForeignKey(x => x.IdMagazineArticle).OnDelete(DeleteBehavior.NoAction); // Mag.MagazineArticleSource -> Mag.MagazineArticle
         modelBuilder.Entity<MagazineArticleTag>().HasOne<MagazineArticle>().WithMany().HasForeignKey(x => x.IdMagazineArticle); // Mag.MagazineArticleTag -> Mag.MagazineArticle
         modelBuilder.Entity<StoreProductAsset>().HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.NoAction); // Store.ProductAsset -> Warehouse.Product
-        modelBuilder.Entity<Shop.Data.Domain.Admin.Entities.AdminUserWarehouseAccess>().HasOne<Domain.Warehouse.Entities.Warehouse>().WithMany().HasForeignKey(x => x.IdWarehouse).OnDelete(DeleteBehavior.NoAction); // Admin.SystemUserWarehouseAccess -> Warehouse.Warehouse
+        modelBuilder.Entity<Shop.Data.Domain.Admin.Entities.AdminSystemUserWarehouse>().HasOne<Domain.Warehouse.Entities.Warehouse>().WithMany().HasForeignKey(x => x.IdWarehouse).OnDelete(DeleteBehavior.NoAction); // Admin.SystemUserWarehouse -> Warehouse.Warehouse
         modelBuilder.Entity<StoreProductAccessory>().HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.NoAction); // Store.ProductAccessory -> Warehouse.Product
         modelBuilder.Entity<VoucherLine>().HasOne<WarehouseUnit>().WithMany().HasForeignKey(x => x.IdUnit).OnDelete(DeleteBehavior.NoAction); // Warehouse.VoucherLine -> Warehouse.Unit
         modelBuilder.Entity<AccountCompareItem>().HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile); // Account.CompareItem -> Account.Profile
@@ -702,7 +690,6 @@ public sealed partial class ShopDbContext
         modelBuilder.Entity<StoreCouponUsage>().HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdCustomerOrder); // Store.CouponUsage -> Store.Order
         modelBuilder.Entity<AccountProfile>().HasOne(x => x.Gender).WithMany().HasForeignKey(x => x.IdGender).OnDelete(DeleteBehavior.Restrict); // Account.Profile -> Account.Gender
         modelBuilder.Entity<AccountMessage>().HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile); // Account.Message -> Account.Profile
-        modelBuilder.Entity<StoreOrderPreviousNumber>().HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdOrder); // Store.OrderPreviousNumber -> Store.Order
         modelBuilder.Entity<StoreCustomerOrderReference>().HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict); // Store.Order -> Store.OrderStatus
         modelBuilder.Entity<StoreCustomerOrderReference>().HasOne<AccountCoupon>().WithMany().HasForeignKey(x => x.IdCoupon).OnDelete(DeleteBehavior.Restrict); // Store.Order -> Store.Coupon
         modelBuilder.Entity<StoreCustomerOrderReference>().HasOne(x => x.Bank).WithMany().HasForeignKey(x => x.IdBank).OnDelete(DeleteBehavior.Restrict); // Store.Order -> Store.Bank
@@ -718,7 +705,7 @@ public sealed partial class ShopDbContext
         modelBuilder.Entity<StoreOrderAccessory>().HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdOrder); // Store.OrderAccessory -> Store.Order
         modelBuilder.Entity<StoreOrderAccessory>().HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict); // Store.OrderAccessory -> Warehouse.Product
         modelBuilder.Entity<StoreOrderAccessory>().HasOne<SalesPlanReference>().WithMany().HasForeignKey(x => x.IdSalesPlan).OnDelete(DeleteBehavior.Restrict); // Store.OrderAccessory -> Warehouse.SalesPlanReference
-        modelBuilder.Entity<StoreOrderAccessory>().HasOne<StoreAccessory>().WithMany().HasForeignKey(x => x.IdAccessory).OnDelete(DeleteBehavior.Restrict); // Store.OrderAccessory -> Store.Accessory
+        modelBuilder.Entity<StoreOrderAccessory>().HasOne(x => x.Accessory).WithMany().HasForeignKey(x => x.IdAccessory).OnDelete(DeleteBehavior.Restrict); // Store.OrderAccessory -> Store.Accessory
         modelBuilder.Entity<StorePaymentAttempt>().HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict); // Store.PaymentAttempt -> Store.PaymentAttemptStatus
         modelBuilder.Entity<AccountRecentSearch>().HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile); // Account.RecentSearch -> Account.Profile
         modelBuilder.Entity<ProductFeedback>().HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict); // Store.ProductFeedback -> Warehouse.Product

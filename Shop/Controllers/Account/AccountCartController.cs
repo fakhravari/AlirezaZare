@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Data.Application.Account.Contracts;
 using Shop.Data.Application.Store;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Services;
-using Shop.Models;
+using Shop.Data.Application.Store.Models;
 using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Domain.Store.Entities;
 
@@ -18,11 +19,11 @@ namespace Shop.Controllers.Account;
 [Route("api/account")]
 public sealed class AccountCartController : AccountApiControllerBase
 {
-    private readonly ISalesPlanSource plans;
+    private readonly ICheckoutSalesPlans plans;
     private readonly IProductPurchaseConfigurationSource purchaseConfigurations;
     private readonly IAccountDataCommands data;
 
-    public AccountCartController(ISalesPlanSource salesPlans, IProductPurchaseConfigurationSource configurations,
+    public AccountCartController(ICheckoutSalesPlans salesPlans, IProductPurchaseConfigurationSource configurations,
         IAccountDataCommands accountData) : base(accountData)
     {
         plans = salesPlans;

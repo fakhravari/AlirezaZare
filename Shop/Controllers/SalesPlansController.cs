@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Shop.Models;
+using Shop.Data.Application.Store.Models;
 using Shop.Services;
 using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Domain.Store.Entities;
@@ -9,7 +9,7 @@ namespace Shop.Controllers;
 [ApiController]
 [Route("api/store/sales-plans")]
 public sealed class SalesPlansController(
-    ISalesPlanSource plans,
+    ICheckoutSalesPlans plans,
     IProductPurchaseConfigurationSource purchaseConfigurations,
     IStorePublicPageData pageData) : ControllerBase
 {
@@ -236,7 +236,7 @@ public sealed class SalesPlansController(
             selected.Any(id => !allowedByOffer.Contains(id, StringComparer.Ordinal)))
             throw new InvalidDataException();
 
-        foreach (ProductAccessory accessory in product.Accessories)
+        foreach (ProductAccessoryRow accessory in product.Accessories)
         {
             if (!accessory.IsRequired && !selected.Contains(accessory.Key)) continue;
             if (!offer.AccessoryPriceAmounts.TryGetValue(accessory.Key, out decimal amount))

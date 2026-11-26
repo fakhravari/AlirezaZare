@@ -2,7 +2,7 @@
 
 وضعیت دیدگاه‌ها و پرسش‌های محصول با شناسهٔ عددی `statusId` در API و کلید خارجی `Store.ProductFeedback.IdStatus` نگهداری می‌شود؛ نام فارسی و انگلیسی از `Store.ProductFeedbackStatus` می‌آید. شناسهٔ ۱ در انتظار بررسی، ۲ تأییدشده، ۳ ردشده و ۴ حذف‌شده است. وضعیت حذف‌شده از ویترین عمومی و دیدگاه‌های کاربر کنار گذاشته می‌شود؛ مدیران همچنان می‌توانند آن را در پنل فیلتر و بازبینی کنند. انتقال داده و وضعیت اجرای migration در [راهنمای دیتابیس](../architecture/database.md) ثبت شده است.
 
-صفحه از `Shop/Controllers/ProductController.cs` به `Shop/Views/Product/Details.cshtml` می‌رود. دادهٔ کاتالوگ از `ICatalogSource` و گزینه‌ها/طرح‌ها از `ISalesPlanSource` می‌آیند. منطق تعاملی دیتیل در `Shop/wwwroot/shop/js/store/commerce.js` است؛ مالک‌های CSS و JS را در `tools/ui-owners.json` بیابید.
+صفحه از `Shop/Controllers/ProductController.cs` به `Shop/Views/Product/Details.cshtml` می‌رود. دادهٔ کاتالوگ از `ICatalogSource` و گزینه‌ها/طرح‌ها از قرارداد `ICheckoutSalesPlans` پیاده‌شده در `DatabaseSalesPlanSource` می‌آیند. منطق تعاملی دیتیل در `Shop/wwwroot/shop/js/store/commerce.js` است؛ مالک‌های CSS و JS را در `tools/ui-owners.json` بیابید.
 
 لوگوی برند و پرچم کشور در دیتیل از دادهٔ کاتالوگ می‌آیند؛ نشانی کامل CDN بدون تغییر و مسیر نسبی از ریشهٔ سایت بارگذاری می‌شود.
 

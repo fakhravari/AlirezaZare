@@ -73,12 +73,16 @@ test("invoice displays variant and accessory prices and the pre-discount subtota
 });
 
 test("order components use the saved accessory amount", async () => {
-  const account = await readFile("Shop/Controllers/AccountController.cs", "utf8");
-  const admin = await readFile("Admin/Areas/Store/Controllers/Api/StoreOrdersAdminApiController.cs", "utf8");
+  const account = await readFile("Data/Infrastructure/Account/AccountStateQueryService.cs", "utf8");
+  const admin = await readFile("Data/Infrastructure/Store/StoreOrdersAdminData.cs", "utf8");
   const query = await readFile("Shop/Features/Store/Database/Seeds/order-invoice-details-query.sql", "utf8");
-  assert.match(account, /PriceAmount = reference\.UnitAmountSnapshot/);
-  assert.match(account, /calculatedUnitAmount = reference\.PriceAmount/);
-  assert.match(admin, /PriceAmount = r\.UnitAmountSnapshot/);
-  assert.match(admin, /calculatedUnitAmount = r\.PriceAmount/);
-  assert.match(query, /reference\.AccessoryNameSnapshot[\s\S]*?reference\.UnitAmountSnapshot/);
+  const entity = await readFile("Data/Domain/Store/Entities/StorePriceVersion.cs", "utf8");
+  const migration = await readFile("Shop/Features/Store/Database/Migrations/176-order-accessory-price-relation.sql", "utf8");
+  const accessory = entity.slice(entity.indexOf("public sealed class StoreOrderAccessory"));
+  assert.doesNotMatch(accessory, /AccessoryNameSnapshot|UnitAmountSnapshot/);
+  assert.match(migration, /DROP COLUMN \[AccessoryNameSnapshot\], \[UnitAmountSnapshot\]/);
+  assert.match(account, /PriceAmount = referenceVersion\.version\.FinalPriceAmount/);
+  assert.match(account, /AccessoryName = referenceVersion\.reference\.Accessory\.Name/);
+  assert.match(admin, /x\.version\.FinalPriceAmount[\s\S]*?x\.x\.Accessory\.Name/);
+  assert.match(query, /accessory\.Name[\s\S]*?accessoryPrice\.FinalPriceAmount/);
 });

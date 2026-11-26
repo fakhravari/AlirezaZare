@@ -31,19 +31,12 @@ public sealed class StorePriceVersion
 /// <summary>Accessory selections shared by all lines of one order, product and sales plan.</summary>
 public sealed class StoreOrderAccessory
 {
+    public decimal Id { get; set; }
     public decimal IdOrder { get; set; }
     public decimal IdProduct { get; set; }
     public long IdSalesPlan { get; set; }
     public decimal IdAccessory { get; set; }
     public decimal IdPriceVersion { get; set; }
-    public string AccessoryNameSnapshot { get; set; } = "";
-    public decimal UnitAmountSnapshot { get; set; }
     public StorePriceVersion PriceVersion { get; set; } = null!;
-}
-
-/// <summary>Order line unit amount calculated from its price version references.</summary>
-public sealed class StoreOrderItemAmount
-{
-    public long IdOrderItem { get; set; }
-    public decimal UnitAmount { get; set; }
+    public StoreAccessory Accessory { get; set; } = null!;
 }

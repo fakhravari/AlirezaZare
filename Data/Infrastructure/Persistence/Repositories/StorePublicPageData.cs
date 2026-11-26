@@ -42,22 +42,13 @@ public sealed class StorePublicPageData(ShopDbContext dbContext) : IStorePublicP
             : new ManagedPageData(page.Id, page.PageKey, page.RoutePath, page.Title, page.Description, page.Sections);
     }
 
-    public async Task<IReadOnlyList<OrderTrackingData>> FindOrderTrackingCandidatesAsync(string orderNumber,
+    public async Task<IReadOnlyList<OrderTrackingData>> FindOrderTrackingCandidatesAsync(decimal orderId,
         CancellationToken cancellationToken) => await dbContext.StoreCustomerOrders
         .AsNoTracking()
-        .Where(order => order.OrderNumber == orderNumber || dbContext.StoreOrderPreviousNumbers
-            .AsNoTracking().Any(previous => previous.IdOrder == order.Id && previous.PreviousNumber == orderNumber))
-        .Select(order => new OrderTrackingData(order.Id, order.OrderNumber, order.StatusReference.Code,
+        .Where(order => order.Id == orderId)
+        .Select(order => new OrderTrackingData(order.Id, order.StatusReference.NameEn,
             order.StatusReference.NameFa, order.CreatedAtUtc, order.ShippingCarrier, order.ShippingTrackingCode,
-            order.AddressSnapshotJson))
-        .ToListAsync(cancellationToken);
-
-    public async Task<IReadOnlyList<OrderTrackingHistoryData>> ReadOrderTrackingHistoryAsync(decimal orderId,
-        CancellationToken cancellationToken) => await dbContext.StoreOrderShipmentTrackingHistories
-        .AsNoTracking()
-        .Where(history => history.IdOrder == orderId)
-        .OrderBy(history => history.ChangedAtUtc)
-        .Select(history => new OrderTrackingHistoryData(history.Carrier, history.TrackingCode, history.ChangedAtUtc))
+            order.Address.Phone))
         .ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<AssignedCouponData>> ReadAssignedCouponsAsync(long profileId,

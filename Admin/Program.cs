@@ -47,6 +47,9 @@ builder.Services.AddScoped<FtpMediaUploadService>();
 builder.Services.Configure<MvcOptions>(options => options.Filters.Add<AdminPermissionFilter>());
 
 builder.Services.AddShopDatabase(builder.Configuration);
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped(provider => provider.GetRequiredService<IHttpContextAccessor>().HttpContext!.User);
+builder.Services.AddAdminDataOperations();
 builder.Services.AddHostedService<AdminBootstrapper>();
 
 var app = builder.Build();
