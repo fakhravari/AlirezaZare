@@ -30,7 +30,7 @@ public sealed record ManagedPageData(long Id, string PageKey, string RoutePath, 
     IReadOnlyList<ManagedPageSectionData> Sections);
 public sealed record ManagedPageSectionData(long Id, string SectionKey, string? Heading, string? Body, int SortOrder);
 public sealed record OrderTrackingData(decimal Id, string StatusNameEn, string StatusName,
-    DateTime CreatedAtUtc, string? ShippingCarrier, string? ShippingTrackingCode, string Phone);
+    DateTime CreatedAtUtc, string Phone);
 public sealed record AssignedCouponData(string Id, string Code, int DiscountPercent, bool Enabled, DateOnly ExpiresOn,
     int UsageLimit);
 public sealed record ProfileGenderData(int Id, string Code, string Name);

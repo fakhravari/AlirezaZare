@@ -693,8 +693,6 @@
             }
             if (page.dataset.adminPage === "orders") {
                 if (["warehouse-confirmed", "in-transit", "shipped-to-post", "delivered"].includes(item.status)) {
-                    const tracking = document.createElement("button"); tracking.type = "button"; tracking.className = "btn btn-xs btn-default ms-1";
-                    tracking.dataset.orderTracking = String(index); tracking.textContent = "رهگیری"; actions.append(tracking);
                 }
                 const next = item.status === "warehouse-confirmed" ? [["in-transit", "ثبت ارسال"], ["shipped-to-post", "تحویل به پست"]]
                     : ["in-transit", "shipped-to-post"].includes(item.status) ? [["delivered", "ثبت تحویل"]] : [];
@@ -790,24 +788,41 @@
     }
 
     async function loadSliders(root) {
-        const container = root.querySelector("[data-media-library-items]");
         const status = root.querySelector("[data-media-library-status]");
         try {
             const slides = await ui.getJson("/api/admin/store/media/sliders");
-            container.replaceChildren();
+            const mobile = root.querySelector('[data-slider-items="mobile"]'), desktop = root.querySelector('[data-slider-items="desktop"]');
+            mobile.replaceChildren(); desktop.replaceChildren();
+            const makeCard = slide => {
+                const form = document.createElement("form"); form.className = "admin-slider-card"; form.dataset.sliderEdit = slide.id;
+                const image = document.createElement("img"); image.className = "admin-slider-card__preview"; image.src = slide.imageUrl || ""; image.alt = slide.title || "پیش‌نمایش بنر"; image.loading = "lazy";
+                const details = document.createElement("div"); details.className = "admin-slider-card__details";
+                const titleLabel = document.createElement("label"); titleLabel.className = "form-label"; titleLabel.textContent = "عنوان بنر";
+                const title = document.createElement("input"); title.className = "form-control"; title.name = "title"; title.value = slide.title || ""; title.maxLength = 200; title.required = true; titleLabel.append(title);
+                const urlLabel = document.createElement("label"); urlLabel.className = "form-label"; urlLabel.textContent = "نشانی مقصد";
+                const url = document.createElement("input"); url.className = "form-control"; url.name = "url"; url.value = slide.url || ""; url.maxLength = 1000; url.dir = "ltr"; url.required = true; urlLabel.append(url);
+                const placements = document.createElement("div"); placements.className = "admin-slider-card__placements";
+                for (const [name, labelText] of [["showOnMobile", "نمایش در موبایل"], ["showOnDesktop", "نمایش در دسکتاپ"]]) {
+                    const label = document.createElement("label"); label.className = "form-check form-switch";
+                    const checkbox = document.createElement("input"); checkbox.className = "form-check-input"; checkbox.type = "checkbox"; checkbox.name = name; checkbox.value = "true"; checkbox.checked = Boolean(slide[name]); checkbox.setAttribute("role", "switch");
+                    const text = document.createElement("span"); text.className = "form-check-label"; text.textContent = labelText; label.append(checkbox, text); placements.append(label);
+                }
+                const path = document.createElement("code"); path.className = "admin-media-path"; path.dir = "ltr"; path.textContent = slide.imagePath || "";
+                const actions = document.createElement("div"); actions.className = "admin-media-actions";
+                const save = document.createElement("button"); save.type = "submit"; save.className = "btn btn-primary btn-sm"; save.textContent = "ذخیره تغییرات";
+                const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-danger btn-sm"; remove.dataset.sliderDelete = ""; remove.dataset.adminConfirm = `بنر «${slide.title || "بدون عنوان"}» حذف شود؟`; remove.textContent = "حذف بنر";
+                actions.append(save, remove); details.append(titleLabel, urlLabel, placements, path, actions); form.append(image, details); return form;
+            };
             for (const slide of slides) {
-                const form = document.createElement("form");
-                form.className = "admin-media-card";
-                form.dataset.sliderEdit = slide.id;
-                form.innerHTML = '<img class="admin-media-preview" alt="" loading="lazy"><div class="admin-media-details"><label>عنوان<input name="title" class="form-control" required maxlength="200"></label><label>نشانی لینک<input name="url" class="form-control" dir="ltr" required maxlength="1000"></label><label><input data-admin-switch role="switch" name="showOnMobile" type="checkbox" value="true"> موبایل</label><label><input data-admin-switch role="switch" name="showOnDesktop" type="checkbox" value="true"> دسکتاپ</label><code class="admin-media-path" dir="ltr"></code><div class="admin-media-actions"><button class="btn btn-primary btn-sm" type="submit">ذخیره</button><button class="btn btn-danger btn-sm" type="button" data-slider-delete data-admin-confirm="این اسلاید از فروشگاه حذف شود؟">حذف</button></div></div>';
-                form.querySelector("img").src = slide.imageUrl || "";
-                form.querySelector("img").alt = slide.title;
-                form.elements.title.value = slide.title; form.elements.url.value = slide.url;
-                form.elements.showOnMobile.checked = slide.showOnMobile; form.elements.showOnDesktop.checked = slide.showOnDesktop;
-                form.querySelector("code").textContent = slide.imagePath;
-                container.append(form);
+                if (slide.showOnMobile) mobile.append(makeCard(slide));
+                if (slide.showOnDesktop) desktop.append(makeCard(slide));
             }
-            status.textContent = slides.length ? ui.formatNumber(slides.length) + " اسلاید" : "اسلایدی ثبت نشده است.";
+            for (const key of ["mobile", "desktop"]) {
+                const count = root.querySelector(`[data-slider-items="${key}"]`).querySelectorAll("[data-slider-edit]").length;
+                const countLabel = root.querySelector(`[data-slider-count="${key}"]`); countLabel.textContent = `${ui.formatNumber(count)} بنر`;
+                if (!count) { const empty = document.createElement("p"); empty.className = "admin-slider-empty"; empty.textContent = `هنوز بنری برای ${key === "mobile" ? "موبایل" : "دسکتاپ"} ثبت نشده است.`; root.querySelector(`[data-slider-items="${key}"]`).append(empty); }
+            }
+            status.textContent = `${ui.formatNumber(slides.length)} اسلاید ثبت‌شده · شمارش هر دستگاه جداگانه نمایش داده می‌شود.`;
         } catch (error) { status.textContent = error.message || "دریافت اسلایدها ناموفق بود."; }
     }
 
@@ -819,8 +834,10 @@
         body.set("showOnMobile", form.elements.showOnMobile.checked ? "true" : "false");
         body.set("showOnDesktop", form.elements.showOnDesktop.checked ? "true" : "false");
         body.set("__RequestVerificationToken", form.closest("[data-media-library]").querySelector('[data-media-library-token] [name="__RequestVerificationToken"]').value);
-        try { const result = await ui.getJson('/api/admin/store/media/sliders/' + encodeURIComponent(form.dataset.sliderEdit), { method: "POST", body }); ui.notify(result.message, "success"); }
+        const save = form.querySelector('[type="submit"]'); save.disabled = true;
+        try { const result = await ui.getJson('/api/admin/store/media/sliders/' + encodeURIComponent(form.dataset.sliderEdit), { method: "POST", body }); ui.notify(result.message, "success"); await loadSliders(form.closest("[data-media-library]")); }
         catch (error) { ui.notify(error.message || "ذخیره اسلاید ناموفق بود.", "danger"); }
+        finally { save.disabled = false; }
     });
     document.addEventListener("click", async event => {
         const button = event.target.closest("[data-slider-delete]");
@@ -1474,7 +1491,7 @@
                 const row = document.createElement("tr");
                 for (const value of [servicePageLabels[item.pageKey] || item.pageKey, item.title, item.routePath, ui.formatNumber(item.sectionCount), item.published ? "منتشرشده" : "پیش‌نویس"]) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); }
                 const actionCell = document.createElement("td"), edit = document.createElement("button");
-                edit.type = "button"; edit.className = "btn btn-sm btn-default"; edit.dataset.servicePageEdit = item.pageKey; edit.textContent = "ویرایش محتوا"; ui.withIcon(edit, "fa-pen-to-square"); actionCell.append(edit); row.append(actionCell); body.append(row);
+                edit.type = "button"; edit.className = "btn btn-sm btn-default"; edit.dataset.servicePageEdit = item.pageKey; edit.textContent = "ویرایش صفحه"; ui.withIcon(edit, "fa-pen-to-square"); actionCell.append(edit); row.append(actionCell); body.append(row);
             }
             statusNode.textContent = `${ui.formatNumber(pages.length)} خدمت در فهرست است.`;
         } else {
@@ -1485,7 +1502,14 @@
                 for (const value of [servicePageLabels[selectedKey] || selectedKey, item?.title || detail.title, ui.formatNumber(index + 1)]) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); }
                 const content = document.createElement("td"), heading = document.createElement("strong"), preview = document.createElement("div"); heading.textContent = section.heading || "(بدون عنوان)"; preview.className = "small text-muted text-truncate"; preview.textContent = (section.body || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim(); content.append(heading, preview); row.append(content);
                 const published = document.createElement("td"); published.textContent = detail.isPublished ? "منتشرشده" : "پیش‌نویس"; row.append(published);
-                const actionCell = document.createElement("td"), edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-sm btn-default"; edit.dataset.servicePageEdit = selectedKey; edit.textContent = "ویرایش خدمت"; ui.withIcon(edit, "fa-pen-to-square"); actionCell.append(edit); row.append(actionCell); body.append(row);
+                const actionCell = document.createElement("td"), actions = document.createElement("div"), edit = document.createElement("button"), remove = document.createElement("button"), up = document.createElement("button"), down = document.createElement("button"); actions.className = "d-flex flex-wrap gap-1";
+                edit.type = "button"; edit.className = "btn btn-sm btn-default"; edit.dataset.serviceSectionEdit = section.sectionKey; edit.dataset.servicePageKey = selectedKey; edit.textContent = "ویرایش"; ui.withIcon(edit, "fa-pen-to-square");
+                remove.type = "button"; remove.className = "btn btn-sm btn-danger"; remove.dataset.serviceSectionDelete = section.sectionKey; remove.dataset.servicePageKey = selectedKey; remove.dataset.adminConfirm = `ردیف «${section.heading || "بدون عنوان"}» حذف شود؟`;
+                remove.textContent = "حذف"; ui.withIcon(remove, "fa-trash-can");
+                if ((detail.sections || []).length <= 1) { remove.disabled = true; remove.title = "هر صفحه باید دست‌کم یک ردیف محتوا داشته باشد."; remove.removeAttribute("data-admin-confirm"); }
+                up.type = down.type = "button"; up.className = down.className = "btn btn-sm btn-default"; up.dataset.serviceSectionReorder = "up"; down.dataset.serviceSectionReorder = "down"; up.dataset.servicePageKey = down.dataset.servicePageKey = selectedKey; up.dataset.serviceSectionKey = down.dataset.serviceSectionKey = section.sectionKey;
+                up.disabled = index === 0; down.disabled = index === detail.sections.length - 1; up.title = "انتقال به بالا"; down.title = "انتقال به پایین"; up.setAttribute("aria-label", "انتقال ردیف به بالا"); down.setAttribute("aria-label", "انتقال ردیف به پایین"); ui.withIcon(up, "fa-arrow-up"); ui.withIcon(down, "fa-arrow-down");
+                actions.append(edit, remove, up, down); actionCell.append(actions); row.append(actionCell); body.append(row);
             });
             statusNode.textContent = `${servicePageLabels[selectedKey] || selectedKey} · ${ui.formatNumber((detail?.sections || []).length)} ردیف محتوا`;
         }
@@ -1552,11 +1576,7 @@
             const heading = document.createElement("input"); heading.id = headingId; heading.className = "form-control mb-3"; heading.maxLength = 300; heading.value = section.heading || ""; heading.dataset.sectionHeading = ""; heading.required = true;
             const bodyLabel = document.createElement("label"); bodyLabel.className = "form-label mb-1"; bodyLabel.htmlFor = bodyId; bodyLabel.textContent = "متن بخش";
             const body = document.createElement("textarea"); body.id = bodyId; body.className = "form-control mb-3"; body.rows = 5; body.maxLength = 20000; body.value = section.body || ""; body.dataset.sectionBody = ""; body.dataset.richEditor = ""; body.required = true;
-            const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-danger btn-sm align-self-start"; remove.dataset.serviceSectionRemove = ""; remove.textContent = "حذف بخش";
-            const moveUp = document.createElement("button"); moveUp.type = "button"; moveUp.className = "btn btn-default btn-sm me-1"; moveUp.dataset.serviceSectionMove = "up"; moveUp.textContent = "بالا";
-            const moveDown = document.createElement("button"); moveDown.type = "button"; moveDown.className = "btn btn-default btn-sm me-1"; moveDown.dataset.serviceSectionMove = "down"; moveDown.textContent = "پایین";
-            const actions = document.createElement("div"); actions.className = "d-flex flex-wrap gap-2 border-top pt-3"; actions.dataset.sectionActions = ""; actions.setAttribute("aria-label", `عملیات بخش ${index + 1}`); actions.append(moveUp, moveDown, remove);
-            card.append(legend, key, titleLabel, heading, bodyLabel, body, actions); container.append(card);
+            card.append(legend, key, titleLabel, heading, bodyLabel, body); container.append(card);
         });
         renumberEditorSections(container, "[data-service-section]", "[data-section-actions]");
     }
@@ -1623,15 +1643,6 @@
             renumberEditorSections(parent, "[data-mag-section]", ".admin-content-section-card__actions");
             return;
         }
-        const remove = event.target.closest("[data-service-section-remove]");
-        if (remove) { const container = remove.closest("[data-service-sections]"); remove.closest("[data-service-section]")?.remove(); renumberEditorSections(container, "[data-service-section]", "[data-section-actions]"); }
-        const move = event.target.closest("[data-service-section-move]");
-        if (move) {
-            const card = move.closest("[data-service-section]"), parent = card.parentElement;
-            if (move.dataset.serviceSectionMove === "up" && card.previousElementSibling) parent.insertBefore(card, card.previousElementSibling);
-            if (move.dataset.serviceSectionMove === "down" && card.nextElementSibling) parent.insertBefore(card.nextElementSibling, card);
-            renumberEditorSections(parent, "[data-service-section]", "[data-section-actions]");
-        }
     });
     document.addEventListener("change", async event => {
         const filter = event.target.closest("[data-service-page-filter]"); if (!filter) return;
@@ -1647,10 +1658,16 @@
     document.addEventListener("submit", event => {
         const form = event.target.closest("[data-service-page-editor]"); if (!form) return;
         event.preventDefault(); const root = document.querySelector("[data-service-pages]"), button = form.querySelector('[type="submit"]');
-        const sectionRows = [...form.querySelectorAll("[data-service-section]")];
-        const sections = sectionRows.map(row => ({ sectionKey: row.querySelector("[data-section-key]").value, heading: row.querySelector("[data-section-heading]").value, body: window.AdminRichEditor?.getValue(row.querySelector("[data-section-body]")) ?? row.querySelector("[data-section-body]").value }));
-        if (!sections.length) { ui.notify("هر صفحه باید دست‌کم یک بخش داشته باشد.", "danger"); return; }
         const pageKey = form.elements.pageKey.value;
+        const current = root?.__servicePageDetail;
+        if (!current || (root.__servicePageSelectedKey && root.__servicePageSelectedKey !== pageKey)) { ui.notify("اطلاعات صفحه تازه‌سازی نشده است؛ صفحه را دوباره باز کنید.", "danger"); return; }
+        let sections = [...(current.sections || [])];
+        if (form.dataset.servicePageEditMode === "section") {
+            const row = form.querySelector("[data-service-section]"), sectionKey = form.dataset.serviceEditSectionKey;
+            if (!row || !sectionKey) { ui.notify("ردیف انتخاب‌شده برای ویرایش پیدا نشد.", "danger"); return; }
+            const edited = { sectionKey, heading: row.querySelector("[data-section-heading]").value.trim(), body: (window.AdminRichEditor?.getValue(row.querySelector("[data-section-body]")) ?? row.querySelector("[data-section-body]").value).trim() };
+            sections = sections.map(section => section.sectionKey === sectionKey ? edited : section);
+        }
         const body = { title: form.elements.title.value, description: form.elements.description.value, isPublished: form.elements.isPublished.checked, sections };
         const token = form.querySelector('[name="__RequestVerificationToken"]')?.value || ""; button.disabled = true;
         void ui.getJson(`${root.dataset.api}/${encodeURIComponent(pageKey)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
@@ -1658,7 +1675,7 @@
             .catch(error => ui.notify(error.message || "ذخیرهٔ صفحه ناموفق بود.", "danger")).finally(() => { button.disabled = false; });
     });
     document.addEventListener("click", async event => {
-        const button = event.target.closest("[data-service-section-create], [data-service-section-save], [data-service-section-cancel], [data-service-page-edit], [data-mag-create], [data-mag-action]"); if (!button) return;
+        const button = event.target.closest("[data-service-section-create], [data-service-section-save], [data-service-section-cancel], [data-service-section-delete], [data-service-section-reorder], [data-service-page-edit], [data-mag-create], [data-mag-action]"); if (!button) return;
         if (button.hasAttribute("data-service-section-create")) {
             const root = button.closest("[data-service-pages]"); if (!root?.__servicePageSelectedKey || !root.__servicePageDetail) return;
             if (root.querySelector("[data-service-new-section]")) { root.querySelector("[data-service-new-heading]")?.focus(); return; }
@@ -1679,6 +1696,35 @@
                 const result = await ui.getJson(`${root.dataset.api}/${encodeURIComponent(key)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify({ title: page.title, description: page.description || "", isPublished: page.isPublished, sections }) });
                 ui.notify(result.message || "ردیف محتوا ذخیره شد.", "success"); await loadServicePages(key);
             } catch (error) { ui.notify(error.message || "ذخیرهٔ ردیف محتوا ناموفق بود.", "danger"); button.disabled = false; }
+            return;
+        }
+        if (button.hasAttribute("data-service-section-delete")) {
+            const root = button.closest("[data-service-pages]"), key = button.dataset.servicePageKey, page = root?.__servicePageDetail;
+            if (!root || !page || !key || button.disabled) return;
+            const sections = (page.sections || []).filter(section => section.sectionKey !== button.dataset.serviceSectionDelete);
+            if (sections.length === (page.sections || []).length) return;
+            if (!sections.length) { ui.notify("هر صفحه باید دست‌کم یک ردیف محتوا داشته باشد.", "danger"); return; }
+            const form = document.querySelector("[data-service-page-editor]"), token = form?.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            button.disabled = true;
+            try {
+                const result = await ui.getJson(`${root.dataset.api}/${encodeURIComponent(key)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify({ title: page.title, description: page.description || "", isPublished: page.isPublished, sections }) });
+                ui.notify(result.message || "ردیف محتوا حذف شد.", "success"); await loadServicePages(key);
+            } catch (error) { ui.notify(error.message || "حذف ردیف محتوا ناموفق بود.", "danger"); button.disabled = false; }
+            return;
+        }
+        if (button.hasAttribute("data-service-section-reorder")) {
+            const root = button.closest("[data-service-pages]"), key = button.dataset.servicePageKey, page = root?.__servicePageDetail;
+            if (!root || !page || !key || button.disabled) return;
+            const sections = [...(page.sections || [])], from = sections.findIndex(section => section.sectionKey === button.dataset.serviceSectionKey);
+            const to = from + (button.dataset.serviceSectionReorder === "up" ? -1 : 1);
+            if (from < 0 || to < 0 || to >= sections.length) return;
+            [sections[from], sections[to]] = [sections[to], sections[from]];
+            button.disabled = true;
+            const form = document.querySelector("[data-service-page-editor]"), token = form?.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            try {
+                const result = await ui.getJson(`${root.dataset.api}/${encodeURIComponent(key)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify({ title: page.title, description: page.description || "", isPublished: page.isPublished, sections }) });
+                ui.notify(result.message || "ترتیب ردیف‌ها ذخیره شد.", "success"); await loadServicePages(key);
+            } catch (error) { ui.notify(error.message || "تغییر ترتیب ناموفق بود.", "danger"); button.disabled = false; }
             return;
         }
         if (button.hasAttribute("data-service-page-edit")) {
@@ -1883,24 +1929,6 @@
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("category-editor-modal")).show();
             }).catch(error => ui.notify(error.message || "دریافت دسته‌ها ناموفق بود.", "danger"))
                 .finally(() => { categoryEdit.disabled = false; });
-            return;
-        }
-        const trackingButton = event.target.closest("[data-order-tracking]");
-        if (trackingButton) {
-            const page = trackingButton.closest('[data-admin-page="orders"]');
-            const item = page?.__adminRows?.[Number(trackingButton.dataset.orderTracking)];
-            const form = document.querySelector("[data-order-tracking-form]");
-            if (!item || !form || trackingButton.disabled) return;
-            trackingButton.disabled = true;
-            void ui.getJson(`/api/admin/store/orders/${encodeURIComponent(item.id)}`).then(order => {
-                if (!page.isConnected || !form.isConnected) return;
-                form.reset(); form.elements.id.value = order.id;
-                form.elements.carrier.value = order.shippingCarrier || ""; form.elements.trackingCode.value = order.shippingTrackingCode || "";
-                form.__expected = { expectedCarrier: order.shippingCarrier, expectedTrackingCode: order.shippingTrackingCode };
-                form.querySelector("[data-order-tracking-number]").textContent = `سفارش ${order.orderNumber}`;
-                window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("order-tracking-modal")).show();
-            }).catch(error => ui.notify(error.message || "دریافت اطلاعات سفارش ناموفق بود.", "danger"))
-                .finally(() => { trackingButton.disabled = false; });
             return;
         }
         const productCreate = event.target.closest("[data-product-create]");
@@ -2289,7 +2317,6 @@
                         "جمع محاسبه‌شده از نسخه‌های قیمت": order.calculatedItemSubtotal,
                         ...(order.hasItemSubtotalMismatch ? { "هشدار مبلغ": "جمع اقلام با مبلغ ثبت‌شده سفارش یکسان نیست؛ قبل از اقدام، سوابق سفارش را بررسی کنید." } : {}),
                         "شناسه حواله": order.idVoucher || "ثبت نشده",
-                        "شرکت حمل": order.shippingCarrier || "ثبت نشده", "کد رهگیری": order.shippingTrackingCode || "ثبت نشده",
                         "نشانی ثبت‌شده": Object.values(address).filter(value => typeof value === "string" && value).join("، "),
                         "اجزای قیمت‌گذاری": components.map(component => ({
                             "کالا": component.productName,
@@ -2309,7 +2336,7 @@
                         }))
                     }, { layout: "order", groups: [
                         { title: "خلاصه سفارش", keys: ["شماره سفارش", "مشتری", "وضعیت", "مبلغ تومان", "جمع ثبت‌شده پیش از تخفیف", "جمع اجزا", "تخفیف کوپن", "جمع اجزا پس از کوپن", "جمع محاسبه‌شده از نسخه‌های قیمت", "اختلاف جمع اجزا (تومان)", "اختلاف مبلغ نهایی (تومان)", "هشدار مبلغ"] },
-                        { title: "تحویل و نشانی", keys: ["شناسه حواله", "شرکت حمل", "کد رهگیری", "نشانی ثبت‌شده"] },
+                        { title: "تحویل و نشانی", keys: ["شناسه حواله", "نشانی ثبت‌شده"] },
                         { title: "جزئیات قیمت هر جزء", keys: ["اجزای قیمت‌گذاری"] }
                     ] });
                 }).catch(error => ui.notify(error.message || "دریافت جزئیات سفارش ناموفق بود.", "danger"))
@@ -2386,19 +2413,6 @@
             void ui.getJson(`/api/admin/store/catalog/categories/manage${original ? `/${encodeURIComponent(original)}` : ""}`, { method: original ? "PUT" : "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
                 .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("category-editor-modal"))?.hide(); const page = document.querySelector('[data-admin-section="categories"]'); if (page) return loadCatalog(page, Number(page.dataset.adminPageNumber || 1)); })
                 .catch(error => ui.notify(error.message || "ذخیرهٔ دسته ناموفق بود.", "danger"))
-                .finally(() => { save.disabled = false; });
-            return;
-        }
-        const trackingForm = event.target.closest("[data-order-tracking-form]");
-        if (trackingForm) {
-            event.preventDefault();
-            const save = trackingForm.querySelector('[type="submit"]'); if (save.disabled || !trackingForm.__expected) return;
-            const token = trackingForm.querySelector('[name="__RequestVerificationToken"]')?.value || "";
-            const body = { ...trackingForm.__expected, carrier: trackingForm.elements.carrier.value, trackingCode: trackingForm.elements.trackingCode.value };
-            save.disabled = true;
-            void ui.getJson(`/api/admin/store/orders/${encodeURIComponent(trackingForm.elements.id.value)}/tracking`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
-                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("order-tracking-modal"))?.hide(); })
-                .catch(error => ui.notify(error.message || "ثبت رهگیری ناموفق بود.", "danger"))
                 .finally(() => { save.disabled = false; });
             return;
         }

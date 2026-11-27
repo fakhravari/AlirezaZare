@@ -45,21 +45,3 @@
         </div>
     </section>
 </div>
-<div class="modal fade" id="order-tracking-modal" tabindex="-1" aria-labelledby="order-tracking-title" aria-hidden="true">
-    <div class="modal-dialog">
-        <form class="modal-content" data-order-tracking-form data-admin-confirm="اطلاعات رهگیری سفارش ذخیره شود؟">
-            @Html.AntiForgeryToken()<input type="hidden" name="id"/>
-            <div class="modal-header">
-                <h2 class="modal-title fs-5" id="order-tracking-title">اطلاعات رهگیری سفارش</h2><button class="btn-close ms-0" type="button" data-bs-dismiss="modal" aria-label="بستن"></button>
-            </div>
-            <div class="modal-body">
-                <p data-order-tracking-number></p>
-                <label class="form-label" for="order-carrier">شرکت حمل</label><input id="order-carrier" name="carrier" class="form-control mb-3" maxlength="100" required/>
-                <label class="form-label" for="order-tracking-code">کد رهگیری</label><input id="order-tracking-code" name="trackingCode" class="form-control" maxlength="100" required/>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button>
-            </div>
-        </form>
-    </div>
-</div>

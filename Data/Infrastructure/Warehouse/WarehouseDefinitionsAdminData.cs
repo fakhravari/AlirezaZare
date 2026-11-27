@@ -72,10 +72,7 @@ public sealed class WarehouseDefinitionsAdminData(ShopDbContext db, System.Secur
             .ToListAsync(cancellationToken)),
         "variants" => await GetVariantsAsync(cancellationToken),
         "lookups" => await GetLookupsAsync(cancellationToken),
-        "stock-owners" => Success(await db.SalesPlanReferences.AsNoTracking().OrderBy(x => x.DisplayName)
-            .Select(x => new
-                { x.Id, x.StoreSalesPlanKey, x.DisplayName, x.IdStockOwnerType, x.Code, x.PlanType, x.IsActive })
-            .ToListAsync(cancellationToken)),
+        "stock-owners" => await GetStockOwnersAsync(cancellationToken),
         "sales-plan-mapping" => await GetSalesPlanMappingAsync(cancellationToken),
         _ => Missing()
     };
@@ -971,7 +968,8 @@ public sealed class WarehouseDefinitionsAdminData(ShopDbContext db, System.Secur
             {
                 PartyInput? input = Parse<PartyInput>(payload);
                 if (input is null || !ValidCodeName(input.Name, input.Name, 200, 200)
-                                  || input.PartyType is not ("Person" or "Organization" or "Warehouse" or "Other"))
+                                  || input.PartyType is not ("Person" or "Organization" or "Warehouse" or "Other")
+                                  || (input.ExternalPartyKey?.Trim().Length ?? 0) > 128)
                     return Validation("نوع و نام مرجع معتبر نیست.");
 
                 long? linkedWarehouse = input.PartyType == "Warehouse" ? input.WarehouseId : null;
@@ -980,6 +978,19 @@ public sealed class WarehouseDefinitionsAdminData(ShopDbContext db, System.Secur
                                                            x => x.Id == linkedWarehouse && x.IsActive,
                                                            cancellationToken)))
                     return Validation("برای مرجع انبار، انبار فعال را انتخاب کنید.");
+
+                string? externalPartyKey = string.IsNullOrWhiteSpace(input.ExternalPartyKey)
+                    ? null
+                    : input.ExternalPartyKey.Trim();
+                if (linkedWarehouse.HasValue && await db.WarehouseParties.AnyAsync(
+                        party => party.IdWarehouse == linkedWarehouse.Value && (!id.HasValue || party.Id != id.Value),
+                        cancellationToken))
+                    return Conflict(new { detail = "برای این انبار قبلاً مرجع ثبت شده است؛ همان مرجع را ویرایش کنید." });
+
+                if (externalPartyKey is not null && await db.WarehouseParties.AnyAsync(
+                        party => party.ExternalPartyKey == externalPartyKey && (!id.HasValue || party.Id != id.Value),
+                        cancellationToken))
+                    return Conflict(new { detail = "این شناسهٔ بیرونی قبلاً برای مرجع دیگری ثبت شده است." });
 
                 if (linkedWarehouse.HasValue &&
                     !await CanAccessWarehouseAsync(linkedWarehouse.Value, cancellationToken)) return Denied();
@@ -994,9 +1005,7 @@ public sealed class WarehouseDefinitionsAdminData(ShopDbContext db, System.Secur
 
                 entity.Name = input.Name.Trim();
                 entity.PartyType = input.PartyType;
-                entity.ExternalPartyKey = string.IsNullOrWhiteSpace(input.ExternalPartyKey)
-                    ? null
-                    : input.ExternalPartyKey.Trim();
+                entity.ExternalPartyKey = externalPartyKey;
                 entity.IdWarehouse = linkedWarehouse;
                 entity.IsActive = input.IsActive;
                 entity.UpdatedAtUtc = DateTime.UtcNow;
@@ -1539,6 +1548,36 @@ public sealed class WarehouseDefinitionsAdminData(ShopDbContext db, System.Secur
         return Success(new { siteWarehouseId = siteId, companies, warehouses, plans, links });
     }
 
+    private async Task<AdminOperationResult> GetStockOwnersAsync(CancellationToken cancellationToken)
+    {
+        var owners = await db.SalesPlanReferences.AsNoTracking().OrderBy(x => x.DisplayName)
+            .Select(x => new
+                { x.Id, x.StoreSalesPlanKey, x.DisplayName, x.IdStockOwnerType, x.Code, x.PlanType, x.IsActive })
+            .ToListAsync(cancellationToken);
+        var warehouseLinks = await db.WarehouseStockOwners.AsNoTracking()
+            .Join(db.Warehouses.AsNoTracking(), link => link.IdWarehouse, warehouse => warehouse.Id,
+                (link, warehouse) => new { link.IdStockOwner, warehouse.IdCompany, warehouse.Name })
+            .Join(db.Companies.AsNoTracking(), link => link.IdCompany, company => company.Id,
+                (link, company) => new { link.IdStockOwner, link.Name, CompanyName = company.Name })
+            .OrderBy(link => link.CompanyName).ThenBy(link => link.Name)
+            .ToListAsync(cancellationToken);
+        var labelsByOwner = warehouseLinks.GroupBy(link => link.IdStockOwner)
+            .ToDictionary(group => group.Key,
+                group => string.Join("، ", group.Select(link => $"{link.CompanyName} / {link.Name}")));
+
+        return Success(owners.Select(owner => new
+        {
+            owner.Id,
+            owner.StoreSalesPlanKey,
+            owner.DisplayName,
+            WarehouseLabel = labelsByOwner.GetValueOrDefault(owner.Id),
+            owner.IdStockOwnerType,
+            owner.Code,
+            owner.PlanType,
+            owner.IsActive
+        }).ToList());
+    }
+
     private async Task<AdminOperationResult> GetLookupsAsync(CancellationToken cancellationToken)
     {
         IQueryable<Company> companyQuery = db.Companies.AsNoTracking().Where(x => x.IsActive);
@@ -1607,7 +1646,7 @@ public sealed class WarehouseDefinitionsAdminData(ShopDbContext db, System.Secur
         var plans = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DisplayName)
             .Select(x => new { x.Id, x.DisplayName, x.StoreSalesPlanKey }).ToListAsync(cancellationToken);
         var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive && x.IdParent != null)
-            .OrderBy(x => x.NameFa).Select(x => new { x.Id, name = x.NameFa, Name = x.NameFa, x.NameEn })
+            .OrderBy(x => x.NameFa).Select(x => new { x.Id, Name = x.NameFa, x.NameEn })
             .ToListAsync(cancellationToken);
         var products = await db.Products
             .AsNoTracking()

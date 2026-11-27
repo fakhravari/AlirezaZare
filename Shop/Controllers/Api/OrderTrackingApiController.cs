@@ -36,9 +36,7 @@ public sealed class OrderTrackingApiController(IStorePublicPageData pageData) : 
             orderNumber = order.Id.ToString(CultureInfo.InvariantCulture),
             status = StoreOrderStatusNames.CodeFromNameEn(order.StatusNameEn),
             statusName = order.StatusName,
-            createdAtUtc = DateTime.SpecifyKind(order.CreatedAtUtc, DateTimeKind.Utc),
-            shippingCarrier = order.ShippingCarrier,
-            shippingTrackingCode = order.ShippingTrackingCode
+            createdAtUtc = DateTime.SpecifyKind(order.CreatedAtUtc, DateTimeKind.Utc)
         });
     }
 

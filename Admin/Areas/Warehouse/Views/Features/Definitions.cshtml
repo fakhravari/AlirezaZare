@@ -56,25 +56,14 @@
         @if (Model.FeatureId == "variant-names")
         {
             <section class="panel panel-inverse">
-                <div class="panel-heading">
+                <div class="panel-heading d-flex align-items-center justify-content-between">
                     <h2 class="panel-title">تنوع محصول</h2>
+                    <button type="button" class="btn btn-primary btn-sm" data-variant-name-create hidden="@(!User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Create"))">
+                        <i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن نام
+                    </button>
                 </div>
                 <div class="panel-body">
-                    <form class="row g-2 align-items-end mb-3" data-variant-name-form>
-                        <input type="hidden" name="id"/>
-                        <div class="col-12 col-md-4">
-                            <label class="form-label" for="variant-name-parent">والد</label>
-                            <select class="form-select" id="variant-name-parent" name="idParent">
-                                <option value="">ریشه</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <label class="form-label" for="variant-name-label">نام</label><input class="form-control" id="variant-name-label" name="name" maxlength="300" required/>
-                        </div>
-                        <div class="col-12 col-md-4 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">ذخیرهٔ نام</button><button type="button" class="btn btn-default" data-variant-name-cancel hidden>انصراف</button>
-                        </div>
-                    </form>
+                    <div class="admin-data-status small text-muted mb-2" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
                     <div class="admin-permission-tree overflow-auto border rounded" data-variant-name-tree aria-label="درخت تنوع محصول"></div>
                 </div>
             </section>
@@ -134,6 +123,17 @@
                             </select>
                         </div>
                     }
+                    @if (Model.FeatureId == "stock-owners")
+                    {
+                        <div class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+                            <label class="visually-hidden" for="stock-owner-type-filter">فیلتر بر اساس نوع</label>
+                            <select class="form-select" id="stock-owner-type-filter" data-stock-owner-type-filter>
+                                <option value="">همهٔ انواع</option>
+                                <option value="2">مالک</option>
+                                <option value="1">طرح فروش</option>
+                            </select>
+                        </div>
+                    }
                     <div class="admin-data-status small text-muted" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
                     @if (Model.FeatureId == "units")
                     {
@@ -175,6 +175,30 @@
         }
     }
 </div>
+@if (Model.FeatureId == "variant-names")
+{
+    <div class="modal fade" id="variant-name-modal" tabindex="-1" aria-labelledby="variant-name-modal-title" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" data-variant-name-form>
+                @Html.AntiForgeryToken()<input type="hidden" name="id"/>
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="variant-name-modal-title" data-variant-name-modal-title>افزودن نام تنوع</h2>
+                    <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label" for="variant-name-parent">والد</label>
+                    <select class="form-select mb-3" id="variant-name-parent" name="idParent"><option value="">ریشه</option></select>
+                    <label class="form-label" for="variant-name-label">نام</label>
+                    <input class="form-control" id="variant-name-label" name="name" maxlength="300" required/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn btn-primary">ذخیرهٔ نام</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
 <div class="modal fade" id="admin-definition-modal" tabindex="-1" aria-labelledby="admin-definition-title" aria-hidden="true">
     <div class="modal-dialog">
         <form class="modal-content" data-definition-form data-admin-confirm="تعریف انبار ذخیره شود؟">

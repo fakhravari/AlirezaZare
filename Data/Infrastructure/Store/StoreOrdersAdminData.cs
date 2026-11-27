@@ -27,27 +27,6 @@ public sealed class StoreOrdersAdminData(ShopDbContext db) : IStoreOrdersAdminDa
             StoreOrderStatusNames.CodeFromNameEn(x.NameEn), x.NameFa, x.NameEn)).ToArray();
     }
 
-    public async Task<bool> UpdateTrackingAsync(decimal id, string carrier, string trackingCode,
-        string? expectedCarrier, string? expectedTrackingCode, CancellationToken ct)
-    {
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
-        var order = await db.StoreCustomerOrders.Include(x => x.StatusReference)
-            .SingleOrDefaultAsync(x => x.Id == id, ct);
-        if (order is null || order.StatusReference.NameEn is not
-                (StoreOrderStatusNames.WarehouseConfirmed or StoreOrderStatusNames.InTransit or
-                    StoreOrderStatusNames.ShippedToPost or StoreOrderStatusNames.Delivered) ||
-            order.IdVoucher is null ||
-            !await db.StorePaymentAttempts.AnyAsync(p => p.IdOrder == id &&
-                p.StatusReference.Code == "verified" && p.Amount == order.TotalAmount, ct) ||
-            order.ShippingCarrier != expectedCarrier || order.ShippingTrackingCode != expectedTrackingCode)
-            return false;
-        order.ShippingCarrier = carrier;
-        order.ShippingTrackingCode = trackingCode;
-        await db.SaveChangesAsync(ct);
-        await transaction.CommitAsync(ct);
-        return true;
-    }
-
     public async Task<ShippingStatusUpdateStatus> UpdateShippingStatusAsync(decimal id, string expectedStatus,
         string status, CancellationToken ct)
     {
@@ -122,7 +101,6 @@ public sealed class StoreOrdersAdminData(ShopDbContext db) : IStoreOrdersAdminDa
                 CouponDiscountAmount = x.CouponDiscountAmount, CreatedAtUtc = x.CreatedAtUtc,
                 CustomerName = (p.FirstName + " " + p.LastName).Trim(), IdVoucher = x.IdVoucher,
                 IdAddress = x.IdAddress,
-                ShippingCarrier = x.ShippingCarrier, ShippingTrackingCode = x.ShippingTrackingCode,
                 AddressJson = "{}"
             }).SingleOrDefaultAsync(ct);
         if (order is null) return null;

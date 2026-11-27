@@ -126,8 +126,6 @@ public sealed class StoreCustomerOrderReference
     public AccountAddress Address { get; set; } = null!;
     public long IdBank { get; set; }
     public StoreBank Bank { get; set; } = null!;
-    public string? ShippingCarrier { get; set; }
-    public string? ShippingTrackingCode { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public decimal? IdVoucher { get; set; }
     public ICollection<StoreCustomerOrderItem> Items { get; set; } = new List<StoreCustomerOrderItem>();

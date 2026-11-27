@@ -277,8 +277,6 @@ public sealed class AccountStateQueryService(ShopDbContext db) : IAccountStateQu
                 x.Id,
                 StatusNameEn = x.StatusReference.NameEn,
                 StatusName = x.StatusReference.NameFa,
-                x.ShippingCarrier,
-                ShippingTrackingCode = x.ShippingTrackingCode,
                 PaymentMethod = x.Bank.Code,
                 Address = new
                 {
@@ -460,8 +458,6 @@ public sealed class AccountStateQueryService(ShopDbContext db) : IAccountStateQu
                 order.StatusName,
                 order.PaymentMethod,
                 order.Address,
-                order.ShippingCarrier,
-                shippingTrackingCode = order.ShippingTrackingCode,
                 createdAtUtc = AsUtc(order.CreatedAtUtc),
                 order.ItemCount,
                 order.TotalAmount,

@@ -109,9 +109,14 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const selectedSalesPlanId = unavailableSpecialPlan
                 ? defaultPlan?.id || "regular"
                 : requestedPlanId || (defaultPlan && planIsSelectable(defaultPlan) ? defaultPlan.id : fallbackPlan?.id || "regular");
+            const hasInventoryVariantPrice = (inventoryVariant) => {
+                const amount = inventoryVariant?.priceBySalesPlan?.[selectedSalesPlanId];
+                return amount !== null && amount !== undefined && Number.isFinite(Number(amount));
+            };
             const allInventoryVariants = (salesPlans.inventoryVariants || []).filter((variant) => variant.productId === p.id);
             const hasWarehouseVariants = allInventoryVariants.length > 0;
-            const inventoryVariants = allInventoryVariants.filter((variant) => !variant.disabledSalesPlanIds?.includes(selectedSalesPlanId))
+            const inventoryVariants = allInventoryVariants.filter((variant) =>
+                !variant.disabledSalesPlanIds?.includes(selectedSalesPlanId) && hasInventoryVariantPrice(variant))
                 .sort((left, right) => Number(right.isDefault === true) - Number(left.isDefault === true));
             const inventorySelections = {};
             const inventoryVariantAttributes = (variant) => Array.isArray(variant.attributes) ? variant.attributes : [];
@@ -168,10 +173,6 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 : null;
             const requestedPlanUnavailable = Boolean(requestedPlanId && !requestedPlan);
             const selectedOffer = () => planOffers.find((offer) => offer.salesPlanId === selectedSalesPlanId);
-            const hasInventoryVariantPrice = (inventoryVariant) => {
-                const amount = inventoryVariant?.priceBySalesPlan?.[selectedSalesPlanId];
-                return amount !== null && amount !== undefined && Number.isFinite(Number(amount));
-            };
             const priceForInventoryVariant = (inventoryVariant) => {
                 const offer = selectedOffer();
                 const variantPrice = inventoryVariant?.priceBySalesPlan?.[selectedSalesPlanId];

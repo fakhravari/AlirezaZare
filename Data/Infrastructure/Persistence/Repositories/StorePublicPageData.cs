@@ -47,8 +47,7 @@ public sealed class StorePublicPageData(ShopDbContext dbContext) : IStorePublicP
         .AsNoTracking()
         .Where(order => order.Id == orderId)
         .Select(order => new OrderTrackingData(order.Id, order.StatusReference.NameEn,
-            order.StatusReference.NameFa, order.CreatedAtUtc, order.ShippingCarrier, order.ShippingTrackingCode,
-            order.Address.Phone))
+            order.StatusReference.NameFa, order.CreatedAtUtc, order.Address.Phone))
         .ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<AssignedCouponData>> ReadAssignedCouponsAsync(long profileId,

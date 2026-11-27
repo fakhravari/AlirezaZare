@@ -16,25 +16,6 @@ public sealed class StoreOrdersAdminApiController(IStoreOrdersAdminData orderDat
     public async Task<IActionResult> Statuses(CancellationToken cancellationToken) =>
         Ok(await orderData.ReadStatusesAsync(cancellationToken));
 
-    [HttpPut("{id:long}/tracking")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateTracking(long id, [FromBody] TrackingInput input,
-        CancellationToken cancellationToken)
-    {
-        string carrier = input.Carrier?.Trim() ?? "", code = input.TrackingCode?.Trim() ?? "";
-        if (id <= 0 || carrier.Length is < 1 or > 100 || code.Length is < 1 or > 100 ||
-            carrier.Any(char.IsControl) || code.Any(char.IsControl) ||
-            (input.ExpectedCarrier?.Length ?? 0) > 100 || (input.ExpectedTrackingCode?.Length ?? 0) > 100)
-            return BadRequest(new { title = "شرکت حمل یا کد رهگیری معتبر نیست." });
-
-        bool updated = await orderData.UpdateTrackingAsync(id, carrier, code, input.ExpectedCarrier,
-            input.ExpectedTrackingCode, cancellationToken);
-        if (!updated)
-            return Conflict(new { title = "اطلاعات سفارش تغییر کرده یا سفارش شرایط ثبت رهگیری را ندارد." });
-
-        return Ok(new { message = "اطلاعات رهگیری ثبت شد." });
-    }
-
     [HttpPut("{id:long}/shipping-status")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateShippingStatus(long id, [FromBody] ShippingStatusInput input,
@@ -101,9 +82,4 @@ public sealed class StoreOrdersAdminApiController(IStoreOrdersAdminData orderDat
     }
     public sealed record ShippingStatusInput(string? ExpectedStatus, string? Status);
 
-    public sealed record TrackingInput(
-        string? Carrier,
-        string? TrackingCode,
-        string? ExpectedCarrier,
-        string? ExpectedTrackingCode);
 }

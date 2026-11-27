@@ -3,8 +3,6 @@ namespace Shop.Data.Application.Store.Contracts;
 public interface IStoreOrdersAdminData
 {
     Task<IReadOnlyList<OrderStatusData>> ReadStatusesAsync(CancellationToken cancellationToken);
-    Task<bool> UpdateTrackingAsync(decimal orderId, string carrier, string trackingCode, string? expectedCarrier,
-        string? expectedTrackingCode, CancellationToken cancellationToken);
     Task<ShippingStatusUpdateStatus> UpdateShippingStatusAsync(decimal orderId, string expectedStatus, string status,
         CancellationToken cancellationToken);
     Task<OrderListData> ReadOrdersAsync(string search, string status, DateTime? fromUtc, DateTime? untilUtc,
@@ -26,8 +24,6 @@ public sealed class OrderDetailsData : OrderListRowDataBase
     public decimal CalculatedItemSubtotal { get; set; }
     public bool HasItemSubtotalMismatch { get; set; }
     public decimal? IdVoucher { get; set; }
-    public string? ShippingCarrier { get; set; }
-    public string? ShippingTrackingCode { get; set; }
     public string AddressJson { get; set; } = "{}";
     public string ItemsJson { get; set; } = "[]";
     public string ComponentsJson { get; set; } = "[]";

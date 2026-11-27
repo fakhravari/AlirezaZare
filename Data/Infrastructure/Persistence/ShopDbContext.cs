@@ -1024,12 +1024,6 @@ public partial class ShopDbContext : DbContext
                 .HasColumnType("int");
             entity.Property(e => e.IdVoucher)
                 .HasColumnType("numeric(30,0)");
-            entity.Property(e => e.ShippingCarrier)
-                .HasColumnType("nvarchar(100)")
-                .HasMaxLength(100);
-            entity.Property(e => e.ShippingTrackingCode)
-                .HasColumnType("nvarchar(100)")
-                .HasMaxLength(100);
             entity.Property(e => e.SubtotalAmount)
                 .HasColumnType("decimal(19,0)")
                 .ValueGeneratedOnAdd()
