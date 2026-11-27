@@ -1478,11 +1478,13 @@
             }
             statusNode.textContent = `${ui.formatNumber(pages.length)} خدمت در فهرست است.`;
         } else {
-            setServiceTableHead(root, ["خدمت", "عنوان صفحه", "ردیف", "عنوان بخش", "وضعیت صفحه", "عملیات"]);
+            setServiceTableHead(root, ["خدمت", "عنوان صفحه", "ردیف", "محتوای بخش", "وضعیت صفحه", "عملیات"]);
             const item = pages.find(page => page.pageKey === selectedKey), detail = root.__servicePageDetail;
             (detail?.sections || []).forEach((section, index) => {
                 const row = document.createElement("tr");
-                for (const value of [servicePageLabels[selectedKey] || selectedKey, item?.title || detail.title, ui.formatNumber(index + 1), section.heading || "(بدون عنوان)", detail.isPublished ? "منتشرشده" : "پیش‌نویس"]) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); }
+                for (const value of [servicePageLabels[selectedKey] || selectedKey, item?.title || detail.title, ui.formatNumber(index + 1)]) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); }
+                const content = document.createElement("td"), heading = document.createElement("strong"), preview = document.createElement("div"); heading.textContent = section.heading || "(بدون عنوان)"; preview.className = "small text-muted text-truncate"; preview.textContent = (section.body || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim(); content.append(heading, preview); row.append(content);
+                const published = document.createElement("td"); published.textContent = detail.isPublished ? "منتشرشده" : "پیش‌نویس"; row.append(published);
                 const actionCell = document.createElement("td"), edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-sm btn-default"; edit.dataset.servicePageEdit = selectedKey; edit.textContent = "ویرایش خدمت"; ui.withIcon(edit, "fa-pen-to-square"); actionCell.append(edit); row.append(actionCell); body.append(row);
             });
             statusNode.textContent = `${servicePageLabels[selectedKey] || selectedKey} · ${ui.formatNumber((detail?.sections || []).length)} ردیف محتوا`;
@@ -1496,8 +1498,8 @@
         const service = document.createElement("td"); service.textContent = servicePageLabels[root.__servicePageSelectedKey] || root.__servicePageSelectedKey;
         const pageTitle = document.createElement("td"); pageTitle.textContent = root.__servicePageDetail?.title || "";
         const number = document.createElement("td"); number.textContent = ui.formatNumber((root.__servicePageDetail?.sections || []).length + 1);
-        const headingCell = document.createElement("td"), heading = document.createElement("input"); heading.className = "form-control"; heading.maxLength = 300; heading.required = true; heading.placeholder = "عنوان ردیف محتوا"; heading.setAttribute("aria-label", "عنوان ردیف محتوا"); heading.dataset.serviceNewHeading = ""; headingCell.append(heading);
-        const statusCell = document.createElement("td"); statusCell.textContent = "پیش‌نویس تا ذخیره";
+        const headingCell = document.createElement("td"), fields = document.createElement("div"), heading = document.createElement("input"), bodyInput = document.createElement("textarea"); fields.className = "d-grid gap-2"; heading.className = "form-control"; heading.maxLength = 300; heading.required = true; heading.placeholder = "عنوان بخش"; heading.setAttribute("aria-label", "عنوان بخش"); heading.dataset.serviceNewHeading = ""; bodyInput.className = "form-control"; bodyInput.maxLength = 20000; bodyInput.rows = 4; bodyInput.required = true; bodyInput.placeholder = "متن بخش"; bodyInput.setAttribute("aria-label", "متن بخش"); bodyInput.dataset.serviceNewBody = ""; fields.append(heading, bodyInput); headingCell.append(fields);
+        const statusCell = document.createElement("td"); statusCell.textContent = "پس از ذخیره منتشر می‌شود";
         const actions = document.createElement("td"), save = document.createElement("button"), cancel = document.createElement("button");
         save.type = "button"; save.className = "btn btn-sm btn-primary me-1"; save.dataset.serviceSectionSave = ""; save.textContent = "ذخیره";
         cancel.type = "button"; cancel.className = "btn btn-sm btn-default"; cancel.dataset.serviceSectionCancel = ""; cancel.textContent = "انصراف";
@@ -1621,11 +1623,6 @@
             renumberEditorSections(parent, "[data-mag-section]", ".admin-content-section-card__actions");
             return;
         }
-        const add = event.target.closest("[data-service-section-add]");
-        if (add) {
-            const form = add.closest("[data-service-page-editor]"), container = form.querySelector("[data-service-sections]"), existing = [...container.querySelectorAll("[data-service-section]")].map(row => ({ sectionKey: row.querySelector("[data-section-key]").value, heading: row.querySelector("[data-section-heading]").value, body: window.AdminRichEditor?.getValue(row.querySelector("[data-section-body]")) ?? row.querySelector("[data-section-body]").value }));
-            existing.push({ sectionKey: `section-${Date.now()}`, heading: "", body: "" }); renderServiceSections(container, existing); return;
-        }
         const remove = event.target.closest("[data-service-section-remove]");
         if (remove) { const container = remove.closest("[data-service-sections]"); remove.closest("[data-service-section]")?.remove(); renumberEditorSections(container, "[data-service-section]", "[data-section-actions]"); }
         const move = event.target.closest("[data-service-section-move]");
@@ -1636,10 +1633,16 @@
             renumberEditorSections(parent, "[data-service-section]", "[data-section-actions]");
         }
     });
-    document.addEventListener("change", event => {
+    document.addEventListener("change", async event => {
         const filter = event.target.closest("[data-service-page-filter]"); if (!filter) return;
         const root = filter.closest("[data-service-pages]");
-        renderServicePageRows(root, filter.value);
+        root.__servicePageSelectedKey = filter.value; root.__servicePageDetail = null;
+        renderServicePageRows(root);
+        if (filter.value) {
+            const key = filter.value, statusNode = root.querySelector("[data-service-page-status]"); statusNode.textContent = "در حال دریافت ردیف‌های محتوا…";
+            try { root.__servicePageDetail = await ui.getJson(`${root.dataset.api}/${encodeURIComponent(key)}`); if (filter.value === key) renderServicePageRows(root, key); }
+            catch (error) { statusNode.textContent = error.message || "دریافت ردیف‌های محتوا ناموفق بود."; }
+        }
     });
     document.addEventListener("submit", event => {
         const form = event.target.closest("[data-service-page-editor]"); if (!form) return;
@@ -1655,7 +1658,28 @@
             .catch(error => ui.notify(error.message || "ذخیرهٔ صفحه ناموفق بود.", "danger")).finally(() => { button.disabled = false; });
     });
     document.addEventListener("click", async event => {
-        const button = event.target.closest("[data-service-page-edit], [data-mag-create], [data-mag-action]"); if (!button) return;
+        const button = event.target.closest("[data-service-section-create], [data-service-section-save], [data-service-section-cancel], [data-service-page-edit], [data-mag-create], [data-mag-action]"); if (!button) return;
+        if (button.hasAttribute("data-service-section-create")) {
+            const root = button.closest("[data-service-pages]"); if (!root?.__servicePageSelectedKey || !root.__servicePageDetail) return;
+            ui.destroyDataTable(root.querySelector("[data-admin-datatable]")); renderNewServiceSectionRow(root); ui.refreshDataTable(root.querySelector("[data-admin-datatable]")); return;
+        }
+        if (button.hasAttribute("data-service-section-cancel")) {
+            const root = button.closest("[data-service-pages]"); root?.querySelector("[data-service-new-section]")?.remove(); if (root) ui.refreshDataTable(root.querySelector("[data-admin-datatable]")); return;
+        }
+        if (button.hasAttribute("data-service-section-save")) {
+            const root = button.closest("[data-service-pages]"), row = button.closest("[data-service-new-section]"), page = root?.__servicePageDetail, key = root?.__servicePageSelectedKey;
+            const heading = row?.querySelector("[data-service-new-heading]")?.value.trim() || "", bodyText = row?.querySelector("[data-service-new-body]")?.value.trim() || "";
+            if (!root || !page || !key || !heading || !bodyText) { ui.notify("عنوان و متن ردیف محتوا را وارد کنید.", "danger"); return; }
+            if ((page.sections || []).length >= 50) { ui.notify("هر صفحه حداکثر ۵۰ ردیف محتوا می‌تواند داشته باشد.", "danger"); return; }
+            const form = document.querySelector("[data-service-page-editor]"), token = form?.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            const sections = [...(page.sections || []), { sectionKey: `section-${Date.now().toString(36)}`, heading, body: bodyText, isPublished: true }];
+            button.disabled = true;
+            try {
+                const result = await ui.getJson(`${root.dataset.api}/${encodeURIComponent(key)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify({ title: page.title, description: page.description || "", isPublished: page.isPublished, sections }) });
+                ui.notify(result.message || "ردیف محتوا ذخیره شد.", "success"); await loadServicePages(key);
+            } catch (error) { ui.notify(error.message || "ذخیرهٔ ردیف محتوا ناموفق بود.", "danger"); button.disabled = false; }
+            return;
+        }
         if (button.hasAttribute("data-service-page-edit")) {
             const root = document.querySelector("[data-service-pages]"), form = document.querySelector("[data-service-page-editor]"), key = button.dataset.servicePageEdit;
             if (!root || !form || button.disabled) return;
