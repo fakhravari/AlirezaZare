@@ -196,6 +196,12 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     white-space: normal;
 }
 
+.dt-container table.dataTable.admin-datatable-compact-actions thead th.admin-datatable-actions,
+.dt-container table.dataTable.admin-datatable-compact-actions tbody td.admin-datatable-actions {
+    width: 12rem;
+    max-width: 12rem;
+}
+
 .dt-container table.dataTable tr > :first-child,
 .admin-table-wrap > table.admin-styled-table tr > :first-child {
     border-inline-start: 0;

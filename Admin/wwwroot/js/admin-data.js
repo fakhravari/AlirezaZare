@@ -1454,15 +1454,76 @@
             statusNode.textContent = rows.length ? "" : "مقاله‌ای ثبت نشده است.";
         } catch (error) { statusNode.textContent = error.message || "دریافت مقاله‌ها ناموفق بود."; }
     }
+    const servicePageLabels = Object.freeze({
+        about: "دربارهٔ ما", contact: "تماس با ما", shipping: "راهنمای ارسال", warranty: "گارانتی",
+        tracking: "پیگیری سفارش", terms: "قوانین و مقررات", returns: "شرایط بازگشت کالا",
+        privacy: "حریم خصوصی", faq: "پرسش‌های متداول"
+    });
+    function setServiceTableHead(root, labels) {
+        const head = root.querySelector("[data-admin-datatable] thead tr");
+        head.replaceChildren(...labels.map(label => { const th = document.createElement("th"); th.scope = "col"; th.textContent = label; return th; }));
+    }
+    function renderServicePageRows(root, selectedKey = "") {
+        const table = root.querySelector("[data-admin-datatable]"), body = root.querySelector("[data-service-page-rows]"), statusNode = root.querySelector("[data-service-page-status]"), create = root.querySelector("[data-service-section-create]");
+        const pages = root.__servicePageRows || [];
+        ui.destroyDataTable(table); body.replaceChildren();
+        create.disabled = !selectedKey || !root.__servicePageDetail;
+        if (!selectedKey) {
+            setServiceTableHead(root, ["خدمت", "عنوان صفحه", "نشانی", "ردیف‌های محتوا", "وضعیت", "عملیات"]);
+            for (const item of pages) {
+                const row = document.createElement("tr");
+                for (const value of [servicePageLabels[item.pageKey] || item.pageKey, item.title, item.routePath, ui.formatNumber(item.sectionCount), item.published ? "منتشرشده" : "پیش‌نویس"]) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); }
+                const actionCell = document.createElement("td"), edit = document.createElement("button");
+                edit.type = "button"; edit.className = "btn btn-sm btn-default"; edit.dataset.servicePageEdit = item.pageKey; edit.textContent = "ویرایش محتوا"; ui.withIcon(edit, "fa-pen-to-square"); actionCell.append(edit); row.append(actionCell); body.append(row);
+            }
+            statusNode.textContent = `${ui.formatNumber(pages.length)} خدمت در فهرست است.`;
+        } else {
+            setServiceTableHead(root, ["خدمت", "عنوان صفحه", "ردیف", "عنوان بخش", "وضعیت صفحه", "عملیات"]);
+            const item = pages.find(page => page.pageKey === selectedKey), detail = root.__servicePageDetail;
+            (detail?.sections || []).forEach((section, index) => {
+                const row = document.createElement("tr");
+                for (const value of [servicePageLabels[selectedKey] || selectedKey, item?.title || detail.title, ui.formatNumber(index + 1), section.heading || "(بدون عنوان)", detail.isPublished ? "منتشرشده" : "پیش‌نویس"]) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); }
+                const actionCell = document.createElement("td"), edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-sm btn-default"; edit.dataset.servicePageEdit = selectedKey; edit.textContent = "ویرایش خدمت"; ui.withIcon(edit, "fa-pen-to-square"); actionCell.append(edit); row.append(actionCell); body.append(row);
+            });
+            statusNode.textContent = `${servicePageLabels[selectedKey] || selectedKey} · ${ui.formatNumber((detail?.sections || []).length)} ردیف محتوا`;
+        }
+        ui.refreshDataTable(table);
+    }
+    function renderNewServiceSectionRow(root) {
+        const body = root.querySelector("[data-service-page-rows]");
+        body.querySelector("[data-service-new-section]")?.remove();
+        const row = document.createElement("tr"); row.dataset.serviceNewSection = "";
+        const service = document.createElement("td"); service.textContent = servicePageLabels[root.__servicePageSelectedKey] || root.__servicePageSelectedKey;
+        const pageTitle = document.createElement("td"); pageTitle.textContent = root.__servicePageDetail?.title || "";
+        const number = document.createElement("td"); number.textContent = ui.formatNumber((root.__servicePageDetail?.sections || []).length + 1);
+        const headingCell = document.createElement("td"), heading = document.createElement("input"); heading.className = "form-control"; heading.maxLength = 300; heading.required = true; heading.placeholder = "عنوان ردیف محتوا"; heading.setAttribute("aria-label", "عنوان ردیف محتوا"); heading.dataset.serviceNewHeading = ""; headingCell.append(heading);
+        const statusCell = document.createElement("td"); statusCell.textContent = "پیش‌نویس تا ذخیره";
+        const actions = document.createElement("td"), save = document.createElement("button"), cancel = document.createElement("button");
+        save.type = "button"; save.className = "btn btn-sm btn-primary me-1"; save.dataset.serviceSectionSave = ""; save.textContent = "ذخیره";
+        cancel.type = "button"; cancel.className = "btn btn-sm btn-default"; cancel.dataset.serviceSectionCancel = ""; cancel.textContent = "انصراف";
+        actions.append(save, cancel); row.append(service, pageTitle, number, headingCell, statusCell, actions); body.append(row); heading.focus();
+    }
     async function loadServicePages(selectedKey = "") {
         const root = document.querySelector("[data-service-pages]"); if (!root) return;
-        const select = root.querySelector("[data-service-page-select]"), statusNode = root.querySelector("[data-service-page-status]"), form = root.querySelector("[data-service-page-editor]");
+        const filter = root.querySelector("[data-service-page-filter]"), statusNode = root.querySelector("[data-service-page-status]");
+        statusNode.textContent = "در حال دریافت صفحه‌ها…";
         try {
             const rows = await ui.getJson(root.dataset.api);
-            select.replaceChildren(new Option("صفحه را انتخاب کنید", ""), ...rows.map(item => new Option(`${item.title} (${item.routePath})`, item.pageKey)));
-            select.value = selectedKey;
-            form.hidden = !selectedKey; statusNode.textContent = selectedKey ? "" : "برای ویرایش یک صفحه را انتخاب کنید.";
-        } catch (error) { statusNode.textContent = error.message || "دریافت صفحه‌های خدماتی ناموفق بود."; }
+            root.__servicePageRows = rows;
+            filter.replaceChildren(new Option("همهٔ خدمت‌ها", ""), ...rows.map(item => new Option(`${servicePageLabels[item.pageKey] || item.pageKey} (${ui.formatNumber(item.sectionCount)} ردیف)`, item.pageKey)));
+            filter.value = rows.some(item => item.pageKey === selectedKey) ? selectedKey : "";
+            root.__servicePageSelectedKey = filter.value;
+            root.__servicePageDetail = null;
+            if (filter.value) {
+                statusNode.textContent = "در حال دریافت ردیف‌های محتوا…";
+                root.__servicePageDetail = await ui.getJson(`${root.dataset.api}/${encodeURIComponent(filter.value)}`);
+            }
+            renderServicePageRows(root, filter.value);
+        } catch (error) {
+            root.__servicePageRows = [];
+            renderServicePageRows(root);
+            statusNode.textContent = error.message || "دریافت صفحه‌های خدماتی ناموفق بود.";
+        }
     }
     function renumberEditorSections(container, selector, actionsSelector) {
         const cards = [...container.querySelectorAll(selector)];
@@ -1575,34 +1636,43 @@
             renumberEditorSections(parent, "[data-service-section]", "[data-section-actions]");
         }
     });
-    document.addEventListener("change", async event => {
-        const select = event.target.closest("[data-service-page-select]"); if (!select) return;
-        const root = select.closest("[data-service-pages]"), form = root.querySelector("[data-service-page-editor]"), statusNode = root.querySelector("[data-service-page-status]"), key = select.value;
-        if (!key) { form.hidden = true; statusNode.textContent = "برای ویرایش یک صفحه را انتخاب کنید."; return; }
-        select.disabled = true; form.hidden = true; statusNode.textContent = "در حال دریافت متن صفحه…";
-        try {
-            const page = await ui.getJson(`${root.dataset.api}/${encodeURIComponent(key)}`);
-            form.elements.title.value = page.title; form.elements.description.value = page.description || "";
-            renderServiceSections(form.querySelector("[data-service-sections]"), page.sections);
-            form.elements.isPublished.checked = page.isPublished; form.hidden = false; statusNode.textContent = "";
-        } catch (error) { form.hidden = true; statusNode.textContent = error.message || "دریافت متن صفحه ناموفق بود."; }
-        finally { select.disabled = false; }
+    document.addEventListener("change", event => {
+        const filter = event.target.closest("[data-service-page-filter]"); if (!filter) return;
+        const root = filter.closest("[data-service-pages]");
+        renderServicePageRows(root, filter.value);
     });
     document.addEventListener("submit", event => {
         const form = event.target.closest("[data-service-page-editor]"); if (!form) return;
-        event.preventDefault(); const root = form.closest("[data-service-pages]"), select = root.querySelector("[data-service-page-select]"), button = form.querySelector('[type="submit"]');
+        event.preventDefault(); const root = document.querySelector("[data-service-pages]"), button = form.querySelector('[type="submit"]');
         const sectionRows = [...form.querySelectorAll("[data-service-section]")];
         const sections = sectionRows.map(row => ({ sectionKey: row.querySelector("[data-section-key]").value, heading: row.querySelector("[data-section-heading]").value, body: window.AdminRichEditor?.getValue(row.querySelector("[data-section-body]")) ?? row.querySelector("[data-section-body]").value }));
         if (!sections.length) { ui.notify("هر صفحه باید دست‌کم یک بخش داشته باشد.", "danger"); return; }
-        const pageKey = select.value;
+        const pageKey = form.elements.pageKey.value;
         const body = { title: form.elements.title.value, description: form.elements.description.value, isPublished: form.elements.isPublished.checked, sections };
         const token = form.querySelector('[name="__RequestVerificationToken"]')?.value || ""; button.disabled = true;
         void ui.getJson(`${root.dataset.api}/${encodeURIComponent(pageKey)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
-            .then(result => { ui.notify(result.message, "success"); return loadServicePages(pageKey).then(() => select.dispatchEvent(new Event("change", { bubbles: true }))); })
+            .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("service-page-editor-modal"))?.hide(); return loadServicePages(root.querySelector("[data-service-page-filter]").value); })
             .catch(error => ui.notify(error.message || "ذخیرهٔ صفحه ناموفق بود.", "danger")).finally(() => { button.disabled = false; });
     });
     document.addEventListener("click", async event => {
-        const button = event.target.closest("[data-mag-create], [data-mag-action]"); if (!button) return;
+        const button = event.target.closest("[data-service-page-edit], [data-mag-create], [data-mag-action]"); if (!button) return;
+        if (button.hasAttribute("data-service-page-edit")) {
+            const root = document.querySelector("[data-service-pages]"), form = document.querySelector("[data-service-page-editor]"), key = button.dataset.servicePageEdit;
+            if (!root || !form || button.disabled) return;
+            button.disabled = true;
+            try {
+                const page = await ui.getJson(`${root.dataset.api}/${encodeURIComponent(key)}`);
+                form.reset(); form.elements.pageKey.value = key; form.elements.title.value = page.title;
+                form.elements.description.value = page.description || ""; form.elements.isPublished.checked = page.isPublished;
+                renderServiceSections(form.querySelector("[data-service-sections]"), page.sections || []);
+                const modal = document.getElementById("service-page-editor-modal");
+                modal.querySelector("[data-service-page-editor-title]").textContent = `ویرایش ${servicePageLabels[key] || "صفحهٔ خدماتی"}`;
+                modal.querySelector("[data-service-page-editor-hint]").textContent = `${root.__servicePageRows.find(item => item.pageKey === key)?.routePath || ""} · ${ui.formatNumber((page.sections || []).length)} بخش`;
+                window.bootstrap?.Modal?.getOrCreateInstance(modal).show();
+            } catch (error) { ui.notify(error.message || "دریافت متن صفحه ناموفق بود.", "danger"); }
+            finally { button.disabled = false; }
+            return;
+        }
         const form = document.querySelector("[data-mag-editor]");
         if (button.dataset.magAction === "image") {
             const mediaForm = document.querySelector("[data-article-image-form]");
