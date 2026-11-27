@@ -1006,8 +1006,9 @@
             }
             const info = document.createElement("div"); info.className = "admin-category-node-info";
             const name = document.createElement("strong"); name.className = "admin-permission-name"; name.textContent = item.name || "—";
+            name.classList.toggle("text-danger", item.isActive === false);
             const meta = document.createElement("div"); meta.className = "admin-category-node-meta";
-            for (const value of [item.id, item.englishName, item.slug, item.isActive ? "منتشر" : "پیش‌نویس"]) {
+            for (const value of [item.id, item.englishName]) {
                 if (!value) continue;
                 const part = document.createElement("span"); part.textContent = value; meta.append(part);
             }

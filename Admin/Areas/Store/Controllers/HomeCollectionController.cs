@@ -9,31 +9,42 @@ namespace Shop.Admin.Areas.Store.Controllers;
 public sealed class HomeCollectionController(IStoreHomeCollectionAdminData data) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index(string? q, int page = 1, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
     {
-        q = (q ?? "").Trim();
-        if (q.Length > 100 || page is < 1 or > 100000) return BadRequest();
         ViewData["Title"] = "محصولات منتخب صفحهٔ اصلی";
         ViewData["AreaTitle"] = "مدیریت فروشگاه";
         ViewData["FeatureId"] = "home-collection";
-        var result = await data.ReadAsync(q, page, cancellationToken);
+        var result = await data.ReadAsync(cancellationToken);
         return View(new HomeCollectionModel(
             result.Products.Select(x => new HomeCollectionProduct(x.Id, x.ProductId, x.Name, x.Code, x.SortOrder,
                 x.IsStoreEnabled)).ToList(),
             result.Tabs.Select(x => new HomeCollectionTab(x.Id, x.CategoryId, x.Name, x.SortOrder, x.IsActive,
                 x.CategoryActive)).ToList(),
             result.Categories.Select(x => new HomeCollectionCategory(x.Id, x.Name)).ToList(),
-            result.Candidates.Select(x => new HomeCollectionCandidate(x.Id, x.Name, x.Code)).ToList(), q, page,
-            result.Total, result.TabsReady));
+            result.TabsReady));
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddProduct(decimal productId, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddProducts(decimal[]? productIds, CancellationToken cancellationToken)
     {
-        var result = await data.AddProductAsync(productId, cancellationToken);
+        if (productIds is null || productIds.Length is < 1 or > 100) return BadRequest();
+        var result = await data.AddProductsAsync(productIds, cancellationToken);
         if (result != HomeCollectionMutationResult.Saved) return BadRequest();
         TempData["HomeCollectionMessage"] = "فهرست کالاهای منتخب ذخیره شد.";
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Candidates(string? q, int page = 1, CancellationToken cancellationToken = default)
+    {
+        string search = (q ?? "").Trim();
+        if (search.Length > 100 || page is < 1 or > 10000) return BadRequest();
+        var result = await data.ReadCandidatesAsync(search, page, cancellationToken);
+        return Json(new
+        {
+            items = result.Items.Select(item => new { id = item.Id, name = item.Name, code = item.Code }),
+            more = result.More
+        });
     }
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -48,9 +59,10 @@ public sealed class HomeCollectionController(IStoreHomeCollectionAdminData data)
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddCategory(long categoryId, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddCategories(long[]? categoryIds, CancellationToken cancellationToken)
     {
-        var result = await data.AddCategoryAsync(categoryId, cancellationToken);
+        if (categoryIds is null || categoryIds.Length is < 1 or > 50) return BadRequest();
+        var result = await data.AddCategoriesAsync(categoryIds, cancellationToken);
         if (result != HomeCollectionMutationResult.Saved) return BadRequest();
         TempData["HomeCollectionMessage"] = "فهرست دسته‌ها ذخیره شد.";
         return RedirectToAction(nameof(Index));
@@ -86,14 +98,8 @@ public sealed record HomeCollectionTab(
     bool IsActive,
     bool CategoryActive);
 
-public sealed record HomeCollectionCandidate(decimal Id, string Name, string Code);
-
 public sealed record HomeCollectionModel(
     List<HomeCollectionProduct> Products,
     List<HomeCollectionTab> Tabs,
     List<HomeCollectionCategory> Categories,
-    List<HomeCollectionCandidate> Candidates,
-    string Query,
-    int Page,
-    int Total,
     bool TabsReady);

@@ -4,6 +4,10 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         const v = ui.storage.json(key, []);
         return Array.isArray(v) ? v.filter((x) => x && typeof x === "object") : [];
     };
+    const readIds = (key) => {
+        const values = ui.storage.json(key, []);
+        return Array.isArray(values) ? [...new Set(values.map(String))] : [];
+    };
     const esc = (v) => ui.escapeHtml(v);
     const addressKey = "hn-delivery-addresses";
     const couponPageSize = 5;
@@ -190,7 +194,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         const values = {
             statOrders: document.querySelectorAll(".profile-order-card").length,
             statAddresses: read(addressKey).length,
-            statFavorites: read("hn-favorites").length,
+            statFavorites: readIds("hn-favorites").length,
             statCoupons: activeCoupons.length,
             statCompare: compareCount,
         };

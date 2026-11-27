@@ -47,7 +47,9 @@
                 continue;
             }
             const productFilter = select.matches("[data-product-filter]");
-            const productApi = select.closest("[data-store-variant-prices]")?.dataset.api;
+            const checkboxFilter = select.matches("[data-product-filter], [data-checkbox-filter]");
+            const productApi = select.dataset.productApi || select.closest("[data-store-variant-prices]")?.dataset.api;
+            const productCandidatesUrl = select.dataset.productCandidatesUrl;
             const remoteProductUrl = select.dataset.remoteProductUrl;
             $(select).select2({
                 dir: "rtl",
@@ -66,11 +68,11 @@
                             pagination: { more: data.more }
                         })
                     }
-                } : productFilter && productApi ? {
+                } : productFilter && (productCandidatesUrl || productApi) ? {
                     placeholder: "انتخاب کالا با نام یا کد",
                     closeOnSelect: false,
                     ajax: {
-                        url: `${productApi}/products`,
+                        url: productCandidatesUrl || `${productApi}/products`,
                         delay: 250,
                         data: params => ({ q: params.term || "", page: params.page || 1 }),
                         processResults: data => ({
@@ -92,13 +94,29 @@
                         return $(label);
                     }
                 } : {}),
+                ...(!productFilter && checkboxFilter ? {
+                    closeOnSelect: false,
+                    templateResult: item => {
+                        if (!item.id) return item.text;
+                        const label = document.createElement("span");
+                        label.className = "admin-product-filter-option";
+                        const box = document.createElement("input");
+                        box.type = "checkbox";
+                        box.value = String(item.id);
+                        box.tabIndex = -1;
+                        box.setAttribute("aria-hidden", "true");
+                        box.checked = [...select.selectedOptions].some(option => option.value === String(item.id));
+                        label.append(box, document.createTextNode(item.text));
+                        return $(label);
+                    }
+                } : {}),
                 matcher: (params, data) => {
                     const visible = visibleOptions(data);
                     return visible ? defaultMatcher(params, visible) : null;
                 },
                 dropdownParent: modal ? $(modal) : $(document.body)
             });
-            if (productFilter) $(select).on("select2:select select2:unselect", () => {
+            if (checkboxFilter) $(select).on("select2:select select2:unselect", () => {
                 const selected = new Set([...select.selectedOptions].map(option => option.value));
                 document.querySelectorAll(".select2-container--open .admin-product-filter-option input").forEach(box => {
                     box.checked = selected.has(box.value);

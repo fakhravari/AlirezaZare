@@ -8,8 +8,7 @@ namespace Shop.Data.Infrastructure.Store;
 
 public sealed class StoreHomeCollectionAdminData(ShopDbContext db) : IStoreHomeCollectionAdminData
 {
-    public async Task<HomeCollectionAdminData> ReadAsync(string search, int page,
-        CancellationToken cancellationToken)
+    public async Task<HomeCollectionAdminData> ReadAsync(CancellationToken cancellationToken)
     {
         var collection = await db.StoreProductCollections.AsNoTracking()
             .SingleOrDefaultAsync(item => item.CollectionKey == "selected", cancellationToken);
@@ -37,23 +36,40 @@ public sealed class StoreHomeCollectionAdminData(ShopDbContext db) : IStoreHomeC
                 .Select(row => new HomeCollectionTabData(row.tab.Id, row.category.Id, row.category.TreePathNames,
                     row.tab.SortOrder, row.tab.IsActive, row.category.IsActive)).ToListAsync(cancellationToken)
             : [];
-        var products = db.Products.AsNoTracking().Where(item => item.IsStoreEnabled &&
-            (search == "" || item.NameFa.Contains(search) || item.ProductKey.Contains(search)));
-        int total = await products.CountAsync(cancellationToken);
-        var candidates = await products.OrderBy(item => item.NameFa).ThenBy(item => item.Id)
-            .Skip((page - 1) * 50).Take(50)
-            .Select(item => new HomeCollectionCandidateData(item.Id, item.NameFa, item.ProductKey))
-            .ToListAsync(cancellationToken);
-        return new HomeCollectionAdminData(selected, tabs, categories, candidates, search, page, total, tabsReady);
+        return new HomeCollectionAdminData(selected, tabs, categories, tabsReady);
     }
 
-    public async Task<HomeCollectionMutationResult> AddProductAsync(decimal productId,
+    public async Task<HomeCollectionCandidatesPage> ReadCandidatesAsync(string search, int page,
         CancellationToken cancellationToken)
     {
+        var selectedProductIds = db.StoreProductCollectionItems.AsNoTracking()
+            .Where(item => db.StoreProductCollections.Any(collection =>
+                collection.Id == item.IdCollection && collection.CollectionKey == "selected"))
+            .Select(item => item.IdProduct);
+        var products = db.Products.AsNoTracking().Where(item => item.IsStoreEnabled &&
+            !selectedProductIds.Contains(item.Id) &&
+            (search == "" || item.NameFa.Contains(search) || item.ProductKey.Contains(search)));
+        const int pageSize = 30;
+        var rows = await products.OrderBy(item => item.NameFa).ThenBy(item => item.Id)
+            .Skip((page - 1) * pageSize).Take(pageSize + 1)
+            .Select(item => new HomeCollectionCandidateData(item.Id, item.NameFa, item.ProductKey))
+            .ToListAsync(cancellationToken);
+        return new HomeCollectionCandidatesPage(rows.Take(pageSize).ToArray(), rows.Count > pageSize);
+    }
+
+    public async Task<HomeCollectionMutationResult> AddProductsAsync(IReadOnlyCollection<decimal> productIds,
+        CancellationToken cancellationToken)
+    {
+        decimal[] ids = productIds.Distinct().ToArray();
+        if (ids.Length == 0 || ids.Length > 100) return HomeCollectionMutationResult.InvalidProduct;
+
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,
             cancellationToken);
-        if (!await db.Products.AnyAsync(item => item.Id == productId && item.IsStoreEnabled, cancellationToken))
+        int availableCount = await db.Products.CountAsync(item => ids.Contains(item.Id) && item.IsStoreEnabled,
+            cancellationToken);
+        if (availableCount != ids.Length)
             return HomeCollectionMutationResult.InvalidProduct;
+
         var collection = await db.StoreProductCollections.SingleOrDefaultAsync(item =>
             item.CollectionKey == "selected", cancellationToken);
         if (collection is null)
@@ -62,14 +78,17 @@ public sealed class StoreHomeCollectionAdminData(ShopDbContext db) : IStoreHomeC
             db.StoreProductCollections.Add(collection);
             await db.SaveChangesAsync(cancellationToken);
         }
-        if (!await db.StoreProductCollectionItems.AnyAsync(item => item.IdCollection == collection.Id &&
-                item.IdProduct == productId, cancellationToken))
+        var existing = await db.StoreProductCollectionItems.Where(item => item.IdCollection == collection.Id)
+            .Select(item => item.IdProduct).ToListAsync(cancellationToken);
+        decimal[] toAdd = ids.Except(existing).ToArray();
+        if (toAdd.Length > 0)
         {
             int last = await db.StoreProductCollectionItems.Where(item => item.IdCollection == collection.Id)
                 .MaxAsync(item => (int?)item.SortOrder, cancellationToken) ?? 0;
-            if (last > int.MaxValue - 10) return HomeCollectionMutationResult.SortOrderLimit;
-            db.StoreProductCollectionItems.Add(new StoreProductCollectionItem
-                { IdCollection = collection.Id, IdProduct = productId, SortOrder = last + 10 });
+            if ((long)last + toAdd.Length * 10L > int.MaxValue)
+                return HomeCollectionMutationResult.SortOrderLimit;
+            db.StoreProductCollectionItems.AddRange(toAdd.Select((id, index) => new StoreProductCollectionItem
+                { IdCollection = collection.Id, IdProduct = id, SortOrder = last + (index + 1) * 10 }));
             await db.SaveChangesAsync(cancellationToken);
         }
         await transaction.CommitAsync(cancellationToken);
@@ -91,19 +110,29 @@ public sealed class StoreHomeCollectionAdminData(ShopDbContext db) : IStoreHomeC
         return HomeCollectionMutationResult.Saved;
     }
 
-    public async Task<HomeCollectionMutationResult> AddCategoryAsync(long categoryId,
+    public async Task<HomeCollectionMutationResult> AddCategoriesAsync(IReadOnlyCollection<long> categoryIds,
         CancellationToken cancellationToken)
     {
+        long[] ids = categoryIds.Distinct().ToArray();
+        if (ids.Length == 0 || ids.Length > 50) return HomeCollectionMutationResult.InvalidCategory;
+
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,
             cancellationToken);
-        if (!await db.StoreCategories.AnyAsync(item => item.Id == categoryId && item.IsActive, cancellationToken))
+        int activeCount = await db.StoreCategories.CountAsync(item => ids.Contains(item.Id) && item.IsActive,
+            cancellationToken);
+        if (activeCount != ids.Length)
             return HomeCollectionMutationResult.InvalidCategory;
-        if (!await db.StoreHomeCategoryTabs.AnyAsync(item => item.IdCategory == categoryId, cancellationToken))
+
+        var existing = await db.StoreHomeCategoryTabs.Where(item => ids.Contains(item.IdCategory))
+            .Select(item => item.IdCategory).ToListAsync(cancellationToken);
+        long[] toAdd = ids.Except(existing).ToArray();
+        if (toAdd.Length > 0)
         {
             int last = await db.StoreHomeCategoryTabs.MaxAsync(item => (int?)item.SortOrder, cancellationToken) ?? 0;
-            if (last > int.MaxValue - 10) return HomeCollectionMutationResult.SortOrderLimit;
-            db.StoreHomeCategoryTabs.Add(new StoreHomeCategoryTab
-                { IdCategory = categoryId, SortOrder = last + 10, IsActive = true });
+            if ((long)last + toAdd.Length * 10L > int.MaxValue)
+                return HomeCollectionMutationResult.SortOrderLimit;
+            db.StoreHomeCategoryTabs.AddRange(toAdd.Select((id, index) => new StoreHomeCategoryTab
+                { IdCategory = id, SortOrder = last + (index + 1) * 10, IsActive = true }));
             await db.SaveChangesAsync(cancellationToken);
         }
         await transaction.CommitAsync(cancellationToken);

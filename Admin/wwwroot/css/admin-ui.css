@@ -189,6 +189,13 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     vertical-align: middle;
 }
 
+.dt-container table.dataTable thead th.admin-datatable-actions,
+.dt-container table.dataTable tbody td.admin-datatable-actions {
+    width: 28rem;
+    max-width: 28rem;
+    white-space: normal;
+}
+
 .dt-container table.dataTable tr > :first-child,
 .admin-table-wrap > table.admin-styled-table tr > :first-child {
     border-inline-start: 0;
@@ -1650,6 +1657,12 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
 
 .admin-product-filter-option { display: flex; align-items: center; gap: .5rem; }
 .admin-product-filter-option input { pointer-events: none; }
+.home-collection-category-picker { width: min(100%, 30rem); min-width: min(30rem, 100%); }
+.home-collection-product-picker { width: min(100%, 34rem); min-width: min(34rem, 100%); }
+@media (max-width: 575.98px) {
+    .home-collection-category-picker,
+    .home-collection-product-picker { width: 100%; min-width: 0; }
+}
 
 .admin-filter-bar > .btn {
     min-height: 2.35rem;

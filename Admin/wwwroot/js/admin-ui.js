@@ -756,7 +756,12 @@
             deferRender: true,
             info: !externallyPaged,
             infoCallback: (settings, start, end, max, total) => `نمایش ${new Intl.NumberFormat("fa-IR").format(start)} تا ${new Intl.NumberFormat("fa-IR").format(end)} از ${new Intl.NumberFormat("fa-IR").format(total)} ردیف`,
-            columnDefs: hasActions ? [{ targets: -1, orderable: false, searchable: false }] : []
+            columnDefs: hasActions ? [{
+                targets: -1,
+                orderable: false,
+                searchable: false,
+                className: "admin-datatable-actions"
+            }] : []
         });
         instance.on("draw", localizePaging);
         dataTableInstances.set(table, instance);
