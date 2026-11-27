@@ -214,6 +214,16 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     max-width: 12rem;
 }
 
+.dt-container table.dataTable.admin-catalog-products-table thead th.admin-datatable-actions,
+.dt-container table.dataTable.admin-catalog-products-table tbody td.admin-datatable-actions {
+    width: 4rem;
+    max-width: 4rem;
+}
+
+.dt-container table.dataTable.admin-catalog-products-table tbody td.admin-datatable-actions .admin-row-actions__inner {
+    min-width: 0;
+}
+
 .dt-container table.dataTable tr > :first-child,
 .admin-table-wrap > table.admin-styled-table tr > :first-child {
     border-inline-start: 0;
@@ -899,6 +909,13 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     line-height: 1.55;
 }
 
+.admin-permission-row > .admin-permission-name,
+.admin-permission-row > .admin-permission-choice > .admin-permission-name {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 .admin-permission-checkbox:disabled + .admin-permission-name {
     color: #586873;
     cursor: not-allowed;
@@ -1302,13 +1319,18 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     }
 }
 .admin-row-actions {
+    text-align: center;
+    vertical-align: middle;
+    white-space: normal;
+}
+
+.admin-row-actions__inner {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     gap: .45rem;
     min-width: 8rem;
-    white-space: normal;
 }
 
 .admin-action-btn {
@@ -1334,6 +1356,15 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     flex: 0 0 auto;
     margin: 0;
     font-size: .82rem;
+}
+
+.admin-action-btn.admin-action-btn-icon-only {
+    min-width: 2.35rem;
+    padding-inline: .55rem;
+}
+
+.admin-product-actions-menu {
+    min-width: 15rem;
 }
 
 .admin-action-btn.btn-primary,

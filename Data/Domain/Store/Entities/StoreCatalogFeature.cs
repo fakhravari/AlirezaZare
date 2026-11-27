@@ -9,16 +9,14 @@ public static class StoreCatalogFeatureKinds
 public sealed class StoreCatalogFeature
 {
     public long Id { get; set; }
+    public long? IdParent { get; set; }
     public string Name { get; set; } = "";
+    public string TreePathIds { get; set; } = string.Empty;
+    public string TreePathNames { get; set; } = string.Empty;
+    public string? ValueKey { get; set; }
+    public string? NameEn { get; set; }
+    public string? HexCode { get; set; }
     public byte Kind { get; set; }
-    public bool IsActive { get; set; } = true;
-}
-
-public sealed class StoreCatalogFeatureValue
-{
-    public long Id { get; set; }
-    public long IdFeature { get; set; }
-    public string Name { get; set; } = "";
     public bool IsActive { get; set; } = true;
 }
 

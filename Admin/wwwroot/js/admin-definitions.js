@@ -36,6 +36,7 @@
         button.type = "button";
         button.setAttribute("aria-label", label);
         button.title = label;
+        if (iconOnly) button.dataset.adminIconOnly = "true";
         const icon = element("i", null, `fa ${iconName}`);
         icon.setAttribute("aria-hidden", "true");
         button.append(icon);
@@ -487,12 +488,18 @@
             valueSelect.replaceChildren();
             const placeholder = element("option", tree.length ? "انتخاب مقدار" : "ابتدا کالایی با درخت تنوع انتخاب کنید"); placeholder.value = ""; valueSelect.append(placeholder);
             const attribute = tree.find(item => String(item.id) === String(attributeSelect.value));
-            for (const item of attribute?.values || []) { const option = element("option", item.label || item.key); option.value = item.id; valueSelect.append(option); }
+            for (const item of attribute?.values || []) {
+                const label = item.treePathIds && item.treePathNames ? `${item.treePathIds} · ${item.treePathNames}` : item.label || item.key;
+                const option = element("option", label); option.value = item.id; valueSelect.append(option);
+            }
             valueSelect.value = selectedId == null ? "" : String(selectedId);
             valueSelect.disabled = !attribute;
         };
         const emptyAttribute = element("option", tree.length ? "انتخاب ویژگی" : "درخت تنوعی برای این کالا ثبت نشده است"); emptyAttribute.value = ""; attributeSelect.append(emptyAttribute);
-        for (const item of tree) { const option = element("option", item.label); option.value = item.id; attributeSelect.append(option); }
+        for (const item of tree) {
+            const label = item.treePathIds && item.treePathNames ? `${item.treePathIds} · ${item.treePathNames}` : item.label;
+            const option = element("option", label); option.value = item.id; attributeSelect.append(option);
+        }
         attributeSelect.value = data.attributeId == null ? "" : String(data.attributeId);
         attributeSelect.addEventListener("change", () => fillValues(null));
         fillValues(data.valueId);

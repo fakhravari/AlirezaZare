@@ -9,18 +9,21 @@ public static class AdminListQuery
 {
     public const int DefaultPageSize = 50;
     public const int MaximumPageSize = 100;
+    public const int MaximumCustomPageSize = 200;
     public const int MaximumPage = 100_000;
     public const int MaximumSearchLength = 100;
     public const int ExportBatchSize = 1_000;
 
-    public static bool TryCreate(int page, int? pageSize, string? search, out AdminPageRequest request)
+    public static bool TryCreate(int page, int? pageSize, string? search, out AdminPageRequest request,
+        int maximumPageSize = MaximumPageSize)
     {
         int size = pageSize ?? DefaultPageSize;
         string normalizedSearch = NormalizeSearch(search);
         long offset = ((long)page - 1) * size;
 
         if (page is < 1 or > MaximumPage
-            || size is < 1 or > MaximumPageSize
+            || maximumPageSize is < 1 or > MaximumCustomPageSize
+            || size < 1 || size > maximumPageSize
             || offset > int.MaxValue
             || normalizedSearch.Length > MaximumSearchLength
             || normalizedSearch.Any(char.IsControl))

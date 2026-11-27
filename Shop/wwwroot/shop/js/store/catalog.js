@@ -66,6 +66,13 @@
       .map(({title, specs}) => ({title, specs}));
   };
   const attributeDefinitions = data.attributeDefinitions || {};
+  const colorDefinitions = Object.fromEntries((data.catalogFeatureOptions || [])
+    .filter((item) => item.kind === 2 && item.featureName === "رنگ")
+    .map((item) => {
+      const id = String(item.valueKey || item.valueId);
+      return [id, {id, fa: item.valueName, en: item.nameEn || item.valueName,
+        hex: item.hexCode || "#64748b", slug: id}];
+    }));
   const categoryEntries = Object.entries(data.categories).map(([id, category]) => ({
     id, slug: String(category.slug || "").trim(), en: String(category.en || "").trim(),
     fa: String(category.fa || "").trim(), label: String(category.fa || "").trim(),
@@ -173,7 +180,9 @@
     if (!resolvedCategory) throw new Error("Unknown catalog category node: " + product.categoryId);
     const media = relation(data.media, product.mediaId);
     if (brand.countryCode) relation(data.countries, brand.countryCode);
-    const colors = product.colorIds.map((id) => relation(data.colors, id));
+    const colors = (product.catalogFeatures || [])
+      .filter((item) => item.kind === 2 && item.featureName === "رنگ")
+      .map((item) => relation(colorDefinitions, item.valueKey || String(item.valueId)));
     const detail = (() => {
       const sharedDetail = relation(data.details, product.detailId);
       const sharedSpecGroups = [
@@ -283,7 +292,7 @@
       : path;
   };
   window.HNCountries = freeze(data.countries);
-  window.HNProductColors = freeze(data.colors);
+  window.HNProductColors = freeze(colorDefinitions);
   window.HNProducts = freeze(products);
   window.HNProductUrl = productUrl;
   window.HNCatalog = Object.freeze({schemaVersion: data.schemaVersion, products: window.HNProducts,

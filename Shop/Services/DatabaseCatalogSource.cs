@@ -39,7 +39,7 @@ public sealed class DatabaseCatalogSource(
         foreach (string property in new[]
                  {
                      "specificationGroups", "specificationCategories", "specificationFeatures", "attributeDefinitions",
-                     "brands", "categories", "colors", "countries", "details", "media", "collections"
+                     "brands", "categories", "countries", "details", "media", "collections"
                  })
         {
             if (root[property] is not JsonArray rows) continue;
@@ -76,7 +76,6 @@ public sealed record CatalogSnapshot(
         JsonElement brands = root.GetProperty("brands"),
             categories = root.GetProperty("categories"),
             media = root.GetProperty("media"),
-            colors = root.GetProperty("colors"),
             countries = root.GetProperty("countries"),
             details = root.GetProperty("details"),
             attributeDefinitions = root.GetProperty("attributeDefinitions");
@@ -167,9 +166,6 @@ public sealed record CatalogSnapshot(
             if (nonLeafCategories.Contains(Text(category, "id")))
                 throw new InvalidDataException($"Product category must be a leaf category: {id}");
             _ = Reference(details, product, "detailId");
-            foreach (JsonElement color in product.GetProperty("colorIds").EnumerateArray())
-                if (!colors.TryGetProperty(color.GetString()!, out _))
-                    throw new InvalidDataException($"Unknown product color: {id}");
             string imagePath = Text(images, "main");
             if (product.GetProperty("price").GetDecimal() < 0 || product.GetProperty("stockQuantity").GetInt32() < 0)
                 throw new InvalidDataException($"Invalid price/stock: {id}");

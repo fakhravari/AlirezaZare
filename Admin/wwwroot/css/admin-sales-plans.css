@@ -47,7 +47,7 @@
 .admin-sales-plans__publication { margin-top: 1.25rem; padding-top: .25rem; border-top: 1px solid #dce5ea; }
 .admin-sales-plans__actions { margin-top: .8rem; }
 
-.admin-row-actions.admin-pricing-row-actions { justify-content: flex-start; }
+.admin-row-actions.admin-pricing-row-actions > .admin-row-actions__inner { justify-content: flex-start; }
 
 @media (max-width: 575px) {
     .admin-sales-plans__section { padding: 1rem; }

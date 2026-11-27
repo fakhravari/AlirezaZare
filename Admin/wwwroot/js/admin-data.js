@@ -12,6 +12,69 @@
     let productAccessories = [];
     let accessoryRequest = 0;
     let productUnitConversionRowId = 0;
+    let activeProductActionMenu = null;
+
+    function featurePathLabel(item) {
+        const ids = item?.treePathIds || String(item?.id ?? "");
+        const names = item?.treePathNames || item?.name || "";
+        return ids && names ? `${ids} · ${names}` : names || ids;
+    }
+
+    function appendFeatureValueSwatch(parent, value) {
+        if (!/^#[0-9a-f]{6}$/i.test(value?.hexCode || "")) return;
+        const swatch = document.createElement("span");
+        swatch.className = "ms-2";
+        swatch.setAttribute("aria-hidden", "true");
+        swatch.style.cssText = "display:inline-block;width:.9rem;height:.9rem;border-radius:50%;border:1px solid #94a3b8;vertical-align:middle";
+        swatch.style.backgroundColor = value.hexCode;
+        parent.append(swatch);
+    }
+
+    function closeProductActionMenu(returnFocus = false) {
+        if (!activeProductActionMenu) return;
+        const { toggle, dropdown, menu } = activeProductActionMenu;
+        menu.classList.remove("show");
+        menu.style.removeProperty("position"); menu.style.removeProperty("inset"); menu.style.removeProperty("top");
+        menu.style.removeProperty("left"); menu.style.removeProperty("right"); menu.style.removeProperty("z-index");
+        menu.style.removeProperty("max-height"); menu.style.removeProperty("overflow-y");
+        dropdown.append(menu);
+        toggle.setAttribute("aria-expanded", "false");
+        activeProductActionMenu = null;
+        if (returnFocus && toggle.isConnected) toggle.focus();
+    }
+
+    function openProductActionMenu(toggle, dropdown, menu) {
+        closeProductActionMenu();
+        menu.classList.add("show");
+        menu.style.position = "fixed";
+        menu.style.inset = "auto";
+        menu.style.top = "0"; menu.style.left = "0";
+        menu.style.zIndex = "1080";
+        menu.style.maxHeight = `${Math.max(80, window.innerHeight - 16)}px`;
+        menu.style.overflowY = "auto";
+        document.body.append(menu);
+
+        const anchor = toggle.getBoundingClientRect();
+        const size = menu.getBoundingClientRect();
+        const below = window.innerHeight - anchor.bottom - 8;
+        const above = anchor.top - 8;
+        const openBelow = size.height <= below || below >= above;
+        const top = openBelow ? Math.min(anchor.bottom, window.innerHeight - size.height - 8) : Math.max(8, anchor.top - size.height);
+        const left = document.documentElement.dir === "rtl"
+            ? Math.max(8, Math.min(anchor.right - size.width, window.innerWidth - size.width - 8))
+            : Math.max(8, Math.min(anchor.left, window.innerWidth - size.width - 8));
+        menu.style.top = `${top}px`; menu.style.left = `${left}px`;
+        toggle.setAttribute("aria-expanded", "true");
+        activeProductActionMenu = { toggle, dropdown, menu };
+    }
+
+    document.addEventListener("click", event => {
+        if (activeProductActionMenu && !activeProductActionMenu.menu.contains(event.target)
+            && event.target !== activeProductActionMenu.toggle && !activeProductActionMenu.toggle.contains(event.target)) closeProductActionMenu();
+    });
+    document.addEventListener("keydown", event => { if (event.key === "Escape" && activeProductActionMenu) closeProductActionMenu(true); });
+    document.addEventListener("scroll", () => closeProductActionMenu(), true);
+    window.addEventListener("resize", () => closeProductActionMenu());
 
     async function loadCatalogFeatureManager(page) {
         const host = page.querySelector("[data-catalog-feature-manager]");
@@ -25,29 +88,52 @@
                 list.replaceChildren();
                 const rows = features.filter(feature => feature.kind === kind);
                 if (!rows.length) { const empty = document.createElement("p"); empty.className = "text-muted small"; empty.textContent = "هنوز ویژگی‌ای تعریف نشده است."; list.append(empty); }
+                const rootList = document.createElement("ul"); rootList.className = "admin-permission-list"; rootList.setAttribute("role", "group");
+                if (rows.length) list.append(rootList);
                 for (const feature of rows) {
-                    const card = document.createElement("article"); card.className = "border rounded p-2";
-                    const header = document.createElement("div"); header.className = "d-flex align-items-center justify-content-between gap-2";
-                    const title = document.createElement("strong"); title.textContent = feature.name;
+                    const node = document.createElement("li"); node.className = "admin-permission-node"; node.setAttribute("role", "treeitem");
+                    const row = document.createElement("div"); row.className = "admin-permission-row";
+                    const childList = document.createElement("ul"); childList.className = "admin-permission-list"; childList.setAttribute("role", "group"); childList.hidden = true;
+                    const toggle = document.createElement("button"); toggle.type = "button"; toggle.className = "admin-permission-toggle";
+                    toggle.setAttribute("aria-expanded", "false"); toggle.setAttribute("aria-label", `بازکردن ${featurePathLabel(feature)}`);
+                    toggle.append(Object.assign(document.createElement("span"), { className: "admin-permission-chevron", textContent: "›" }));
+                    toggle.addEventListener("click", () => {
+                        const expanded = toggle.getAttribute("aria-expanded") !== "true";
+                        toggle.setAttribute("aria-expanded", String(expanded));
+                        toggle.setAttribute("aria-label", `${expanded ? "بستن" : "بازکردن"} ${featurePathLabel(feature)}`);
+                        node.setAttribute("aria-expanded", String(expanded)); childList.hidden = !expanded;
+                    });
+                    const title = document.createElement("strong"); title.className = "admin-permission-name"; title.textContent = featurePathLabel(feature);
                     const rename = document.createElement("button"); rename.type = "button"; rename.className = "btn btn-sm btn-outline-secondary";
                     rename.dataset.referenceRenameFeature = String(feature.id); rename.dataset.currentName = feature.name; rename.textContent = "ویرایش نام";
-                    header.append(title, rename); card.append(header);
-                    const values = document.createElement("div"); values.className = "d-flex flex-wrap gap-1 my-2";
+                    row.append(toggle, title, rename); node.append(row);
                     for (const value of feature.values || []) {
-                        const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-sm btn-light";
+                        const valueNode = document.createElement("li"); valueNode.className = "admin-permission-node"; valueNode.setAttribute("role", "treeitem");
+                        const valueRow = document.createElement("div"); valueRow.className = "admin-permission-row";
+                        valueRow.append(Object.assign(document.createElement("span"), { className: "admin-permission-toggle-spacer" }));
+                        const valueLabel = document.createElement("span"); valueLabel.className = `admin-permission-name${value.isActive ? "" : " text-muted"}`;
+                        valueLabel.textContent = value.isActive ? featurePathLabel(value) : `${featurePathLabel(value)} (غیرفعال)`;
+                        const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-sm btn-outline-secondary text-nowrap";
                         edit.dataset.referenceRenameValue = String(value.id); edit.dataset.referenceFeatureId = String(feature.id);
-                        edit.dataset.currentName = value.name; edit.textContent = value.isActive ? value.name : `${value.name} (غیرفعال)`; edit.disabled = !value.isActive;
-                        values.append(edit);
+                        edit.dataset.currentName = value.name; edit.textContent = "ویرایش مقدار"; edit.disabled = !value.isActive;
+                        appendFeatureValueSwatch(valueRow, value);
+                        valueRow.append(valueLabel, edit); valueNode.append(valueRow); childList.append(valueNode);
                     }
-                    if (!(feature.values || []).length) { const emptyValues = document.createElement("span"); emptyValues.className = "text-muted small"; emptyValues.textContent = "مقداری ثبت نشده است."; values.append(emptyValues); }
-                    card.append(values);
+                    if (!(feature.values || []).length) {
+                        const emptyNode = document.createElement("li"); emptyNode.className = "admin-permission-node";
+                        const emptyRow = document.createElement("div"); emptyRow.className = "admin-permission-row text-muted small";
+                        emptyRow.append(Object.assign(document.createElement("span"), { className: "admin-permission-toggle-spacer" }));
+                        emptyRow.append(document.createTextNode("مقداری ثبت نشده است.")); emptyNode.append(emptyRow); childList.append(emptyNode);
+                    }
                     if (feature.isActive) {
-                        const form = document.createElement("form"); form.className = "d-flex gap-2"; form.dataset.referenceValueCreate = String(feature.id);
+                        const valueNode = document.createElement("li"); valueNode.className = "admin-permission-node";
+                        const form = document.createElement("form"); form.className = "admin-permission-row"; form.dataset.referenceValueCreate = String(feature.id);
+                        form.append(Object.assign(document.createElement("span"), { className: "admin-permission-toggle-spacer" }));
                         const input = document.createElement("input"); input.className = "form-control form-control-sm"; input.name = "name"; input.maxLength = kind === 1 ? 100 : 300; input.placeholder = "مقدار جدید"; input.required = true;
                         const button = document.createElement("button"); button.className = "btn btn-sm btn-outline-primary text-nowrap"; button.type = "submit"; button.textContent = "افزودن مقدار";
-                        form.append(input, button); card.append(form);
+                        form.append(input, button); valueNode.append(form); childList.append(valueNode);
                     }
-                    list.append(card);
+                    node.append(childList); rootList.append(node);
                 }
             }
             status.textContent = "مرجع ویژگی‌ها به‌روز است.";
@@ -78,25 +164,46 @@
             for (const [kind, title] of [[1, "تنوع قیمتی"], [2, "ویژگی نمایشی"]]) {
                 const section = document.createElement("section"); section.className = "border rounded p-2 mb-2";
                 const heading = document.createElement("h4"); heading.className = "fs-6"; heading.textContent = title; section.append(heading);
+                const rootList = document.createElement("ul"); rootList.className = "admin-permission-list"; rootList.setAttribute("role", "tree"); section.append(rootList);
                 for (const feature of features.filter(item => item.kind === kind && item.isActive)) {
                     const id = String(feature.id);
-                    select.append(new Option(`${title} — ${feature.name}`, id));
-                    const row = document.createElement("div"); row.className = "d-block mb-2";
+                    select.append(new Option(`${featurePathLabel(feature)} — ${title}`, id));
+                    const node = document.createElement("li"); node.className = "admin-permission-node"; node.setAttribute("role", "treeitem");
+                    const row = document.createElement("div"); row.className = "admin-permission-row";
+                    const childList = document.createElement("ul"); childList.className = "admin-permission-list"; childList.setAttribute("role", "group"); childList.hidden = true;
+                    const toggle = document.createElement("button"); toggle.type = "button"; toggle.className = "admin-permission-toggle";
+                    toggle.setAttribute("aria-expanded", "false"); toggle.setAttribute("aria-label", `بازکردن ${featurePathLabel(feature)}`);
+                    toggle.append(Object.assign(document.createElement("span"), { className: "admin-permission-chevron", textContent: "›" }));
+                    toggle.addEventListener("click", () => {
+                        const expanded = toggle.getAttribute("aria-expanded") !== "true";
+                        toggle.setAttribute("aria-expanded", String(expanded)); toggle.setAttribute("aria-label", `${expanded ? "بستن" : "بازکردن"} ${featurePathLabel(feature)}`);
+                        node.setAttribute("aria-expanded", String(expanded)); childList.hidden = !expanded;
+                    });
                     const input = document.createElement("input"); input.type = "checkbox"; input.className = "form-check-input ms-2";
                     input.dataset.featureChoice = ""; input.value = id; input.checked = direct.has(id) || inherited.has(id); input.disabled = inherited.has(id);
                     input.dataset.featureDirect = String(direct.has(id));
-                    const name = document.createElement("label"); name.htmlFor = `category-feature-${id}`; input.id = name.htmlFor; name.textContent = feature.name + (inherited.has(id) ? " (ارث‌برده از دستهٔ والد)" : "");
-                    const values = document.createElement("small"); values.className = "text-muted d-block";
+                    const name = document.createElement("label"); name.className = "admin-permission-choice"; name.htmlFor = `category-feature-${id}`; input.id = name.htmlFor;
+                    const nameText = document.createElement("span"); nameText.className = "admin-permission-name"; nameText.textContent = featurePathLabel(feature) + (inherited.has(id) ? " (ارث‌برده از دستهٔ والد)" : ""); name.append(input, nameText);
                     const rename = document.createElement("button"); rename.type = "button"; rename.className = "btn btn-xs btn-outline-secondary me-2";
                     rename.dataset.featureRename = id; rename.dataset.featureCurrentName = feature.name; rename.textContent = "ویرایش نام";
                     const activeValues = (feature.values || []).filter(value => value.isActive);
-                    if (!activeValues.length) values.textContent = "هنوز مقداری ثبت نشده است.";
+                    if (!activeValues.length) {
+                        const emptyNode = document.createElement("li"); emptyNode.className = "admin-permission-node";
+                        const emptyRow = document.createElement("div"); emptyRow.className = "admin-permission-row text-muted small";
+                        emptyRow.append(Object.assign(document.createElement("span"), { className: "admin-permission-toggle-spacer" }));
+                        emptyRow.append(document.createTextNode("هنوز مقداری ثبت نشده است.")); emptyNode.append(emptyRow); childList.append(emptyNode);
+                    }
                     for (const value of activeValues) {
+                        const valueNode = document.createElement("li"); valueNode.className = "admin-permission-node"; valueNode.setAttribute("role", "treeitem");
+                        const valueRow = document.createElement("div"); valueRow.className = "admin-permission-row";
+                        valueRow.append(Object.assign(document.createElement("span"), { className: "admin-permission-toggle-spacer" }));
                         const editValue = document.createElement("button"); editValue.type = "button"; editValue.className = "btn btn-xs btn-outline-secondary m-1";
                         editValue.dataset.featureRenameValue = String(value.id); editValue.dataset.featureOwner = id;
-                        editValue.dataset.featureCurrentName = value.name; editValue.textContent = `ویرایش ${value.name}`; values.append(editValue);
+                        editValue.dataset.featureCurrentName = value.name; editValue.textContent = `ویرایش ${featurePathLabel(value)}`;
+                        const valueName = document.createElement("span"); valueName.className = "admin-permission-name"; valueName.textContent = featurePathLabel(value);
+                        valueRow.append(valueName, editValue); valueNode.append(valueRow); childList.append(valueNode);
                     }
-                    row.append(input, name, rename, values); section.append(row);
+                    row.append(toggle, name, rename); node.append(row, childList); rootList.append(node);
                 }
                 groups.append(section);
             }
@@ -130,14 +237,21 @@
                     const selected = new Set(productData.selections.map(item => `${item.idFeature}:${item.idFeatureValue}`));
                     for (const feature of features.filter(item => item.kind === 2 && item.isActive && allowed.has(String(item.id)))) {
                         const fieldset = document.createElement("fieldset"); fieldset.className = "border rounded p-2 mb-2";
-                        const legend = document.createElement("legend"); legend.className = "float-none w-auto px-1 fs-6"; legend.textContent = feature.name; fieldset.append(legend);
+                        const legend = document.createElement("legend"); legend.className = "float-none w-auto px-1 fs-6"; legend.textContent = featurePathLabel(feature); fieldset.append(legend);
+                        const valueList = document.createElement("ul"); valueList.className = "admin-permission-list"; valueList.setAttribute("role", "group");
                         for (const value of feature.values.filter(item => item.isActive)) {
-                            const label = document.createElement("label"); label.className = "d-block";
+                            const valueNode = document.createElement("li"); valueNode.className = "admin-permission-node"; valueNode.setAttribute("role", "treeitem");
+                            const row = document.createElement("div"); row.className = "admin-permission-row";
+                            row.append(Object.assign(document.createElement("span"), { className: "admin-permission-toggle-spacer" }));
+                            const label = document.createElement("label"); label.className = "admin-permission-choice";
                             const input = document.createElement("input"); input.type = "checkbox"; input.className = "form-check-input ms-2";
                             input.dataset.productFeature = String(feature.id); input.value = String(value.id);
                             input.checked = selected.has(`${feature.id}:${value.id}`);
-                            label.append(input, document.createTextNode(value.name)); fieldset.append(label);
+                            const valueName = document.createElement("span"); valueName.className = "admin-permission-name"; valueName.textContent = featurePathLabel(value);
+                            label.append(input); appendFeatureValueSwatch(label, value); label.append(valueName);
+                            row.append(label); valueNode.append(row); valueList.append(valueNode);
                         }
+                        fieldset.append(valueList);
                         choices.append(fieldset);
                     }
                     status.textContent = choices.children.length ? "" : "برای دستهٔ کالا ویژگی نمایشی تعریف نشده است.";
@@ -279,6 +393,30 @@
             conversionFactor: Number(row.querySelector('[name="conversionFactor"]').value)
         }));
     }
+
+    function updateProductFinalPricePreview(form) {
+        const amountInput = form.elements.priceAmount;
+        const discountInput = form.elements.discountPercent;
+        const preview = form.elements.finalPricePreview;
+        if (!amountInput || !discountInput || !preview) return;
+        const amount = ui.priceValue(amountInput);
+        const discountPercent = Number(discountInput.value);
+        if (!Number.isSafeInteger(amount) || amount < 0 || !discountInput.value.trim() || !Number.isFinite(discountPercent)
+            || discountPercent < 0 || discountPercent >= 100 || !discountInput.validity.valid) {
+            preview.value = "";
+            return;
+        }
+        const discountBasisPoints = Math.round(discountPercent * 100);
+        const discountedAmount = BigInt(amount) * BigInt(10000 - discountBasisPoints);
+        let finalAmount = discountedAmount / 10000n;
+        if ((discountedAmount % 10000n) * 2n >= 10000n) finalAmount++;
+        preview.value = ui.formatNumber(finalAmount);
+    }
+
+    document.addEventListener("input", event => {
+        const form = event.target.closest("[data-product-create-form], [data-product-editor]");
+        if (form && (event.target.name === "priceAmount" || event.target.name === "discountPercent")) updateProductFinalPricePreview(form);
+    });
 
     async function loadProductAccessories() {
         const manager = document.querySelector("[data-product-accessories-manager]");
@@ -447,11 +585,7 @@
                 const title = document.createElement("strong");
                 title.className = "text-break";
                 title.textContent = file.title;
-                const path = document.createElement("span");
-                path.className = "small text-muted text-break";
-                path.dir = "ltr";
-                path.textContent = file.path || "—";
-                card.append(type, title, path);
+                card.append(type, title);
                 if (file.path) {
                     const raw = file.path.trim();
                     const relative = raw.replace(/^[~/]+/, "");
@@ -529,13 +663,10 @@
 
                 const heading = document.createElement("div");
                 heading.className = "d-flex align-items-center justify-content-between gap-2";
-                const name = document.createElement("span");
-                name.className = "small text-muted text-break";
-                name.textContent = image.path?.split("/").at(-1) || "تصویر کالا";
                 const orderLabel = document.createElement("strong");
                 orderLabel.className = "small";
                 orderLabel.dataset.imageOrderLabel = "";
-                heading.append(orderLabel, name);
+                heading.append(orderLabel);
                 if (image.isDefault) {
                     const badge = document.createElement("span");
                     badge.className = "badge text-bg-primary flex-shrink-0";
@@ -621,6 +752,7 @@
         const body = page.querySelector("[data-admin-results]");
         const empty = page.querySelector("[data-admin-empty]");
         if (!body) return;
+        closeProductActionMenu();
         ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
         page.__adminRows = rows;
         body.replaceChildren();
@@ -659,8 +791,39 @@
             }
             const actions = document.createElement("td");
             actions.className = "admin-row-actions";
+            const productDetails = page.dataset.adminSection === "products";
+            let productMenu = null;
+            if (productDetails) {
+                const dropdown = document.createElement("div"); dropdown.className = "dropdown";
+                const toggle = document.createElement("button");
+                toggle.type = "button"; toggle.className = "btn btn-xs btn-default dropdown-toggle";
+                toggle.setAttribute("aria-haspopup", "menu"); toggle.setAttribute("aria-expanded", "false");
+                toggle.setAttribute("aria-label", "عملیات کالا"); toggle.title = "عملیات کالا"; toggle.dataset.adminIconOnly = "true";
+                toggle.innerHTML = '<i class="fa fa-ellipsis-vertical" aria-hidden="true"></i><span class="visually-hidden">عملیات کالا</span>';
+                productMenu = document.createElement("div"); productMenu.className = "dropdown-menu dropdown-menu-end admin-product-actions-menu";
+                productMenu.setAttribute("role", "menu");
+                productMenu.id = `product-actions-${item.id}`; toggle.setAttribute("aria-controls", productMenu.id);
+                toggle.addEventListener("click", event => {
+                    event.stopPropagation();
+                    if (activeProductActionMenu?.toggle === toggle) closeProductActionMenu();
+                    else openProductActionMenu(toggle, dropdown, productMenu);
+                });
+                productMenu.addEventListener("click", event => {
+                    if (event.target.closest(".dropdown-item")) queueMicrotask(() => closeProductActionMenu());
+                });
+                dropdown.append(toggle, productMenu); actions.append(dropdown);
+            }
+            const showProductMenuLabel = button => {
+                button.setAttribute("role", "menuitem");
+                const label = button.querySelector(".visually-hidden");
+                if (label) label.classList.remove("visually-hidden");
+                button.classList.add("d-flex", "align-items-center", "gap-2");
+            };
+            const addProductMenuDivider = () => {
+                const divider = document.createElement("hr"); divider.className = "dropdown-divider";
+                productMenu.append(divider);
+            };
             if (page.dataset.adminSection !== "payment-institutions") {
-                const productDetails = page.dataset.adminSection === "products";
                 const details = document.createElement(productDetails ? "a" : "button");
                 if (productDetails) {
                     details.href = `/Store/Catalog/ProductDetails/${encodeURIComponent(item.id)}`;
@@ -673,7 +836,8 @@
                 details.className = "btn btn-xs btn-default";
                 details.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i><span class="visually-hidden">نمایش جزئیات</span>';
                 details.setAttribute("aria-label", "نمایش جزئیات رکورد");
-                actions.append(details);
+                if (productDetails) { details.className = "dropdown-item d-flex align-items-center gap-2"; showProductMenuLabel(details); productMenu.append(details); }
+                else actions.append(details);
             }
             if (page.dataset.adminPage === "product-drafts") {
                 const publish = document.createElement("button");
@@ -715,33 +879,43 @@
             }
             if (page.dataset.adminSection === "products" && page.dataset.canUploadImage === "true") {
                 const edit = document.createElement("button");
-                edit.type = "button"; edit.className = "btn btn-xs btn-default";
+                edit.type = "button"; edit.className = "dropdown-item";
                 edit.dataset.productEdit = String(index); setIconAction(edit, "ویرایش کالا", "fa-pen-to-square");
-                actions.append(edit);
+                showProductMenuLabel(edit);
+                productMenu.append(edit);
+                addProductMenuDivider();
                 const features = document.createElement("button");
-                features.type = "button"; features.className = "btn btn-xs btn-default ms-1";
+                features.type = "button"; features.className = "dropdown-item";
                 features.dataset.productFeatures = String(index); setIconAction(features, "ویژگی‌های نمایشی کالا", "fa-list-check");
-                actions.append(features);
+                showProductMenuLabel(features);
+                productMenu.append(features);
                 const benefits = document.createElement("button");
-                benefits.type = "button"; benefits.className = "btn btn-xs btn-default ms-1";
+                benefits.type = "button"; benefits.className = "dropdown-item";
                 benefits.dataset.productBenefits = String(index); setIconAction(benefits, "مدیریت مزیت‌های کالا", "fa-gift");
-                actions.append(benefits);
+                showProductMenuLabel(benefits);
+                productMenu.append(benefits);
                 const accessories = document.createElement("button");
-                accessories.type = "button"; accessories.className = "btn btn-xs btn-default ms-1";
+                accessories.type = "button"; accessories.className = "dropdown-item";
                 accessories.dataset.productAccessories = String(index); setIconAction(accessories, "مدیریت متعلقات کالا", "fa-puzzle-piece");
-                actions.append(accessories);
+                showProductMenuLabel(accessories);
+                productMenu.append(accessories);
+                addProductMenuDivider();
                 const unpublish = document.createElement("button");
-                unpublish.type = "button"; unpublish.className = "btn btn-xs btn-default";
+                unpublish.type = "button"; unpublish.className = "dropdown-item";
                 unpublish.dataset.productUnpublish = String(index); unpublish.dataset.adminConfirm = `کالای ${item.name} از انتشار خارج شود؟`; setIconAction(unpublish, "خروج از انتشار", "fa-eye-slash");
-                actions.append(unpublish);
+                showProductMenuLabel(unpublish);
+                productMenu.append(unpublish);
+                addProductMenuDivider();
                 const upload = document.createElement("button");
-                upload.type = "button"; upload.className = "btn btn-xs btn-default";
+                upload.type = "button"; upload.className = "dropdown-item";
                 upload.dataset.productImage = String(index); setIconAction(upload, "مدیریت تصویر محصول", "fa-image");
-                actions.append(upload);
+                showProductMenuLabel(upload);
+                productMenu.append(upload);
                 const file = document.createElement("button");
-                file.type = "button"; file.className = "btn btn-xs btn-default";
+                file.type = "button"; file.className = "dropdown-item";
                 file.dataset.productFile = String(index); setIconAction(file, "مدیریت فایل‌های محصول", "fa-paperclip");
-                actions.append(file);
+                showProductMenuLabel(file);
+                productMenu.append(file);
             }
             if (page.dataset.adminSection === "brands" && page.dataset.canUploadImage === "true") {
                 const edit = document.createElement("button");
@@ -1025,12 +1199,11 @@
             const name = document.createElement("strong"); name.className = "admin-permission-name"; name.textContent = item.name || "—";
             name.classList.toggle("text-danger", item.isActive === false);
             const meta = document.createElement("div"); meta.className = "admin-category-node-meta";
-            for (const value of [item.id, item.englishName]) {
+            for (const value of [item.id]) {
                 if (!value) continue;
                 const part = document.createElement("span"); part.textContent = value; meta.append(part);
             }
-            const path = document.createElement("small"); path.className = "small text-muted d-block"; path.textContent = `مسیر: ${categoryPath(item)}`;
-            info.append(name, path, meta); row.append(info);
+            info.append(name, meta); row.append(info);
             const actions = document.createElement("div"); actions.className = "admin-row-actions admin-category-node-actions";
             const details = document.createElement("button"); details.type = "button"; details.className = "btn btn-xs btn-default";
             details.dataset.adminRecord = String(index); details.setAttribute("aria-label", `نمایش جزئیات ${item.name}`);
@@ -1941,6 +2114,7 @@
                 for (const [field, items] of [["brandId", data.brands], ["categoryId", data.categories], ["unitId", data.units]])
                     form.elements[field].replaceChildren(new Option("انتخاب کنید", ""), ...items.map(item => new Option(item.name, String(item.id))));
                 setProductUnitConversions(form, "create", data.units);
+                updateProductFinalPricePreview(form);
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-create-modal")).show();
             }).catch(error => ui.notify(error.message || "دریافت اطلاعات ناموفق بود.", "danger"))
                 .finally(() => { productCreate.disabled = false; });
@@ -2054,7 +2228,7 @@
                         ? "پس از تغییر واحد پایه، واحدهای فرعی باید دوباره تنظیم شوند."
                         : "وضعیت اسناد مشخص نیست؛ تغییر واحد پایه ممکن نیست.";
                 ui.setPriceValue(form.elements.priceAmount, product.priceAmount ?? ""); form.elements.discountPercent.value = product.discountPercent ?? 0;
-                form.elements.finalPricePreview.value = product.finalPriceAmount == null ? "" : ui.formatNumber(product.finalPriceAmount);
+                updateProductFinalPricePreview(form);
                 form.elements.maxPurchaseQuantity.value = product.maxPurchaseQuantity ?? 99;
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-editor-modal")).show();
             }).catch(error => ui.notify(error.message || "دریافت اطلاعات کالا ناموفق بود.", "danger"))

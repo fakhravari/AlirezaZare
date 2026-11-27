@@ -128,7 +128,6 @@ public partial class ShopDbContext : DbContext
 
     public virtual DbSet<StoreBrandEditorial> StoreBrandEditorials { get; set; }
 
-    public virtual DbSet<StoreColor> StoreColors { get; set; }
 
     public virtual DbSet<StoreSpecificationGroup> StoreSpecificationGroups { get; set; }
 
@@ -138,15 +137,12 @@ public partial class ShopDbContext : DbContext
 
     public virtual DbSet<StoreCatalogFeature> StoreCatalogFeatures { get; set; }
 
-    public virtual DbSet<StoreCatalogFeatureValue> StoreCatalogFeatureValues { get; set; }
-
     public virtual DbSet<StoreCategoryCatalogFeature> StoreCategoryCatalogFeatures { get; set; }
 
     public virtual DbSet<StoreProductCatalogFeatureValue> StoreProductCatalogFeatureValues { get; set; }
 
     public virtual DbSet<StoreVariantCatalogFeatureValue> StoreVariantCatalogFeatureValues { get; set; }
 
-    public virtual DbSet<StoreProductColor> StoreProductColors { get; set; }
 
     public virtual DbSet<StoreProductSpecificationValue> StoreProductSpecificationValues { get; set; }
 
@@ -2174,6 +2170,7 @@ public partial class ShopDbContext : DbContext
             {
                 table.HasCheckConstraint("CK_Store_CatalogFeature_Kind", "([Kind]=(2) OR [Kind]=(1))");
                 table.HasCheckConstraint("CK_Store_CatalogFeature_Name", "(len(ltrim(rtrim([Name])))>(0))");
+                table.HasCheckConstraint("CK_Store_CatalogFeature_HexCode", "([HexCode] IS NULL OR [HexCode] like '#[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]')");
             });
             entity.Property(e => e.Id)
                 .HasColumnType("bigint")
@@ -2182,49 +2179,33 @@ public partial class ShopDbContext : DbContext
                 .HasColumnType("bit")
                 .ValueGeneratedOnAdd()
                 .HasDefaultValueSql("((1))");
+            entity.Property(e => e.IdParent).HasColumnType("bigint");
+            entity.Property(e => e.TreePathIds).HasColumnType("nvarchar(4000)").HasMaxLength(4000);
+            entity.Property(e => e.TreePathNames).HasColumnType("nvarchar(4000)").HasMaxLength(4000);
+            entity.Property(e => e.ValueKey).HasColumnType("nvarchar(80)").HasMaxLength(80);
+            entity.Property(e => e.NameEn).HasColumnType("nvarchar(300)").HasMaxLength(300);
+            entity.Property(e => e.HexCode).HasColumnType("char(7)").HasMaxLength(7);
             entity.Property(e => e.Kind)
                 .HasColumnType("tinyint")
                 .ValueGeneratedNever();
             entity.Property(e => e.Name)
-                .HasColumnType("nvarchar(200)")
-                .HasMaxLength(200);
-
-            entity.HasIndex(e => new { e.Kind, e.Name })
-                .HasDatabaseName("UQ_Store_CatalogFeature_Kind_Name")
-                .IsUnique();
-        });
-
-        modelBuilder.Entity<StoreCatalogFeatureValue>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_CatalogFeatureValue");
-
-            entity.ToTable("CatalogFeatureValue", "Store", table =>
-            {
-                table.HasCheckConstraint("CK_Store_CatalogFeatureValue_Name", "(len(ltrim(rtrim([Name])))>(0))");
-            });
-            entity.Property(e => e.Id)
-                .HasColumnType("bigint")
-                .UseIdentityColumn();
-            entity.Property(e => e.IdFeature)
-                .HasColumnType("bigint")
-                .ValueGeneratedNever();
-            entity.Property(e => e.IsActive)
-                .HasColumnType("bit")
-                .ValueGeneratedOnAdd()
-                .HasDefaultValueSql("((1))");
-            entity.Property(e => e.Name)
                 .HasColumnType("nvarchar(300)")
                 .HasMaxLength(300);
 
-            entity.HasIndex(e => new { e.IdFeature, e.Name })
-                .HasDatabaseName("UQ_Store_CatalogFeatureValue_Feature_Name")
-                .IsUnique();
-
+            entity.HasIndex(e => new { e.Kind, e.Name })
+                .HasDatabaseName("UQ_Store_CatalogFeature_Kind_Name")
+                .IsUnique().HasFilter("[IdParent] IS NULL");
+            entity.HasIndex(e => new { e.IdParent, e.Name })
+                .HasDatabaseName("UQ_Store_CatalogFeature_Parent_Name")
+                .IsUnique().HasFilter("[IdParent] IS NOT NULL");
+            entity.HasIndex(e => new { e.IdParent, e.ValueKey })
+                .HasDatabaseName("UQ_Store_CatalogFeature_Parent_ValueKey")
+                .IsUnique().HasFilter("[IdParent] IS NOT NULL AND [ValueKey] IS NOT NULL");
             entity.HasOne<StoreCatalogFeature>()
                 .WithMany()
-                .HasForeignKey(e => e.IdFeature)
+                .HasForeignKey(e => e.IdParent)
                 .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_Store_CatalogFeatureValue_Feature");
+                .HasConstraintName("FK_Store_CatalogFeature_Parent");
         });
 
         modelBuilder.Entity<StoreCategory>(entity =>
@@ -2323,35 +2304,6 @@ public partial class ShopDbContext : DbContext
                 .HasForeignKey(e => e.IdFeature)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Store_CategoryCatalogFeature_Feature");
-        });
-
-        modelBuilder.Entity<StoreColor>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_Color");
-
-            entity.ToTable("Color", "Store", table =>
-            {
-                table.HasCheckConstraint("CK_Store_Color_HexCode", "([HexCode] IS NULL OR [HexCode] like '#[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]')");
-            });
-            entity.Property(e => e.Id)
-                .HasColumnType("bigint")
-                .UseIdentityColumn();
-            entity.Property(e => e.ColorKey)
-                .HasColumnType("nvarchar(80)")
-                .HasMaxLength(80);
-            entity.Property(e => e.HexCode)
-                .HasColumnType("char(7)")
-                .HasMaxLength(7);
-            entity.Property(e => e.NameEn)
-                .HasColumnType("nvarchar(100)")
-                .HasMaxLength(100);
-            entity.Property(e => e.NameFa)
-                .HasColumnType("nvarchar(100)")
-                .HasMaxLength(100);
-
-            entity.HasIndex(e => e.ColorKey)
-                .HasDatabaseName("UQ_Store_Color_ColorKey")
-                .IsUnique();
         });
 
         modelBuilder.Entity<StoreContactMessage>(entity =>
@@ -3000,10 +2952,9 @@ public partial class ShopDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Store_ProductCatalogFeatureValue_Product");
 
-            entity.HasOne<StoreCatalogFeatureValue>()
+            entity.HasOne<StoreCatalogFeature>()
                 .WithMany()
-                .HasForeignKey(e => new { e.IdFeatureValue, e.IdFeature })
-                .HasPrincipalKey(e => new { e.Id, e.IdFeature })
+                .HasForeignKey(e => e.IdFeatureValue)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Store_ProductCatalogFeatureValue_Value");
         });
@@ -3061,39 +3012,6 @@ public partial class ShopDbContext : DbContext
                 .HasForeignKey(e => e.IdProduct)
                 .OnDelete(DeleteBehavior.NoAction)
                 .HasConstraintName("FK_Store_ProductCollectionItem_Product");
-        });
-
-        modelBuilder.Entity<StoreProductColor>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_ProductColor");
-
-            entity.ToTable("ProductColor", "Store");
-            entity.Property(e => e.Id)
-                .HasColumnType("numeric(30,0)")
-                .UseIdentityColumn();
-            entity.Property(e => e.IdColor)
-                .HasColumnType("bigint");
-            entity.Property(e => e.IdProduct)
-                .HasColumnType("numeric(30,0)");
-
-            entity.HasIndex(e => e.IdColor)
-                .HasDatabaseName("IX_ProductColor_IdColor");
-
-            entity.HasIndex(e => new { e.IdProduct, e.IdColor })
-                .HasDatabaseName("UQ_Store_ProductColor_Product_Color")
-                .IsUnique();
-
-            entity.HasOne<StoreColor>()
-                .WithMany()
-                .HasForeignKey(e => e.IdColor)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_Store_ProductColor_Color");
-
-            entity.HasOne<WarehouseProduct>()
-                .WithMany()
-                .HasForeignKey(e => e.IdProduct)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_Store_ProductColor_Product");
         });
 
         modelBuilder.Entity<StoreProductMediaType>(entity =>
@@ -3589,10 +3507,9 @@ public partial class ShopDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Store_VariantCatalogFeatureValue_Feature");
 
-            entity.HasOne<StoreCatalogFeatureValue>()
+            entity.HasOne<StoreCatalogFeature>()
                 .WithMany()
-                .HasForeignKey(e => new { e.IdFeatureValue, e.IdFeature })
-                .HasPrincipalKey(e => new { e.Id, e.IdFeature })
+                .HasForeignKey(e => e.IdFeatureValue)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Store_VariantCatalogFeatureValue_Value");
 

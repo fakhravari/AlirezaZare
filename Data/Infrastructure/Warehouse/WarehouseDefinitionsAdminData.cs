@@ -123,7 +123,7 @@ public sealed class WarehouseDefinitionsAdminData(ShopDbContext db, System.Secur
         var attributes = await db.StoreVariantCatalogFeatureValues
             .AsNoTracking()
             .Join(
-                db.StoreCatalogFeatureValues.AsNoTracking(),
+                db.StoreCatalogFeatures.AsNoTracking(),
                 link => link.IdFeatureValue,
                 value => value.Id,
                 (link, value) => new { link, value })
@@ -315,10 +315,11 @@ public sealed class WarehouseDefinitionsAdminData(ShopDbContext db, System.Secur
 
         var rows = await db.StoreCatalogFeatures
             .AsNoTracking()
+            .Where(x => x.IdParent == null)
             .Join(
-                db.StoreCatalogFeatureValues.AsNoTracking(),
-                attribute => attribute.Id,
-                value => value.IdFeature,
+                db.StoreCatalogFeatures.AsNoTracking().Where(x => x.IdParent != null),
+                attribute => (long?)attribute.Id,
+                value => value.IdParent,
                 (attribute, value) => new { attribute, value })
             .Where(attributeValue =>
                 attributeValue.attribute.Kind == StoreCatalogFeatureKinds.PriceVariant &&
@@ -331,14 +332,24 @@ public sealed class WarehouseDefinitionsAdminData(ShopDbContext db, System.Secur
             {
                 attributeValue.attribute.Id,
                 Label = attributeValue.attribute.Name,
+                attributeValue.attribute.TreePathIds,
+                attributeValue.attribute.TreePathNames,
                 ValueId = attributeValue.value.Id,
-                ValueLabel = attributeValue.value.Name
+                ValueLabel = attributeValue.value.Name,
+                ValueTreePathIds = attributeValue.value.TreePathIds,
+                ValueTreePathNames = attributeValue.value.TreePathNames
             })
             .ToListAsync(cancellationToken);
         return Success(rows.GroupBy(x => new { x.Id, x.Label }).Select(group => new
         {
             id = group.Key.Id, label = group.Key.Label,
-            values = group.Select(x => new { id = x.ValueId, label = x.ValueLabel }).ToArray()
+            treePathIds = group.First().TreePathIds,
+            treePathNames = group.First().TreePathNames,
+            values = group.Select(x => new
+            {
+                id = x.ValueId, label = x.ValueLabel,
+                treePathIds = x.ValueTreePathIds, treePathNames = x.ValueTreePathNames
+            }).ToArray()
         }).ToArray());
     }
 
@@ -1293,12 +1304,12 @@ public sealed class WarehouseDefinitionsAdminData(ShopDbContext db, System.Secur
         }
 
         foreach (VariantAttributeInput item in attributes)
-            if (!await db.StoreCatalogFeatureValues
-                    .AsNoTracking()
+            if (!await db.StoreCatalogFeatures
+                    .AsNoTracking().Where(x => x.IdParent != null)
                     .Join(
                         db.StoreCatalogFeatures.AsNoTracking(),
-                        value => value.IdFeature,
-                        feature => feature.Id,
+                        value => value.IdParent,
+                        feature => (long?)feature.Id,
                         (value, feature) => new { value, feature })
                     .AnyAsync(valueFeature =>
                             valueFeature.value.Id == item.ValueId && valueFeature.feature.Id == item.AttributeId &&
@@ -1356,7 +1367,7 @@ public sealed class WarehouseDefinitionsAdminData(ShopDbContext db, System.Secur
         {
             var feature = await db.StoreCatalogFeatures.SingleAsync(x => x.Id == item.AttributeId, cancellationToken);
             var selected =
-                await db.StoreCatalogFeatureValues.SingleAsync(x => x.Id == item.ValueId && x.IdFeature == feature.Id,
+                await db.StoreCatalogFeatures.SingleAsync(x => x.Id == item.ValueId && x.IdParent == feature.Id,
                     cancellationToken);
             var oldValue = oldValues.FirstOrDefault(x => x.Label == feature.Name && x.DisplayValue == selected.Name);
             if (oldValue is not null)

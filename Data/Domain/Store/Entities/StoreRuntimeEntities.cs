@@ -18,15 +18,6 @@ public sealed class StoreBrandEditorial
     public string? FullDocumentText { get; set; }
 }
 
-public sealed class StoreColor
-{
-    public long Id { get; set; }
-    public string ColorKey { get; set; } = "";
-    public string NameEn { get; set; } = "";
-    public string NameFa { get; set; } = "";
-    public string? HexCode { get; set; }
-}
-
 public sealed class StoreSpecificationGroup
 {
     public long Id { get; set; }
@@ -51,13 +42,6 @@ public sealed class StoreSpecificationFeature
     public string FeatureKey { get; set; } = "";
     public string Label { get; set; } = "";
     public int SortOrder { get; set; }
-}
-
-public sealed class StoreProductColor
-{
-    public decimal Id { get; set; }
-    public decimal IdProduct { get; set; }
-    public long IdColor { get; set; }
 }
 
 public sealed class StoreProductSpecificationValue

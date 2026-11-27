@@ -23,7 +23,7 @@
                         <div class="col-lg-6">
                             <section class="border rounded p-3 h-100" data-reference-feature-kind="@kind.Id">
                                 <h3 class="h5">@kind.Title</h3>
-                                <div class="d-grid gap-2 mb-3" data-reference-feature-list="@kind.Id"></div>
+                                <div class="admin-permission-tree overflow-auto border rounded mb-3 p-2" data-reference-feature-list="@kind.Id" role="tree" aria-label="درخت @kind.Title"></div>
                                 <form class="row g-2 align-items-end" data-reference-feature-create>
                                     <input type="hidden" name="kind" value="@kind.Id"/>
                                     <div class="col">
@@ -103,7 +103,7 @@
             else
             {
                 <div class="table-responsive admin-table-wrap @(catalogSection == "attributes" ? "admin-category-tree-wrap" : "")">
-                    <table class="table table-striped table-hover align-middle mb-0" data-admin-datatable data-admin-table-mode="@((catalogSection is "categories" or "attributes") ? "tree" : "server")">
+                    <table class="table table-striped table-hover align-middle mb-0 @(catalogSection == "products" ? "admin-catalog-products-table" : "")" data-admin-datatable data-admin-table-mode="@((catalogSection is "categories" or "attributes") ? "tree" : "server")">
                         <thead>
                         <tr>
                             @if (catalogSection == "products")
@@ -260,7 +260,7 @@
                         <label class="form-label" for="new-product-limit">حداکثر تعداد خرید</label><input class="form-control" id="new-product-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" value="99" required/>
                     </div>
                     <div class="admin-modal-field admin-modal-field-wide">
-                        <label class="form-label" for="new-product-final-price">مبلغ نهایی فروش (تومان)</label><input class="form-control" id="new-product-final-price" name="finalPricePreview" type="text" placeholder="پس از ثبت تعیین می‌شود" readonly/>
+                        <label class="form-label" for="new-product-final-price">مبلغ نهایی فروش (تومان)</label><input class="form-control" id="new-product-final-price" name="finalPricePreview" type="text" placeholder="با وارد کردن مبلغ و تخفیف محاسبه می‌شود" readonly/>
                     </div>
                 </div>
                 <div class="modal-footer">

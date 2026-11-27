@@ -1,8 +1,22 @@
 # مدل و زیرساخت پایگاه داده
 
+Migration `185-catalog-feature-colors.sql` توسعهٔ مدل کاتالوگ است: نام‌های فارسی/انگلیسی، `ColorKey` و HEX را به مقدارهای ویژگی نمایشی «رنگ» منتقل می‌کند، تخصیص کالا و دسته را می‌سازد و سپس `Store.ProductColor` و `Store.Color` را حذف می‌کند. تا وقتی marker `185-catalog-feature-colors` روی هر پایگاه ثبت نشده، نسخهٔ برنامه‌ای که فقط مدل جدید را می‌خواند با schema قدیمی سازگار نیست؛ فایل migration به‌تنهایی گزارش اجرای پایگاه نیست.
+
 ## وضعیت نگاشت EF
 
 `ShopDbContext` الگوی فایل scaffold شدهٔ EF Core را دنبال می‌کند: سازندهٔ بدون پارامتر و سازندهٔ options، `DbSet`های قابل‌دسترسی، و تنظیم صریح جدول‌ها، ستون‌ها، کلیدها، indexها، قیدها و navigationهای رابطه‌ای در همان فایل قرار دارند. نگاشت هر entity در بلوک مستقل `modelBuilder.Entity` داخل `OnModelCreating` آمده و تنظیمات مدل در فایل جدا یا manifest زمان اجرا نگهداری نمی‌شوند. تنظیمات مدل در فایل جدا یا manifest زمان اجرا نگهداری نمی‌شوند. افزودن یا تغییر entity و تغییر schema باید با همین نگاشت‌های صریح هماهنگ شود؛ این سند سابقهٔ migrationها و تصمیم‌های ساختاری را ثبت می‌کند.
+
+مدل کاتالوگ در کد به `Store.CatalogFeature` خودارجاع تبدیل شده است: ویژگی ریشه `IdParent = NULL` دارد و مقدار ویژگی فرزند مستقیم آن است. `TreePathIds` و `TreePathNames` مسیر شناسه و نام از ریشه تا ردیف را نگه می‌دارند؛ `Kind` فقط نوع ریشه (تنوع قیمتی یا نمایشی) را تعیین می‌کند و مقدار همان نوع را به ارث می‌برد. migration `183-catalog-feature-tree.sql` مقدارهای `Store.CatalogFeatureValue` را با شناسه‌های جدید در ردیف‌های فرزند قرار می‌دهد، تخصیص‌ها را منتقل می‌کند و جدول قدیمی را حذف می‌کند. migration `184-remove-catalog-feature-parent-key.sql` ستون محاسباتی `IdParentKey` را حذف می‌کند؛ دو trigger باقی‌مانده تطابق والد مقدار و ریشهٔ ویژگی را هنگام درج یا تغییر تخصیص کنترل می‌کنند.
+
+Migration `186-document-catalog-feature-assigned-tree-trigger.sql` تعریف `[Store].[TR_CatalogFeature_ValidateAssignedTree]` را با همان منطق دوباره ثبت می‌کند و توضیح فارسی را داخل متن trigger نگه می‌دارد؛ رفتار داده‌ای یا قواعد اعتبارسنجی را تغییر نمی‌دهد. پس از اجرا، marker `186-document-catalog-feature-assigned-tree-trigger` و متن کامنت در `sys.sql_modules` قابل بررسی‌اند.
+
+Migration ۱۸۶ در ۲۸ نوامبر ۲۰۲۶ روی پایگاه `bsshopir_fakhravari` اجرا شد؛ marker آن ثبت و وجود کامنت فارسی در تعریف ذخیره‌شدهٔ trigger از `OBJECT_DEFINITION` تأیید شد.
+
+Migration `187-drop-catalog-feature-assigned-tree-trigger.sql`، trigger `[Store].[TR_CatalogFeature_ValidateAssignedTree]` را حذف می‌کند. در نتیجه تغییر `IdParent` دیگر به‌خاطر تخصیص‌های موجود توسط این trigger مسدود نمی‌شود؛ دو trigger درج/ویرایش تخصیص‌های کالا و تنوع همچنان بررسی می‌کنند که ریشه و مقدار با هم سازگار باشند. Migrationهای ۱۸۴ و ۱۸۶ تعریف trigger را به‌عنوان تاریخچهٔ ایجاد آن نگه می‌دارند؛ migration ۱۸۷ آن را از پایگاه حذف می‌کند.
+
+Migration ۱۸۷ در ۲۸ نوامبر ۲۰۲۶ روی پایگاه `bsshopir_fakhravari` اجرا شد؛ marker ثبت و نبودن trigger هدف و باقی‌ماندن دو trigger اعتبارسنجی تخصیص در `sys.triggers` تأیید شد.
+
+این migrationها در ۲۸ نوامبر ۲۰۲۶ روی پایگاه اصلی `bsshopir_fakhravari` اجرا شدند؛ markerهای ۱۸۳ و ۱۸۴ ثبت شدند. جدول شامل ۳۵ ریشه (۱۳ نوع قیمتی و ۲۲ نمایشی) و ۱۴۲ مقدار فرزند است. تعداد تخصیص‌ها ۱۶۱ برای کالا و ۴۹ برای تنوع است؛ ارجاع شکسته، مسیر خالی و مسیر ناسازگار با والد صفر است و `Store.CatalogFeatureValue` و ستون `IdParentKey` حذف شده‌اند. قبل از انتقال پشتیبان `COPY_ONLY` با `CHECKSUM` گرفته شد؛ `RESTORE VERIFYONLY` به‌دلیل محدودیت مجوز `CREATE DATABASE` برای حساب اتصال قابل اجرا نبود.
 
 ## استاندارد Queryهای EF Core در Shop
 
@@ -186,7 +200,7 @@ Migration `099-home-testimonials.sql` جدول `Store.HomeTestimonial` را بر
 
 ## مرجع ویژگی‌های کاتالوگ و migration 141
 
-`Store.CatalogFeature` و `Store.CatalogFeatureValue` مرجع یگانهٔ نام و مقدار ویژگی‌ها هستند؛ `Kind=1` یعنی تنوع قیمتی و `Kind=2` یعنی ویژگی نمایشی. `Store.CategoryCatalogFeature` تخصیص مستقیم دسته را نگه می‌دارد و مصرف‌کننده‌ها با پیمایش `IdParentCategory` ویژگی‌های والد را به ارث می‌گیرند. `Store.ProductCatalogFeatureValue` فقط برای مقدارهای نمایشی کالا و `Store.VariantCatalogFeatureValue` برای مقدارهای تنوع قیمتی است؛ قیدهای نوع‌دار مانع اتصال اشتباه نوع ویژگی می‌شوند.
+`Store.CatalogFeature` مرجع یگانهٔ ویژگی و مقدارهای آن است؛ ریشه‌ها مقدار `IdParent` خالی دارند و فرزندان، مقدار ویژگی هستند. `Kind=1` یعنی تنوع قیمتی و `Kind=2` یعنی ویژگی نمایشی. مسیر عددی و نامی از ریشه تا هر ردیف در `TreePathIds` و `TreePathNames` نگهداری می‌شود. جدول‌های `Store.ProductCatalogFeatureValue` و `Store.VariantCatalogFeatureValue` همچنان پیوند انتخاب‌ها را نگه می‌دارند؛ مقدار ویژگی مستقیماً به فرزند در `CatalogFeature` اشاره می‌کند.
 
 Migration `141-catalog-features.sql` داده‌ها را افزایشی کپی می‌کند: زوج‌های `ProductSpecsJson` دسته، `Store.ProductSpecificationValue`، مشخصات متصل به تنوع‌های `Warehouse.ProductAttribute*` و overrideهای `Store.ProductSalesPlanOfferSpecificationOverride`. مقدار اختصاصی محصول بر مقدار دسته اولویت دارد و برای محصول‌های فاقد مقدار اختصاصی، نزدیک‌ترین مقدار دسته در زنجیرهٔ والد منتقل می‌شود. migration در صورت JSON نامعتبر، دادهٔ بلندتر از ظرفیت مرجع، مقدار متناقض برای ویژگی/تنوع یا رابطهٔ ناقص متوقف و rollback می‌کند. جدول‌های قدیمی برای حفظ سازگاری فرم‌های فعلی انبار و فروش حذف نمی‌شوند؛ تغییرهای تنوع در مدل جدید و پیوندهای انبار قدیمی باهم نوشته می‌شوند تا قیمت و موجودی همان تنوع حفظ شود.
 

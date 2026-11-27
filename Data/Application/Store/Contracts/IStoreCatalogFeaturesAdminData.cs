@@ -20,9 +20,11 @@ public interface IStoreCatalogFeaturesAdminData
 }
 
 public sealed record CatalogFeatureData(long Id, string Name, byte Kind, bool IsActive,
+    string TreePathIds, string TreePathNames,
     IReadOnlyList<CatalogFeatureValueData> Values);
 
-public sealed record CatalogFeatureValueData(long Id, string Name, bool IsActive);
+public sealed record CatalogFeatureValueData(long Id, string Name, bool IsActive,
+    string TreePathIds, string TreePathNames, string? ValueKey = null, string? NameEn = null, string? HexCode = null);
 public sealed record CategoryFeatureData(bool ValidHierarchy, IReadOnlyList<long> Direct,
     IReadOnlyList<long> Inherited);
 public sealed record ProductFeatureData(bool Exists, bool ValidHierarchy, IReadOnlyList<long> FeatureIds,

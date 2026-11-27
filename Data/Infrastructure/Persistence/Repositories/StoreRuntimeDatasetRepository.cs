@@ -23,7 +23,6 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var countries = await dbContext.GeoCountries.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var categories = await dbContext.StoreCategories.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
             .ToListAsync(cancellationToken);
-        var colors = await dbContext.StoreColors.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var assets = await dbContext.StoreProductAssets.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
             .ToListAsync(cancellationToken);
         var badges = await dbContext.StoreProductBadges.AsNoTracking().ToDictionaryAsync(x => x.Id, cancellationToken);
@@ -62,17 +61,15 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 Quantity = productGroup.Sum(inventoryBalance => inventoryBalance.balance.Quantity)
             })
             .ToDictionaryAsync(x => x.IdProduct, x => x.Quantity, cancellationToken);
-        var productColors = await dbContext.StoreProductColors.AsNoTracking()
-            .Where(x => productIds.Contains(x.IdProduct)).ToListAsync(cancellationToken);
         var catalogFeatureValues = await dbContext.StoreProductCatalogFeatureValues
             .AsNoTracking()
             .Join(
-                dbContext.StoreCatalogFeatures.AsNoTracking(),
+                dbContext.StoreCatalogFeatures.AsNoTracking().Where(x => x.IdParent == null),
                 assignment => assignment.IdFeature,
                 feature => feature.Id,
                 (assignment, feature) => new { assignment, feature })
             .Join(
-                dbContext.StoreCatalogFeatureValues.AsNoTracking(),
+                dbContext.StoreCatalogFeatures.AsNoTracking().Where(x => x.IdParent != null),
                 assignmentFeature => assignmentFeature.assignment.IdFeatureValue,
                 value => value.Id,
                 (assignmentFeature, value) => new { assignmentFeature.assignment, assignmentFeature.feature, value })
@@ -85,7 +82,10 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 FeatureId = assignmentFeatureValue.feature.Id,
                 FeatureName = assignmentFeatureValue.feature.Name,
                 ValueId = assignmentFeatureValue.value.Id,
-                ValueName = assignmentFeatureValue.value.Name
+                ValueName = assignmentFeatureValue.value.Name,
+                assignmentFeatureValue.value.ValueKey,
+                assignmentFeatureValue.value.NameEn,
+                assignmentFeatureValue.value.HexCode
             })
             .ToListAsync(cancellationToken);
         var variantFeatureValues = await dbContext.StoreVariantCatalogFeatureValues
@@ -96,12 +96,12 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 variant => variant.Id,
                 (assignment, variant) => new { assignment, variant })
             .Join(
-                dbContext.StoreCatalogFeatures.AsNoTracking(),
+                dbContext.StoreCatalogFeatures.AsNoTracking().Where(x => x.IdParent == null),
                 assignmentVariant => assignmentVariant.assignment.IdFeature,
                 feature => feature.Id,
                 (assignmentVariant, feature) => new { assignmentVariant.assignment, assignmentVariant.variant, feature })
             .Join(
-                dbContext.StoreCatalogFeatureValues.AsNoTracking(),
+                dbContext.StoreCatalogFeatures.AsNoTracking().Where(x => x.IdParent != null),
                 assignmentVariantFeature => assignmentVariantFeature.assignment.IdFeatureValue,
                 value => value.Id,
                 (assignmentVariantFeature, value) => new
@@ -119,15 +119,18 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 FeatureId = variantFeatureValue.feature.Id,
                 FeatureName = variantFeatureValue.feature.Name,
                 ValueId = variantFeatureValue.value.Id,
-                ValueName = variantFeatureValue.value.Name
+                ValueName = variantFeatureValue.value.Name,
+                variantFeatureValue.value.ValueKey,
+                variantFeatureValue.value.NameEn,
+                variantFeatureValue.value.HexCode
             })
             .ToListAsync(cancellationToken);
         var catalogFeatureOptions = await dbContext.StoreCatalogFeatures
-            .AsNoTracking()
+            .AsNoTracking().Where(x => x.IdParent == null)
             .Join(
-                dbContext.StoreCatalogFeatureValues.AsNoTracking(),
-                feature => feature.Id,
-                value => value.IdFeature,
+                dbContext.StoreCatalogFeatures.AsNoTracking().Where(x => x.IdParent != null),
+                feature => (long?)feature.Id,
+                value => value.IdParent,
                 (feature, value) => new { feature, value })
             .Where(featureValue => featureValue.feature.IsActive && featureValue.value.IsActive)
             .Select(featureValue => new
@@ -136,6 +139,9 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 FeatureName = featureValue.feature.Name,
                 ValueId = featureValue.value.Id,
                 ValueName = featureValue.value.Name,
+                featureValue.value.ValueKey,
+                featureValue.value.NameEn,
+                featureValue.value.HexCode,
                 featureValue.feature.Kind
             })
             .ToListAsync(cancellationToken);
@@ -218,7 +224,6 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var countryCodeById = countries.ToDictionary(x => x.Id, x => x.CountryCode);
         var brandKeyById = brands.ToDictionary(x => x.Id, x => x.BrandKey);
         var categoryById = categories.ToDictionary(x => x.Id);
-        var colorKeyById = colors.ToDictionary(x => x.Id, x => x.ColorKey);
         var groupKeyById = groups.ToDictionary(x => x.Id, x => x.GroupKey);
         var specCategoryById = specCategories.ToDictionary(x => x.Id);
 
@@ -228,7 +233,8 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         root["catalogFeatureOptions"] = new JsonArray(catalogFeatureOptions.Select(x => (JsonNode?)new JsonObject
         {
             ["featureId"] = x.FeatureId, ["featureName"] = x.FeatureName, ["valueId"] = x.ValueId,
-            ["valueName"] = x.ValueName, ["kind"] = x.Kind
+            ["valueName"] = x.ValueName, ["kind"] = x.Kind, ["valueKey"] = x.ValueKey,
+            ["nameEn"] = x.NameEn, ["hexCode"] = x.HexCode
         }).ToArray());
         root["specificationGroups"] = new JsonArray(groups.Select(x =>
             (JsonNode?)new JsonObject { ["id"] = x.GroupKey, ["name"] = x.Name, ["order"] = x.SortOrder }).ToArray());
@@ -270,8 +276,6 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 : null,
             ["en"] = x.NameEn, ["fa"] = x.NameFa, ["slug"] = x.CategoryKey, ["path"] = ParseJsonValue(x.PathJson)
         }).ToArray());
-        root["colors"] = new JsonArray(colors.Select(x => (JsonNode?)new JsonObject
-            { ["id"] = x.ColorKey, ["en"] = x.NameEn, ["fa"] = x.NameFa, ["hex"] = x.HexCode }).ToArray());
         root["countries"] = new JsonArray(countries.Select(x => (JsonNode?)new JsonObject
         {
             ["id"] = x.CountryCode, ["name"] = x.NameFa, ["fa"] = x.NameFa, ["en"] = x.NameEn, ["flag"] = x.FlagPath
@@ -321,19 +325,19 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 ["badgeColor"] = badge?.BackgroundColor, ["badgeTextColor"] = badge?.TextColor,
                 ["badgeBorderColor"] = badge?.BorderColor
             };
-            o["colorIds"] = new JsonArray(productColors.Where(x => x.IdProduct == product.Id)
-                .Select(x => (JsonNode?)JsonValue.Create(colorKeyById.GetValueOrDefault(x.IdColor))).ToArray());
             o["specificationValues"] = new JsonArray();
             o["catalogFeatures"] = new JsonArray(catalogFeatureValues.Where(x => x.IdProduct == product.Id)
                 .Select(x => (JsonNode?)new JsonObject
                 {
                     ["featureId"] = x.FeatureId, ["featureName"] = x.FeatureName, ["valueId"] = x.ValueId,
-                    ["valueName"] = x.ValueName, ["kind"] = 2
+                    ["valueName"] = x.ValueName, ["kind"] = 2, ["valueKey"] = x.ValueKey,
+                    ["nameEn"] = x.NameEn, ["hexCode"] = x.HexCode
                 }).Concat(
                     variantFeatureValues.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject
                     {
                         ["featureId"] = x.FeatureId, ["featureName"] = x.FeatureName, ["valueId"] = x.ValueId,
-                        ["valueName"] = x.ValueName, ["kind"] = 1
+                        ["valueName"] = x.ValueName, ["kind"] = 1, ["valueKey"] = x.ValueKey,
+                        ["nameEn"] = x.NameEn, ["hexCode"] = x.HexCode
                     })).ToArray());
             o["includedBenefits"] = new JsonArray(productBenefits.Where(x => x.IdProduct == product.Id).Select(x =>
                 (JsonNode?)new JsonObject

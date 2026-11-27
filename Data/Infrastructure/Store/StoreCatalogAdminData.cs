@@ -414,12 +414,12 @@ public sealed class StoreCatalogAdminData(ShopDbContext db,
         var specifications = await db.StoreProductCatalogFeatureValues
             .AsNoTracking()
             .Join(
-                db.StoreCatalogFeatures.AsNoTracking(),
+                db.StoreCatalogFeatures.AsNoTracking().Where(x => x.IdParent == null),
                 selected => selected.IdFeature,
                 feature => feature.Id,
                 (selected, feature) => new { selected, feature })
             .Join(
-                db.StoreCatalogFeatureValues.AsNoTracking(),
+                db.StoreCatalogFeatures.AsNoTracking().Where(x => x.IdParent != null),
                 selectedFeature => selectedFeature.selected.IdFeatureValue,
                 value => value.Id,
                 (selectedFeature, value) => new { selectedFeature.selected, selectedFeature.feature, value })
@@ -1577,8 +1577,13 @@ public sealed class StoreCatalogAdminData(ShopDbContext db,
         int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
     {
-        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
-            return Validation("شماره صفحه باید مثبت و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.");
+        int maximumPageSize = string.Equals(section, "attributes", StringComparison.OrdinalIgnoreCase)
+            ? AdminListQuery.MaximumCustomPageSize
+            : AdminListQuery.MaximumPageSize;
+        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging, maximumPageSize))
+            return Validation(string.Equals(section, "attributes", StringComparison.OrdinalIgnoreCase)
+                ? "شماره صفحه باید مثبت و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد."
+                : "شماره صفحه باید مثبت و اندازهٔ صفحه بین ۱ تا ۱۰۰ باشد.");
 
         if (string.Equals(section, "attributes", StringComparison.OrdinalIgnoreCase))
         {
@@ -1607,14 +1612,25 @@ public sealed class StoreCatalogAdminData(ShopDbContext db,
                     x.CategoryKey.Contains(categoryQuery) || x.NameFa.Contains(categoryQuery) ||
                     x.NameEn.Contains(categoryQuery));
             int total = await source.CountAsync(cancellationToken);
-            var all = await source.OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Skip(paging.Offset).Take(paging.PageSize)
+            var all = await source.OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
+                .Skip(paging.Offset).Take(paging.PageSize)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.CategoryKey,
+                    x.NameFa,
+                    x.NameEn,
+                    x.IdParentCategory,
+                    x.IsActive
+                })
                 .ToListAsync(cancellationToken);
             var parents = await db.StoreCategories.AsNoTracking()
+                .Select(x => new { x.Id, x.CategoryKey })
                 .ToDictionaryAsync(x => x.Id, x => x.CategoryKey, cancellationToken);
             var rows = all.Select(x => new CategoryRow(x.CategoryKey, x.NameFa, x.NameEn, x.CategoryKey,
                 x.IdParentCategory is long parentId && parents.TryGetValue(parentId, out string? parentKey)
                     ? parentKey
-                    : "", x.IsActive, x.TreePathIds, x.TreePathNames)).ToArray();
+                    : "", x.IsActive)).ToArray();
 
             return Success(AdminListQuery.CreateResult(rows, total, paging));
         }
@@ -1753,9 +1769,7 @@ public sealed class StoreCatalogAdminData(ShopDbContext db,
         string EnglishName,
         string Slug,
         string ParentId,
-        bool IsActive,
-        string TreePathIds,
-        string TreePathNames);
+        bool IsActive);
 
     private sealed record BrandRow(
         string Id,

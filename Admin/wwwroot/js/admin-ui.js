@@ -264,9 +264,18 @@
 
     function normalizeActionCell(cell) {
         if (!(cell instanceof HTMLTableCellElement) || !cell.closest("tr") || cell.closest("[data-mds-dtp], .mds-bs-dtp-container")) return;
-        const buttons = [...cell.querySelectorAll("button")];
+        const buttons = [...cell.querySelectorAll("button")].filter(button => !button.closest(".dropdown"));
         if (!buttons.length) return;
         cell.classList.add("admin-row-actions");
+        let actionGroup = cell.querySelector(":scope > .admin-row-actions__inner");
+        if (!actionGroup) {
+            actionGroup = document.createElement("div");
+            actionGroup.className = "admin-row-actions__inner";
+            cell.insertBefore(actionGroup, buttons[0]);
+        }
+        for (const button of buttons) {
+            if (button.parentElement !== actionGroup) actionGroup.append(button);
+        }
 
         for (const button of buttons) {
             const icon = button.querySelector("i.fa, i.fas, i.far, svg");
@@ -284,12 +293,16 @@
             ];
             const dataLabel = shortLabels.find(([key]) => button.hasAttribute(`data-${key.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`))?.[1];
             const caption = (alreadyStyled ? button.textContent : dataLabel || visibleText || accessibleLabel).replace(/\s+/gu, " ").trim() || "عملیات";
+            const iconOnly = button.dataset.adminIconOnly === "true"
+                || /ویرایش|حذف/u.test(caption)
+                || Boolean(icon && /\bfa-(?:pen|edit|trash|delete)/u.test(icon.className));
+            if (iconOnly) button.dataset.adminIconOnly = "true";
             if (alreadyStyled && icon && button.querySelector(":scope > span")?.textContent.trim() === caption) continue;
             const variant = button.classList.contains("btn-primary") ? "btn-primary"
                 : button.classList.contains("btn-success") || button.classList.contains("btn-outline-success") ? "btn-outline-success"
                     : button.classList.contains("btn-danger") || button.classList.contains("btn-outline-danger") ? "btn-outline-danger"
                         : button.classList.contains("btn-warning") ? "btn-warning" : "btn-default";
-            button.className = `btn admin-action-btn ${variant}`;
+            button.className = `btn admin-action-btn ${variant}${iconOnly ? " admin-action-btn-icon-only" : ""}`;
             button.title = accessibleLabel;
             button.setAttribute("aria-label", accessibleLabel);
 
@@ -302,6 +315,7 @@
             actionIcon.setAttribute("aria-hidden", "true");
             const captionNode = document.createElement("span");
             captionNode.textContent = caption;
+            if (iconOnly) captionNode.classList.add("visually-hidden");
             button.replaceChildren(actionIcon, captionNode);
             button.dataset.adminActionStyled = "true";
         }

@@ -13,11 +13,11 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
     {
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,
             cancellationToken);
-        var feature = await db.StoreCatalogFeatures.SingleOrDefaultAsync(x => x.Id == featureId, cancellationToken);
+        var feature = await db.StoreCatalogFeatures.SingleOrDefaultAsync(x => x.Id == featureId && x.IdParent == null, cancellationToken);
         if (feature is null) return CatalogFeatureRenameStatus.NotFound;
         if (name.Length < 1 || name.Length > (feature.Kind == StoreCatalogFeatureKinds.PriceVariant ? 80 : 200))
             return CatalogFeatureRenameStatus.InvalidName;
-        if (await db.StoreCatalogFeatures.AnyAsync(x => x.Id != featureId && x.Kind == feature.Kind && x.Name == name,
+        if (await db.StoreCatalogFeatures.AnyAsync(x => x.Id != featureId && x.IdParent == null && x.Kind == feature.Kind && x.Name == name,
                 cancellationToken)) return CatalogFeatureRenameStatus.Duplicate;
         if (feature.Kind == StoreCatalogFeatureKinds.PriceVariant)
         {
@@ -33,6 +33,10 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
             foreach (var attribute in attributes) attribute.Label = name;
         }
         feature.Name = name;
+        feature.TreePathNames = feature.Name;
+        var childValues = await db.StoreCatalogFeatures.Where(x => x.IdParent == featureId).ToListAsync(cancellationToken);
+        foreach (var childValue in childValues)
+            childValue.TreePathNames = $"{feature.Name}/{childValue.Name}";
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return CatalogFeatureRenameStatus.Saved;
@@ -43,13 +47,13 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
     {
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,
             cancellationToken);
-        var feature = await db.StoreCatalogFeatures.SingleOrDefaultAsync(x => x.Id == featureId, cancellationToken);
-        var value = await db.StoreCatalogFeatureValues.SingleOrDefaultAsync(x => x.Id == valueId && x.IdFeature == featureId,
+        var feature = await db.StoreCatalogFeatures.SingleOrDefaultAsync(x => x.Id == featureId && x.IdParent == null, cancellationToken);
+        var value = await db.StoreCatalogFeatures.SingleOrDefaultAsync(x => x.Id == valueId && x.IdParent == featureId,
             cancellationToken);
         if (feature is null || value is null) return CatalogFeatureRenameStatus.NotFound;
         if (name.Length < 1 || name.Length > (feature.Kind == StoreCatalogFeatureKinds.PriceVariant ? 100 : 300))
             return CatalogFeatureRenameStatus.InvalidName;
-        if (await db.StoreCatalogFeatureValues.AnyAsync(x => x.Id != valueId && x.IdFeature == featureId && x.Name == name,
+        if (await db.StoreCatalogFeatures.AnyAsync(x => x.Id != valueId && x.IdParent == featureId && x.Name == name,
                 cancellationToken)) return CatalogFeatureRenameStatus.Duplicate;
         if (feature.Kind == StoreCatalogFeatureKinds.PriceVariant)
         {
@@ -71,6 +75,7 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
             }
         }
         value.Name = name;
+        value.TreePathNames = $"{feature.TreePathNames}/{name}";
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return CatalogFeatureRenameStatus.Saved;
@@ -87,7 +92,7 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
         if (await ReadCategoryChainAsync(categoryId, cancellationToken) is null)
             return SaveCategoryFeaturesStatus.InvalidHierarchy;
         long[] ids = featureIds.Distinct().ToArray();
-        if (await db.StoreCatalogFeatures.CountAsync(x => ids.Contains(x.Id) && x.IsActive, cancellationToken) != ids.Length)
+        if (await db.StoreCatalogFeatures.CountAsync(x => ids.Contains(x.Id) && x.IdParent == null && x.IsActive, cancellationToken) != ids.Length)
             return SaveCategoryFeaturesStatus.InvalidFeatures;
         var existing = await db.StoreCategoryCatalogFeatures.Where(x => x.IdCategory == categoryId)
             .ToListAsync(cancellationToken);
@@ -136,13 +141,13 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
         var allowed = (await db.StoreCategoryCatalogFeatures.Where(x => chain.Contains(x.IdCategory))
             .Select(x => x.IdFeature).Distinct().ToListAsync(cancellationToken)).ToHashSet();
         long[] valueIds = selections.Select(x => x.ValueId).Distinct().ToArray();
-        var valid = await db.StoreCatalogFeatureValues.AsNoTracking()
-            .Join(db.StoreCatalogFeatures.AsNoTracking(), value => value.IdFeature, feature => feature.Id,
+        var valid = await db.StoreCatalogFeatures.AsNoTracking()
+            .Where(value => valueIds.Contains(value.Id) && value.IdParent != null && value.IsActive)
+            .Join(db.StoreCatalogFeatures.AsNoTracking(), value => value.IdParent, feature => (long?)feature.Id,
                 (value, feature) => new { value, feature })
-            .Where(row => valueIds.Contains(row.value.Id) && row.value.IsActive && row.feature.IsActive &&
-                row.feature.Kind == StoreCatalogFeatureKinds.Display)
-            .Select(row => new { row.value.Id, row.value.IdFeature })
-            .ToDictionaryAsync(row => row.Id, row => row.IdFeature, cancellationToken);
+            .Where(row => row.feature.IsActive && row.feature.Kind == StoreCatalogFeatureKinds.Display)
+            .Select(row => new { row.value.Id, FeatureId = row.value.IdParent })
+            .ToDictionaryAsync(row => row.Id, row => row.FeatureId!.Value, cancellationToken);
         if (selections.Any(x => !allowed.Contains(x.FeatureId) ||
             !valid.TryGetValue(x.ValueId, out long featureId) || featureId != x.FeatureId))
             return SaveProductFeaturesStatus.InvalidSelections;
@@ -162,7 +167,7 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
     public async Task<CatalogFeatureMutationResult> CreateFeatureAsync(string name, byte kind,
         CancellationToken cancellationToken)
     {
-        if (await db.StoreCatalogFeatures.AnyAsync(x => x.Kind == kind && x.Name == name, cancellationToken))
+        if (await db.StoreCatalogFeatures.AnyAsync(x => x.IdParent == null && x.Kind == kind && x.Name == name, cancellationToken))
             return new CatalogFeatureMutationResult(CatalogFeatureMutationStatus.Duplicate, 0, name, kind);
         var feature = new StoreCatalogFeature { Name = name, Kind = kind };
         db.StoreCatalogFeatures.Add(feature);
@@ -171,6 +176,9 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
         {
             return new CatalogFeatureMutationResult(CatalogFeatureMutationStatus.Duplicate, 0, name, kind);
         }
+        feature.TreePathIds = feature.Id.ToString();
+        feature.TreePathNames = feature.Name;
+        await db.SaveChangesAsync(cancellationToken);
         return new CatalogFeatureMutationResult(CatalogFeatureMutationStatus.Created, feature.Id, feature.Name,
             feature.Kind);
     }
@@ -179,33 +187,37 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
         CancellationToken cancellationToken)
     {
         var feature = await db.StoreCatalogFeatures.AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == featureId && x.IsActive, cancellationToken);
+            .SingleOrDefaultAsync(x => x.Id == featureId && x.IdParent == null && x.IsActive, cancellationToken);
         if (feature is null)
             return new CatalogFeatureValueMutationResult(CatalogFeatureValueMutationStatus.NotFound, 0, name);
         if (feature.Kind == StoreCatalogFeatureKinds.PriceVariant && name.Length > 100)
             return new CatalogFeatureValueMutationResult(CatalogFeatureValueMutationStatus.TooLong, 0, name);
-        if (await db.StoreCatalogFeatureValues.AnyAsync(x => x.IdFeature == featureId && x.Name == name,
+        if (await db.StoreCatalogFeatures.AnyAsync(x => x.IdParent == featureId && x.Name == name,
                 cancellationToken))
             return new CatalogFeatureValueMutationResult(CatalogFeatureValueMutationStatus.Duplicate, 0, name);
-        var value = new StoreCatalogFeatureValue { IdFeature = featureId, Name = name };
-        db.StoreCatalogFeatureValues.Add(value);
+        var value = new StoreCatalogFeature { IdParent = featureId, Kind = feature.Kind, Name = name };
+        db.StoreCatalogFeatures.Add(value);
         try { await db.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateException)
         {
             return new CatalogFeatureValueMutationResult(CatalogFeatureValueMutationStatus.Duplicate, 0, name);
         }
+        value.TreePathIds = $"{feature.TreePathIds}/{value.Id}".TrimStart('/');
+        value.TreePathNames = $"{feature.TreePathNames}/{value.Name}".TrimStart('/');
+        await db.SaveChangesAsync(cancellationToken);
         return new CatalogFeatureValueMutationResult(CatalogFeatureValueMutationStatus.Created, value.Id, value.Name);
     }
 
     public async Task<IReadOnlyList<CatalogFeatureData>> ReadFeaturesAsync(CancellationToken cancellationToken)
     {
-        var features = await db.StoreCatalogFeatures.AsNoTracking().OrderBy(x => x.Kind).ThenBy(x => x.Name)
-            .Select(x => new { x.Id, x.Name, x.Kind, x.IsActive }).ToListAsync(cancellationToken);
-        var values = await db.StoreCatalogFeatureValues.AsNoTracking().OrderBy(x => x.Name)
-            .Select(x => new { x.Id, x.IdFeature, x.Name, x.IsActive }).ToListAsync(cancellationToken);
+        var features = await db.StoreCatalogFeatures.AsNoTracking().Where(x => x.IdParent == null).OrderBy(x => x.Kind).ThenBy(x => x.Name)
+            .Select(x => new { x.Id, x.Name, x.Kind, x.IsActive, x.TreePathIds, x.TreePathNames }).ToListAsync(cancellationToken);
+        var values = await db.StoreCatalogFeatures.AsNoTracking().Where(x => x.IdParent != null).OrderBy(x => x.Name)
+            .Select(x => new { x.Id, IdFeature = x.IdParent!.Value, x.Name, x.IsActive, x.TreePathIds, x.TreePathNames, x.ValueKey, x.NameEn, x.HexCode }).ToListAsync(cancellationToken);
         return features.Select(feature => new CatalogFeatureData(feature.Id, feature.Name, feature.Kind,
-            feature.IsActive, values.Where(value => value.IdFeature == feature.Id)
-                .Select(value => new CatalogFeatureValueData(value.Id, value.Name, value.IsActive)).ToArray()))
+            feature.IsActive, feature.TreePathIds, feature.TreePathNames, values.Where(value => value.IdFeature == feature.Id)
+                .Select(value => new CatalogFeatureValueData(value.Id, value.Name, value.IsActive,
+                    value.TreePathIds, value.TreePathNames, value.ValueKey, value.NameEn, value.HexCode)).ToArray()))
             .ToArray();
     }
 
