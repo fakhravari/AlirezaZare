@@ -1,5 +1,9 @@
 # مدل و زیرساخت پایگاه داده
 
+## وضعیت نگاشت EF
+
+`ShopDbContext` الگوی فایل scaffold شدهٔ EF Core را دنبال می‌کند: سازندهٔ بدون پارامتر و سازندهٔ options، `DbSet`های قابل‌دسترسی، و تنظیم صریح جدول‌ها، ستون‌ها، کلیدها، indexها، قیدها و navigationهای رابطه‌ای در همان فایل قرار دارند. نگاشت هر entity در بلوک مستقل `modelBuilder.Entity` داخل `OnModelCreating` آمده و تنظیمات مدل در فایل جدا یا manifest زمان اجرا نگهداری نمی‌شوند. تنظیمات مدل در فایل جدا یا manifest زمان اجرا نگهداری نمی‌شوند. افزودن یا تغییر entity و تغییر schema باید با همین نگاشت‌های صریح هماهنگ شود؛ این سند سابقهٔ migrationها و تصمیم‌های ساختاری را ثبت می‌کند.
+
 ## استاندارد Queryهای EF Core در Shop
 
 Queryهای EF Core در پروژهٔ `Shop` باید با قالب یکسان زیر نوشته شوند تا مسیر ساخت query و تفاوت خواندن با تغییر داده روشن بماند:
@@ -271,7 +275,7 @@ Migration `152-price-version-final-price.sql` ستون فیزیکی `Store.Price
 
 ## استاندارد پیکربندی EF Core (Database First)
 
-پایگاه داده منبع حقیقت است و هر دو برنامهٔ Shop و Admin از `Data/Infrastructure/Persistence/ShopDbContext` مشترک استفاده می‌کنند. `OnModelCreating` فقط `ConfigureDatabaseTables` و `ConfigureDatabaseRelationships` را فراخوانی می‌کند: نگاشت جدول/schema و کلیدهای لازم در اولی، و هر رابطه دقیقاً یک‌بار در دومی تعریف می‌شود. هر رابطه با مسیر `Schema.Child -> Schema.Parent` مستند شده است.
+پایگاه داده منبع حقیقت است و هر دو برنامهٔ Shop و Admin از `Data/Infrastructure/Persistence/ShopDbContext` مشترک استفاده می‌کنند. `OnModelCreating` در `ShopDbContext.cs` برای هر entity، نگاشت schema/table، ستون‌ها، کلیدها، indexها، قیدهای check و رابطه‌ها را به‌شکل scaffold شده نگه می‌دارد؛ روابط به ستون‌های کلید خارجی مقصد وصل‌اند و navigationهای تعریف‌شدهٔ entityها حفظ می‌شوند.
 
 رفتار حذف فقط وقتی صریح نوشته می‌شود که با Convention فرق داشته باشد؛ برای FK اجباری، `Cascade` پیش‌فرض EF Core است و تنظیم دوبارهٔ آن لازم نیست. در مدل جاری ۱۹ مورد صریح `Cascade` حذف شدند؛ نوع FKهایشان غیرnullable است و رفتار حذف موردنظر از Convention حفظ می‌شود.
 
@@ -282,6 +286,10 @@ Migration `152-price-version-final-price.sql` ستون فیزیکی `Store.Price
 مقادیر پیش‌فرضی که برای رفتار برنامه لازم‌اند باید هنگام ساخت Entity در کد مشخص شوند. نمونهٔ آن `Warehouse.Voucher.VoucherNumber` است: سرویس `IVoucherNumberGenerator` مقدار بعدی را مستقیماً از sequence موجود `[Warehouse].[VoucherNumberSequence]` می‌خواند و هر دو مسیر صدور حواله آن را پیش از درج تنظیم می‌کنند؛ EF به default constraint ستون تکیه نمی‌کند.
 
 یادداشت تطبیق schema مورخ ۲۵ نوامبر ۲۰۲۶ در بند پیشین، وضعیت مدل پیش از این بازآرایی را ثبت می‌کند؛ آن snapshot توصیف وضعیت فعلی Fluent API یا الزام به بازنمایی ایندکس‌های پایگاه در مدل نیست.
+
+در بررسی خواندنی ۲۷ نوامبر ۲۰۲۶ روی پایگاه `bsshopir_fakhravari`، schema شامل ۱۰۷ جدول، ۷۰۶ ستون، ۱۰۷ کلید اصلی، ۱۵۰ کلید خارجی و ۲۶۳ ایندکس یکتا بود. هر ۱۵۰ کلید خارجی فعال و trusted بودند. جدول‌های تاریخچهٔ migration به‌ترتیب ۱۸۰ marker در `Store.SchemaMigration` و ۱۱ marker در `Warehouse.SchemaMigration` داشتند. در بررسی ستون‌های نام‌گذاری‌شده با پیشوند `Id` (به‌جز کلید اصلی `Id`)، ستونی که نیازمند رابطه به نظر برسد ولی FK نداشته باشد پیدا نشد؛ `Store.SiteSetting.IdentityUpdatedAtUtc` تنها نتیجهٔ بدون FK بود و ستون زمان است، نه شناسهٔ رابطه. snapshot تطبیق ۲۵ نوامبر ۱۰۹ جدول، ۷۲۱ ستون و ۱۵۲ رابطه را ثبت کرده بود؛ این شمارها وضعیت تاریخی مدل/پایگاه در آن روزند و با inventory زندهٔ امروز یکی نیستند. این بررسی خواندنی بود و هیچ داده یا schemaای تغییر نکرد.
+
+Migration `181-remove-legacy-stock-rebuild-procedures.sql` در ۲۷ نوامبر ۲۰۲۶ روی پایگاه اصلی اجرا شد و `Warehouse.RebuildVoucherStock` و wrapper قدیمی `Warehouse.RebuildDocumentStock` را حذف کرد؛ marker ثبت و نبود هر دو رویه پس از اجرا تأیید شد. برنامه از این procedureهای SQL استفاده نمی‌کرد؛ مسیرهای داخلی ثبت و ویرایش سند انبار و ارسال سفارش پرداخت‌شده از `IWarehouseStockLedger.RebuildVoucherAsync` در C# استفاده می‌کنند. migration ۱۶۹ در زمان خود wrapper را برای سازگاری نگه داشته بود، اما پس از تأیید نبود مصرف‌کنندهٔ بیرونی حذف شد. تعریف‌های پیش از حذف برای بازیابی احتمالی در `C:\AlirezaZare-build-artifacts\stock-procedure-removal-20261127\stock-rebuild-procedures-before-181.sql` نگهداری شدند.
 
 Migration `173-remove-order-item-amount-view.sql` در ۲۶ نوامبر ۲۰۲۶ روی پایگاه اصلی اجرا شد و view `Store.OrderItemAmount` و marker آن حذف شد. محاسبهٔ مبلغ از نسخه‌های قیمت سفارش انجام می‌شود؛ migration 176 ذخیرهٔ مبلغ تکراری در `OrderAccessory` را حذف می‌کند.
 
