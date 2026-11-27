@@ -1661,6 +1661,7 @@
         const button = event.target.closest("[data-service-section-create], [data-service-section-save], [data-service-section-cancel], [data-service-page-edit], [data-mag-create], [data-mag-action]"); if (!button) return;
         if (button.hasAttribute("data-service-section-create")) {
             const root = button.closest("[data-service-pages]"); if (!root?.__servicePageSelectedKey || !root.__servicePageDetail) return;
+            if (root.querySelector("[data-service-new-section]")) { root.querySelector("[data-service-new-heading]")?.focus(); return; }
             ui.destroyDataTable(root.querySelector("[data-admin-datatable]")); renderNewServiceSectionRow(root); ui.refreshDataTable(root.querySelector("[data-admin-datatable]")); return;
         }
         if (button.hasAttribute("data-service-section-cancel")) {
