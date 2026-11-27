@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Text.RegularExpressions;
 using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
@@ -17,6 +18,8 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
         if (feature is null) return CatalogFeatureRenameStatus.NotFound;
         if (name.Length < 1 || name.Length > (feature.Kind == StoreCatalogFeatureKinds.PriceVariant ? 80 : 200))
             return CatalogFeatureRenameStatus.InvalidName;
+        if (IsColorFeature(feature) && name != "رنگ")
+            return CatalogFeatureRenameStatus.InvalidMetadata;
         if (await db.StoreCatalogFeatures.AnyAsync(x => x.Id != featureId && x.IdParent == null && x.Kind == feature.Kind && x.Name == name,
                 cancellationToken)) return CatalogFeatureRenameStatus.Duplicate;
         if (feature.Kind == StoreCatalogFeatureKinds.PriceVariant)
@@ -43,6 +46,7 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
     }
 
     public async Task<CatalogFeatureRenameStatus> RenameValueAsync(long featureId, long valueId, string name,
+        string? valueKey, string? nameEn, string? hexCode,
         CancellationToken cancellationToken)
     {
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,
@@ -55,6 +59,17 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
             return CatalogFeatureRenameStatus.InvalidName;
         if (await db.StoreCatalogFeatures.AnyAsync(x => x.Id != valueId && x.IdParent == featureId && x.Name == name,
                 cancellationToken)) return CatalogFeatureRenameStatus.Duplicate;
+        if (IsColorFeature(feature) && (valueKey is not null || nameEn is not null || hexCode is not null))
+        {
+            if (!IsValidColorMetadata(valueKey, nameEn, hexCode))
+                return CatalogFeatureRenameStatus.InvalidMetadata;
+            if (await db.StoreCatalogFeatures.AnyAsync(x => x.Id != valueId && x.IdParent == featureId &&
+                    x.ValueKey == valueKey, cancellationToken))
+                return CatalogFeatureRenameStatus.Duplicate;
+            value.ValueKey = valueKey!.Trim();
+            value.NameEn = nameEn!.Trim();
+            value.HexCode = hexCode!.Trim().ToUpperInvariant();
+        }
         if (feature.Kind == StoreCatalogFeatureKinds.PriceVariant)
         {
             var valueIds = await db.StoreVariantCatalogFeatureValues.AsNoTracking()
@@ -184,6 +199,7 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
     }
 
     public async Task<CatalogFeatureValueMutationResult> CreateValueAsync(long featureId, string name,
+        string? valueKey, string? nameEn, string? hexCode,
         CancellationToken cancellationToken)
     {
         var feature = await db.StoreCatalogFeatures.AsNoTracking()
@@ -192,10 +208,24 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
             return new CatalogFeatureValueMutationResult(CatalogFeatureValueMutationStatus.NotFound, 0, name);
         if (feature.Kind == StoreCatalogFeatureKinds.PriceVariant && name.Length > 100)
             return new CatalogFeatureValueMutationResult(CatalogFeatureValueMutationStatus.TooLong, 0, name);
+        bool isColor = IsColorFeature(feature);
+        if (isColor && !IsValidColorMetadata(valueKey, nameEn, hexCode))
+            return new CatalogFeatureValueMutationResult(CatalogFeatureValueMutationStatus.InvalidMetadata, 0, name);
         if (await db.StoreCatalogFeatures.AnyAsync(x => x.IdParent == featureId && x.Name == name,
                 cancellationToken))
             return new CatalogFeatureValueMutationResult(CatalogFeatureValueMutationStatus.Duplicate, 0, name);
-        var value = new StoreCatalogFeature { IdParent = featureId, Kind = feature.Kind, Name = name };
+        if (isColor && await db.StoreCatalogFeatures.AnyAsync(x => x.IdParent == featureId &&
+                x.ValueKey == valueKey!.Trim(), cancellationToken))
+            return new CatalogFeatureValueMutationResult(CatalogFeatureValueMutationStatus.Duplicate, 0, name);
+        var value = new StoreCatalogFeature
+        {
+            IdParent = featureId,
+            Kind = feature.Kind,
+            Name = name,
+            ValueKey = isColor ? valueKey!.Trim() : null,
+            NameEn = isColor ? nameEn!.Trim() : null,
+            HexCode = isColor ? hexCode!.Trim().ToUpperInvariant() : null
+        };
         db.StoreCatalogFeatures.Add(value);
         try { await db.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateException)
@@ -266,4 +296,13 @@ public sealed class StoreCatalogFeaturesAdminData(ShopDbContext db) : IStoreCata
         }
         return chain;
     }
+
+    private static bool IsColorFeature(StoreCatalogFeature feature) =>
+        feature.Kind == StoreCatalogFeatureKinds.Display && feature.Name == "رنگ";
+
+    private static bool IsValidColorMetadata(string? valueKey, string? nameEn, string? hexCode) =>
+        valueKey is { Length: > 0 and <= 80 } &&
+        Regex.IsMatch(valueKey.Trim(), "^[a-z0-9]+(?:-[a-z0-9]+)*$") &&
+        nameEn is { Length: > 0 and <= 300 } && !string.IsNullOrWhiteSpace(nameEn) &&
+        hexCode is { Length: 7 } && Regex.IsMatch(hexCode.Trim(), "^#[0-9a-fA-F]{6}$");
 }

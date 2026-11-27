@@ -40,11 +40,13 @@ public sealed class StoreCatalogFeaturesApiController(IStoreCatalogFeaturesAdmin
         if (!CanManageFeatures()) return Forbid();
         string name = (input.Name ?? "").Trim();
         if (name.Length is < 1 or > 300) return BadRequest(new { title = "نام مقدار معتبر نیست." });
-        var result = await featureData.CreateValueAsync(id, name, cancellationToken);
+        var result = await featureData.CreateValueAsync(id, name, input.ValueKey, input.NameEn, input.HexCode,
+            cancellationToken);
         return result.Status switch
         {
             CatalogFeatureValueMutationStatus.NotFound => NotFound(),
             CatalogFeatureValueMutationStatus.TooLong => BadRequest(new { title = "مقدار تنوع قیمتی نباید بیش از ۱۰۰ نویسه باشد." }),
+            CatalogFeatureValueMutationStatus.InvalidMetadata => BadRequest(new { title = "برای مقدار رنگ، کلید انگلیسی، نام انگلیسی و کد HEX معتبر لازم است." }),
             CatalogFeatureValueMutationStatus.Duplicate => Conflict(new { title = "ثبت مقدار انجام نشد؛ مقدار تکراری را بررسی کنید." }),
             _ => Ok(new { result.Id, result.Name })
         };
@@ -62,6 +64,7 @@ public sealed class StoreCatalogFeaturesApiController(IStoreCatalogFeaturesAdmin
         {
             CatalogFeatureRenameStatus.NotFound => NotFound(),
             CatalogFeatureRenameStatus.InvalidName => BadRequest(new { title = "نام ویژگی معتبر نیست." }),
+            CatalogFeatureRenameStatus.InvalidMetadata => BadRequest(new { title = "نام ریشهٔ ویژگی رنگ ثابت است." }),
             CatalogFeatureRenameStatus.Duplicate => Conflict(new { title = "نام ویژگی تکراری است." }),
             _ => Ok(new { message = "نام ویژگی ذخیره شد." })
         };
@@ -74,11 +77,13 @@ public sealed class StoreCatalogFeaturesApiController(IStoreCatalogFeaturesAdmin
     {
         if (!CanManageFeatures()) return Forbid();
         string name = (input.Name ?? "").Trim();
-        var result = await featureData.RenameValueAsync(id, valueId, name, cancellationToken);
+        var result = await featureData.RenameValueAsync(id, valueId, name, input.ValueKey, input.NameEn,
+            input.HexCode, cancellationToken);
         return result switch
         {
             CatalogFeatureRenameStatus.NotFound => NotFound(),
             CatalogFeatureRenameStatus.InvalidName => BadRequest(new { title = "نام مقدار معتبر نیست." }),
+            CatalogFeatureRenameStatus.InvalidMetadata => BadRequest(new { title = "برای مقدار رنگ، کلید انگلیسی، نام انگلیسی و کد HEX معتبر لازم است." }),
             CatalogFeatureRenameStatus.Duplicate => Conflict(new { title = "نام مقدار تکراری است." }),
             _ => Ok(new { message = "نام مقدار ذخیره شد." })
         };
@@ -150,7 +155,7 @@ public sealed class StoreCatalogFeaturesApiController(IStoreCatalogFeaturesAdmin
 
 public sealed record FeatureInput(string? Name, byte Kind);
 
-public sealed record FeatureValueInput(string? Name);
+public sealed record FeatureValueInput(string? Name, string? ValueKey, string? NameEn, string? HexCode);
 
 public sealed record CategoryFeaturesInput(long[]? FeatureIds);
 

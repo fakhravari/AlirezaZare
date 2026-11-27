@@ -30,6 +30,50 @@
         parent.append(swatch);
     }
 
+    function appendColorMetadataInput(form, name, placeholder, value, maxLength, pattern) {
+        const column = document.createElement("div");
+        column.className = "col-12 col-sm-6 col-xl-3";
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "form-control form-control-sm";
+        input.name = name;
+        input.placeholder = placeholder;
+        input.setAttribute("aria-label", placeholder);
+        input.maxLength = maxLength;
+        input.required = true;
+        input.value = value || "";
+        if (pattern) input.pattern = pattern;
+        column.append(input);
+        form.append(column);
+    }
+
+    function createColorMetadataForm(featureId, value = null) {
+        const form = document.createElement("form");
+        form.className = "row g-2 align-items-center py-2";
+        form.dataset.referenceColorValue = value ? "update" : "create";
+        if (value) {
+            form.dataset.referenceValueUpdate = String(value.id);
+            form.dataset.referenceFeatureId = String(featureId);
+        } else {
+            form.dataset.referenceValueCreate = String(featureId);
+        }
+        appendColorMetadataInput(form, "name", "نام فارسی رنگ", value?.name, 300);
+        appendColorMetadataInput(form, "nameEn", "نام انگلیسی", value?.nameEn, 300);
+        appendColorMetadataInput(form, "valueKey", "کلید انگلیسی مانند sky-blue", value?.valueKey, 80,
+            "[a-z0-9]+(-[a-z0-9]+)*");
+        appendColorMetadataInput(form, "hexCode", "کد HEX مانند #2563EB", value?.hexCode, 7,
+            "#[0-9a-fA-F]{6}");
+        const buttonColumn = document.createElement("div");
+        buttonColumn.className = "col-12 col-xl-3 d-grid";
+        const button = document.createElement("button");
+        button.className = "btn btn-sm btn-outline-primary";
+        button.type = "submit";
+        button.textContent = value ? "ذخیرهٔ رنگ" : "افزودن رنگ";
+        buttonColumn.append(button);
+        form.append(buttonColumn);
+        return form;
+    }
+
     function closeProductActionMenu(returnFocus = false) {
         if (!activeProductActionMenu) return;
         const { toggle, dropdown, menu } = activeProductActionMenu;
@@ -91,6 +135,7 @@
                 const rootList = document.createElement("ul"); rootList.className = "admin-permission-list"; rootList.setAttribute("role", "group");
                 if (rows.length) list.append(rootList);
                 for (const feature of rows) {
+                    const isColorFeature = kind === 2 && feature.name === "رنگ";
                     const node = document.createElement("li"); node.className = "admin-permission-node"; node.setAttribute("role", "treeitem");
                     const row = document.createElement("div"); row.className = "admin-permission-row";
                     const childList = document.createElement("ul"); childList.className = "admin-permission-list"; childList.setAttribute("role", "group"); childList.hidden = true;
@@ -106,6 +151,7 @@
                     const title = document.createElement("strong"); title.className = "admin-permission-name"; title.textContent = featurePathLabel(feature);
                     const rename = document.createElement("button"); rename.type = "button"; rename.className = "btn btn-sm btn-outline-secondary";
                     rename.dataset.referenceRenameFeature = String(feature.id); rename.dataset.currentName = feature.name; rename.textContent = "ویرایش نام";
+                    if (isColorFeature) { rename.disabled = true; rename.title = "نام ریشهٔ رنگ برای اتصال رنگ‌ها ثابت است."; }
                     row.append(toggle, title, rename); node.append(row);
                     for (const value of feature.values || []) {
                         const valueNode = document.createElement("li"); valueNode.className = "admin-permission-node"; valueNode.setAttribute("role", "treeitem");
@@ -113,6 +159,14 @@
                         valueRow.append(Object.assign(document.createElement("span"), { className: "admin-permission-toggle-spacer" }));
                         const valueLabel = document.createElement("span"); valueLabel.className = `admin-permission-name${value.isActive ? "" : " text-muted"}`;
                         valueLabel.textContent = value.isActive ? featurePathLabel(value) : `${featurePathLabel(value)} (غیرفعال)`;
+                        if (isColorFeature) {
+                            appendFeatureValueSwatch(valueRow, value);
+                            valueRow.append(valueLabel);
+                            valueNode.append(valueRow);
+                            if (value.isActive) valueNode.append(createColorMetadataForm(feature.id, value));
+                            childList.append(valueNode);
+                            continue;
+                        }
                         const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-sm btn-outline-secondary text-nowrap";
                         edit.dataset.referenceRenameValue = String(value.id); edit.dataset.referenceFeatureId = String(feature.id);
                         edit.dataset.currentName = value.name; edit.textContent = "ویرایش مقدار"; edit.disabled = !value.isActive;
@@ -127,11 +181,16 @@
                     }
                     if (feature.isActive) {
                         const valueNode = document.createElement("li"); valueNode.className = "admin-permission-node";
+                        if (isColorFeature) {
+                            valueNode.append(createColorMetadataForm(feature.id));
+                            childList.append(valueNode);
+                        } else {
                         const form = document.createElement("form"); form.className = "admin-permission-row"; form.dataset.referenceValueCreate = String(feature.id);
                         form.append(Object.assign(document.createElement("span"), { className: "admin-permission-toggle-spacer" }));
                         const input = document.createElement("input"); input.className = "form-control form-control-sm"; input.name = "name"; input.maxLength = kind === 1 ? 100 : 300; input.placeholder = "مقدار جدید"; input.required = true;
                         const button = document.createElement("button"); button.className = "btn btn-sm btn-outline-primary text-nowrap"; button.type = "submit"; button.textContent = "افزودن مقدار";
                         form.append(input, button); valueNode.append(form); childList.append(valueNode);
+                        }
                     }
                     node.append(childList); rootList.append(node);
                 }
@@ -2556,21 +2615,29 @@
     document.addEventListener("submit", event => {
         const featureForm = event.target.closest("[data-reference-feature-create]");
         const valueForm = event.target.closest("[data-reference-value-create]");
-        if (!featureForm && !valueForm) return;
+        const valueUpdateForm = event.target.closest("[data-reference-value-update]");
+        if (!featureForm && !valueForm && !valueUpdateForm) return;
         event.preventDefault();
-        const form = featureForm || valueForm;
+        const form = featureForm || valueForm || valueUpdateForm;
         const page = form.closest("[data-admin-page]");
         const manager = page?.querySelector("[data-catalog-feature-manager]");
         const name = form.elements.name.value.trim();
         if (!page || !manager || !name) return;
         const token = manager.querySelector('[name="__RequestVerificationToken"]')?.value || "";
         const kind = featureForm ? Number(form.elements.kind.value) : null;
-        const featureId = valueForm?.dataset.referenceValueCreate;
-        const url = featureForm ? "/api/admin/store/catalog-features" : `/api/admin/store/catalog-features/${encodeURIComponent(featureId)}/values`;
-        const body = featureForm ? { name, kind } : { name };
+        const featureId = valueForm?.dataset.referenceValueCreate || valueUpdateForm?.dataset.referenceFeatureId;
+        const valueId = valueUpdateForm?.dataset.referenceValueUpdate;
+        const baseUrl = "/api/admin/store/catalog-features";
+        const url = featureForm ? baseUrl : valueUpdateForm
+            ? `${baseUrl}/${encodeURIComponent(featureId)}/values/${encodeURIComponent(valueId)}`
+            : `${baseUrl}/${encodeURIComponent(featureId)}/values`;
+        const isColorValue = form.hasAttribute("data-reference-color-value");
+        const body = featureForm ? { name, kind } : isColorValue
+            ? { name, nameEn: form.elements.nameEn.value.trim(), valueKey: form.elements.valueKey.value.trim(), hexCode: form.elements.hexCode.value.trim() }
+            : { name };
         const button = form.querySelector('[type="submit"]'); button.disabled = true;
-        void ui.getJson(url, { method: "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
-            .then(() => { form.reset(); return loadCatalogFeatureManager(page); })
+        void ui.getJson(url, { method: valueUpdateForm ? "PUT" : "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
+            .then(() => { if (!valueUpdateForm) form.reset(); return loadCatalogFeatureManager(page); })
             .catch(error => ui.notify(error.message || "ثبت ویژگی یا مقدار ناموفق بود.", "danger"))
             .finally(() => { button.disabled = false; });
     });

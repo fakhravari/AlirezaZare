@@ -3,45 +3,70 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { chromium } from '@playwright/test';
 
-test('catalog attribute page manages two central feature sets and their values', { skip: !existsSync(chromium.executablePath()) }, async t => {
+test('catalog feature manager creates and edits color metadata', { skip: !existsSync(chromium.executablePath()) }, async t => {
   const browser = await chromium.launch({ headless: true });
   t.after(() => browser.close());
-  const page = await browser.newPage();
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.route('https://example.test/', route => route.fulfill({ contentType: 'text/html', body: '' }));
   await page.goto('https://example.test/');
-  await page.setContent(`<div data-admin-page="catalog" data-admin-section="attributes" data-admin-api="/api/admin/store/catalog/attributes">
+  await page.setContent(`<div dir="rtl" data-admin-page="catalog" data-admin-section="attributes" data-admin-api="/api/admin/store/catalog/attributes">
     <form data-admin-filter><input name="q"></form><div data-admin-status></div><span data-admin-count></span><div data-admin-results></div><div data-admin-pagination></div>
     <section data-catalog-feature-manager><input name="__RequestVerificationToken" value="token"><div data-feature-manager-status></div>
       <div data-reference-feature-list="1"></div><form data-reference-feature-create><input name="kind" value="1"><input name="name"><button type="submit">add</button></form>
       <div data-reference-feature-list="2"></div><form data-reference-feature-create><input name="kind" value="2"><input name="name"><button type="submit">add</button></form>
     </section></div>`);
   await page.evaluate(() => {
+    window.calls = [];
     window.features = [
-      { id: 1, name: 'رنگ', kind: 1, isActive: true, values: [{ id: 10, name: 'آبی', isActive: true }] },
-      { id: 2, name: 'توان', kind: 2, isActive: true, values: [] },
+      { id: 1, name: 'سایز', kind: 1, isActive: true, values: [{ id: 10, name: 'بزرگ', isActive: true }] },
+      { id: 2, name: 'رنگ', kind: 2, isActive: true, values: [{ id: 20, name: 'آبی', isActive: true, valueKey: 'blue', nameEn: 'Blue', hexCode: '#2563EB' }] },
     ];
-    window.AdminUI = { getJson: async (url, options) => {
-      if (url instanceof URL) return { items: [], total: 0, page: 1, pageSize: 50 };
-      if (options?.method === 'POST') {
+    window.AdminUI = { getJson: async (input, options) => {
+      const url = String(input);
+      window.calls.push({ url, method: options?.method || 'GET', body: options?.body });
+      if (url.includes('/catalog/attributes')) return { items: [], total: 0, page: 1, pageSize: 50 };
+      if (url.endsWith('/catalog-features') && (options?.method || 'GET') === 'GET') return window.features;
+      if (options?.method === 'POST' && url.endsWith('/2/values')) {
         const body = JSON.parse(options.body);
-        if (url.endsWith('/values')) window.features.find(x => x.id === Number(url.split('/').at(-2))).values.push({ id: 11, name: body.name, isActive: true });
-        else window.features.push({ id: 3, name: body.name, kind: body.kind, isActive: true, values: [] });
-        return {};
+        window.features[1].values.push({ id: 21, ...body, isActive: true });
+        return { id: 21, name: body.name };
       }
-      if (options?.method === 'PUT') return {};
-      return window.features;
+      if (options?.method === 'PUT' && url.endsWith('/2/values/20')) {
+        Object.assign(window.features[1].values[0], JSON.parse(options.body));
+        return { message: 'saved' };
+      }
+      return {};
     }, notify() {}, formatNumber: String };
   });
   await page.addScriptTag({ path: 'Admin/wwwroot/js/admin-data.js' });
   await page.evaluate(() => AdminPages.initialize(document));
-  await page.locator('[data-reference-feature-list="1"] article').waitFor();
-  assert.equal(await page.locator('[data-reference-feature-list="1"] strong').innerText(), 'رنگ');
-  assert.equal(await page.locator('[data-reference-feature-list="2"] strong').innerText(), 'توان');
-  await page.locator('[data-reference-feature-create]').first().locator('[name="name"]').fill('سایز');
-  await page.locator('[data-reference-feature-create]').first().locator('button').click();
-  await page.locator('[data-reference-feature-list="1"] strong').filter({ hasText: 'سایز' }).waitFor();
-  await page.locator('[data-reference-value-create="3"] [name="name"]').fill('بزرگ');
-  await page.locator('[data-reference-value-create="3"] button').click();
-  await page.locator('[data-reference-feature-list="1"] button').filter({ hasText: 'بزرگ' }).waitFor();
-  assert.equal(await page.locator('[data-reference-feature-list="2"] article').count(), 1);
+
+  const colorList = page.locator('[data-reference-feature-list="2"]');
+  const colorRoot = colorList.locator('[role="treeitem"]').first();
+  await colorRoot.waitFor();
+  assert.equal(await colorRoot.locator('strong').innerText(), '2 · رنگ');
+  assert.equal(await colorRoot.locator('[data-reference-rename-feature]').isDisabled(), true);
+  await colorRoot.locator('.admin-permission-toggle').click();
+  const colorEditor = colorList.locator('[data-reference-value-update="20"]');
+  await colorEditor.waitFor();
+  assert.equal(await colorList.locator('[style*="background-color"]').count(), 1);
+
+  const createForm = colorList.locator('[data-reference-value-create="2"]');
+  await createForm.locator('[name="name"]').fill('آبی آسمانی');
+  await createForm.locator('[name="nameEn"]').fill('Sky blue');
+  await createForm.locator('[name="valueKey"]').fill('sky-blue');
+  await createForm.locator('[name="hexCode"]').fill('#38BDF8');
+  await createForm.locator('button[type="submit"]').click();
+  await colorList.getByText(/آبی آسمانی/).waitFor();
+  const createCall = await page.evaluate(() => window.calls.find(call => call.method === 'POST' && call.url.endsWith('/2/values')));
+  assert.deepEqual(JSON.parse(createCall.body), { name: 'آبی آسمانی', nameEn: 'Sky blue', valueKey: 'sky-blue', hexCode: '#38BDF8' });
+
+  const updateForm = colorList.locator('[data-reference-value-update="20"]');
+  await updateForm.locator('[name="nameEn"]').fill('Azure');
+  await updateForm.locator('[name="hexCode"]').fill('#1D4ED8');
+  await updateForm.locator('button[type="submit"]').click();
+  await page.waitForFunction(() => window.calls.some(call => call.method === 'PUT' && call.url.endsWith('/2/values/20')));
+  const updateCall = await page.evaluate(() => window.calls.find(call => call.method === 'PUT' && call.url.endsWith('/2/values/20')));
+  assert.deepEqual(JSON.parse(updateCall.body), { name: 'آبی', nameEn: 'Azure', valueKey: 'blue', hexCode: '#1D4ED8' });
+  assert.equal(await page.locator('[data-reference-feature-list="1"] [role="treeitem"]').count(), 1);
 });
