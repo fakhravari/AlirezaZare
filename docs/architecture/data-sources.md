@@ -10,6 +10,7 @@
 - `Shop/Seo/`: ابزارهای ساخت URL و قراردادهای کمکی SEO که وابسته به HTTP هستند.
 - `Data/Application/`: قراردادها و use caseهای داده.
 - `Data/Infrastructure/Persistence/`: EF Core، DbContext و repositoryهای SQL.
+- `Data/Application/Export/Contracts/IExcelExportService.cs` و `Data/Infrastructure/Export/DataTableExcelExportService.cs`: قرارداد مشترک تولید فایل Excel از `DataTable`. سرویس در `AddShopDatabase` ثبت می‌شود؛ endpointهای فعلی Admin دادهٔ خروجی را به `DataTable` تبدیل می‌کنند و پاسخ HTTP دانلود را در لایهٔ وب می‌سازند. Shop هم از همان سرویس ثبت‌شده می‌تواند استفاده کند؛ فعلاً endpoint خروجی Excel در Shop پیدا نشد. ساخت workbook وابستگی EPPlus را در Data نگه می‌دارد، نه در کنترلرها.
 - `Data/Application/Email/` و `Data/Infrastructure/Email/`: قرارداد و فرستندهٔ مشترک SMTP که در هر دو برنامه از `AddShopDatabase` ثبت می‌شود.
 - `Data/Domain/`: entityها و قواعد دامنه.
 - `wwwroot/**/js/`: state و rendering مرورگر؛ snapshot سمت کاربر به‌خودی‌خود منبع قطعی قیمت/سفارش نیست.

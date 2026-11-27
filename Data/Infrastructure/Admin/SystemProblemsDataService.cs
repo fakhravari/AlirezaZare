@@ -14,9 +14,9 @@ public sealed class SystemProblemsDataService(ShopDbContext db) : ISystemProblem
                                                                      (p.StartsAtUtc == null || p.StartsAtUtc <= now) &&
                                                                      (p.EndsAtUtc == null || p.EndsAtUtc > now));
         var products = db.Products.AsNoTracking().Where(p => p.IsStoreEnabled);
+
         var productPlans = products
-            .SelectMany(product => plans, (product, plan) => new { product, plan })
-            .Where(productPlan =>
+            .SelectMany(product => plans, (product, plan) => new { product, plan }).Where(productPlan =>
                 (productPlan.plan.IsRegular || db.StoreProductSalesPlanOffers.Any(offer =>
                     offer.IdProduct == productPlan.product.Id && offer.IdSalesPlan == productPlan.plan.Id &&
                     offer.IsEnabled)) &&
@@ -25,24 +25,20 @@ public sealed class SystemProblemsDataService(ShopDbContext db) : ISystemProblem
                     !offer.IsEnabled));
 
         var variantPrices = productPlans
-            .Join(
-                db.ProductVariants.AsNoTracking(),
+            .Join(db.ProductVariants.AsNoTracking(),
                 productPlan => productPlan.product.Id,
                 variant => variant.IdProduct,
                 (productPlan, variant) => new { productPlan.product, productPlan.plan, variant })
-            .GroupJoin(
-                db.StoreProductVariantSalesPlanOffers.AsNoTracking(),
+            .GroupJoin(db.StoreProductVariantSalesPlanOffers.AsNoTracking(),
                 productPlanVariant => new { Variant = productPlanVariant.variant.Id,
                     Plan = productPlanVariant.plan.Id },
                 offer => new { Variant = offer.IdVariant, Plan = offer.IdSalesPlan },
                 (productPlanVariant, offers) => new { productPlanVariant, offers })
-            .SelectMany(
-                productPlanOffers => productPlanOffers.offers.DefaultIfEmpty(),
+            .SelectMany(productPlanOffers => productPlanOffers.offers.DefaultIfEmpty(),
                 (productPlanOffers, offer) => new { productPlanOffers.productPlanVariant, offer })
             .Where(productPlanVariantOffer =>
                 productPlanVariantOffer.productPlanVariant.variant.IsActive &&
-                db.InventoryItems.Any(item =>
-                    item.IdVariant == productPlanVariantOffer.productPlanVariant.variant.Id && item.IsActive) &&
+                db.InventoryItems.Any(item => item.IdVariant == productPlanVariantOffer.productPlanVariant.variant.Id && item.IsActive) &&
                 (productPlanVariantOffer.offer == null ||
                  (productPlanVariantOffer.offer.IsEnabled && !db.StorePriceVersions.Any(price =>
                      price.IdVariant == productPlanVariantOffer.productPlanVariant.variant.Id &&
@@ -59,8 +55,7 @@ public sealed class SystemProblemsDataService(ShopDbContext db) : ISystemProblem
             });
 
         var defaultSale = productPlans
-            .Join(
-                db.ProductVariants.AsNoTracking(),
+            .Join(db.ProductVariants.AsNoTracking(),
                 productPlan => productPlan.product.Id,
                 variant => variant.IdProduct,
                 (productPlan, variant) => new { productPlan.product, productPlan.plan, variant })
@@ -114,9 +109,7 @@ public sealed class SystemProblemsDataService(ShopDbContext db) : ISystemProblem
                 Detail = "تنوع پیش‌فرض فعال ندارد"
             });
 
-        var variantInventory = db.ProductVariants
-            .AsNoTracking()
-            .Where(variant => variant.IsActive && variant.Product.IsStoreEnabled &&
+        var variantInventory = db.ProductVariants.AsNoTracking().Where(variant => variant.IsActive && variant.Product.IsStoreEnabled &&
                               !db.InventoryItems.Any(item =>
                                   item.IdVariant == variant.Id && item.IdProduct == variant.IdProduct &&
                                   item.IsActive))

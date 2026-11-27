@@ -1,5 +1,6 @@
+using System.Data;
 using Microsoft.AspNetCore.Mvc;
-using Shop.Admin.Infrastructure;
+using Shop.Data.Application.Export.Contracts;
 using Shop.Data.Helpers;
 using Shop.Data.Application.Store.Contracts;
 
@@ -8,7 +9,9 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [Area("Store")]
 [ApiController]
 [Route("api/admin/store/newsletter-subscribers")]
-public sealed class StoreNewsletterSubscribersAdminApiController(IStoreNewsletterAdminData data) : ControllerBase
+public sealed class StoreNewsletterSubscribersAdminApiController(
+    IStoreNewsletterAdminData data,
+    IExcelExportService excelExport) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(
@@ -39,32 +42,35 @@ public sealed class StoreNewsletterSubscribersAdminApiController(IStoreNewslette
     }
 
     [HttpGet("export")]
-    public IActionResult Export([FromQuery] string? q, [FromQuery] bool includeUnsubscribed = false,
+    public async Task<IActionResult> Export([FromQuery] string? q, [FromQuery] bool includeUnsubscribed = false,
         CancellationToken cancellationToken = default)
     {
         string search = AdminListQuery.NormalizeSearch(q);
         if (search.Length > AdminListQuery.MaximumSearchLength || search.Any(char.IsControl))
             return ValidationProblem(detail: "عبارت جست‌وجو معتبر نیست.", statusCode: 400);
 
-        return new AdminExcelFileResult("newsletter-subscribers.xlsx", "اعضا", async (worksheet, ct) =>
+        var table = new DataTable("اعضا");
+        table.Columns.Add("ایمیل", typeof(object));
+        table.Columns.Add("تاریخ عضویت", typeof(object));
+        table.Columns.Add("تاریخ لغو", typeof(object));
+        decimal lastId = 0;
+        while (true)
         {
-            await worksheet.WriteRowAsync(ct, "ایمیل", "تاریخ عضویت", "تاریخ لغو");
-            decimal lastId = 0;
-            while (true)
-            {
-                ct.ThrowIfCancellationRequested();
-                var rows = await data.ReadExportBatchAsync(search, includeUnsubscribed, lastId,
-                    AdminListQuery.ExportBatchSize, ct);
-                if (rows.Count == 0) break;
+            cancellationToken.ThrowIfCancellationRequested();
+            var rows = await data.ReadExportBatchAsync(search, includeUnsubscribed, lastId,
+                AdminListQuery.ExportBatchSize, cancellationToken);
+            if (rows.Count == 0) break;
 
-                foreach (var row in rows)
-                    await worksheet.WriteRowAsync(ct, row.Email, row.SubscribedAtUtc.ToString("O"),
-                        row.UnsubscribedAtUtc?.ToString("O"));
+            foreach (var row in rows)
+                table.Rows.Add(row.Email, row.SubscribedAtUtc.ToString("O"),
+                    row.UnsubscribedAtUtc?.ToString("O") ?? (object)DBNull.Value);
 
-                lastId = rows[^1].Id;
-                if (rows.Count < AdminListQuery.ExportBatchSize) break;
-            }
-        });
+            lastId = rows[^1].Id;
+            if (rows.Count < AdminListQuery.ExportBatchSize) break;
+        }
+
+        return File(excelExport.CreateExcel(table, "اعضا", cancellationToken),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "newsletter-subscribers.xlsx");
     }
 }
 

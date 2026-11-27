@@ -1,7 +1,8 @@
 ﻿using System.Globalization;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Shop.Admin.Infrastructure;
+using System.Data;
+using Shop.Data.Application.Export.Contracts;
 using Shop.Data.Helpers;
 using Shop.Data.Application.Store.Contracts;
 
@@ -10,7 +11,9 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [Area("Store")]
 [ApiController]
 [Route("api/admin/store/reports")]
-public sealed class StoreReportsAdminApiController(IStoreReportsAdminData reports) : ControllerBase
+public sealed class StoreReportsAdminApiController(
+    IStoreReportsAdminData reports,
+    IExcelExportService excelExport) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetReport(
@@ -93,31 +96,34 @@ public sealed class StoreReportsAdminApiController(IStoreReportsAdminData report
 
         string[] labels = keys.Select(ExportLabel).ToArray();
 
-        return new AdminExcelFileResult($"store-{type}-report.xlsx", "گزارش", async (worksheet, ct) =>
+        var table = new DataTable("گزارش");
+        foreach (string label in labels)
+            table.Columns.Add(label, typeof(object));
+
+        const int exportPageSize = AdminListQuery.ExportBatchSize;
+        int page = 1;
+        int total;
+        do
         {
-            await worksheet.WriteRowAsync(ct, labels);
-            const int exportPageSize = AdminListQuery.ExportBatchSize;
-            int page = 1;
-            int total;
-            do
+            cancellationToken.ThrowIfCancellationRequested();
+            object report = type switch
             {
-                ct.ThrowIfCancellationRequested();
-                object report = type switch
-                {
-                    "sales" => await reports.ReadSalesAsync(start, end, page, exportPageSize, ct),
-                    "products" => await reports.ReadProductsAsync(start, end, warehouseId, page, exportPageSize,
-                        fullAccess, allowedWarehouseIds, ct),
-                    "inventory" => await reports.ReadInventoryAsync(start, end, warehouseId, page, exportPageSize,
-                        fullAccess, allowedWarehouseIds, ct),
-                    _ => await reports.ReadCustomersAsync(start, end, page, exportPageSize, ct)
-                };
-                JsonElement payload = JsonSerializer.SerializeToElement(report);
-                total = payload.GetProperty("total").GetInt32();
-                foreach (JsonElement item in payload.GetProperty("items").EnumerateArray())
-                    await worksheet.WriteRowAsync(ct, keys.Select(key => ExportValue(item, key)).ToArray());
-                page++;
-            } while ((long)(page - 1) * exportPageSize < total);
-        });
+                "sales" => await reports.ReadSalesAsync(start, end, page, exportPageSize, cancellationToken),
+                "products" => await reports.ReadProductsAsync(start, end, warehouseId, page, exportPageSize,
+                    fullAccess, allowedWarehouseIds, cancellationToken),
+                "inventory" => await reports.ReadInventoryAsync(start, end, warehouseId, page, exportPageSize,
+                    fullAccess, allowedWarehouseIds, cancellationToken),
+                _ => await reports.ReadCustomersAsync(start, end, page, exportPageSize, cancellationToken)
+            };
+            JsonElement payload = JsonSerializer.SerializeToElement(report);
+            total = payload.GetProperty("total").GetInt32();
+            foreach (JsonElement item in payload.GetProperty("items").EnumerateArray())
+                table.Rows.Add(keys.Select(key => ExportValue(item, key) ?? DBNull.Value).ToArray());
+            page++;
+        } while ((long)(page - 1) * exportPageSize < total);
+
+        return File(excelExport.CreateExcel(table, "گزارش", cancellationToken),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"store-{type}-report.xlsx");
     }
 
     private HashSet<long> AllowedWarehouseIds() => User.FindAll("admin_warehouse")

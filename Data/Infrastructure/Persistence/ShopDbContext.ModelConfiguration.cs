@@ -661,10 +661,12 @@ public sealed partial class ShopDbContext
         modelBuilder.Entity<MagazineArticle>().HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.IdMagazineArticle).OnDelete(DeleteBehavior.NoAction); // Mag.MagazineArticle -> Mag.MagazineArticleSection
         modelBuilder.Entity<MagazineArticleRelated>().HasOne<MagazineArticle>().WithMany().HasForeignKey(x => x.IdRelatedArticle).OnDelete(DeleteBehavior.NoAction); // Mag.MagazineArticleRelated -> Mag.MagazineArticle
         modelBuilder.Entity<AccountCart>().HasMany(x => x.Items).WithOne().HasForeignKey(x => x.IdCart); // Account.Cart -> Account.CartItem
+        modelBuilder.Entity<AccountCartItem>().HasMany(x => x.Accessories).WithOne().HasForeignKey(x => x.IdCartItem).OnDelete(DeleteBehavior.Cascade); // Account.CartItem -> Account.CartItemAccessory
         modelBuilder.Entity<AccountCartItemAccessory>().HasOne<StoreProductAccessory>().WithMany().HasForeignKey(x => x.IdProductAccessory).OnDelete(DeleteBehavior.NoAction); // Account.CartItemAccessory -> Store.ProductAccessory
         modelBuilder.Entity<StoreContentPage>().HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.IdContentPage); // Store.ContentPage -> Store.ContentPageSection
         modelBuilder.Entity<StoreFaqItem>().HasOne<StoreContentPage>().WithMany().HasForeignKey(x => x.IdContentPage).OnDelete(DeleteBehavior.NoAction); // Store.FaqItem -> Store.ContentPage
         modelBuilder.Entity<Shop.Data.Domain.Admin.Entities.AdminSystemUser>().HasMany(x => x.Roles).WithOne(x => x.User).HasForeignKey(x => x.IdUser); // Admin.SystemUser -> Admin.SystemUserRole
+        modelBuilder.Entity<AdminSystemUser>().HasMany(x => x.Warehouses).WithOne(x => x.User).HasForeignKey(x => x.IdUser); // Admin.SystemUser -> Admin.SystemUserWarehouse
         modelBuilder.Entity<AdminRole>().HasMany(x => x.Users).WithOne(x => x.Role).HasForeignKey(x => x.IdRole); // Admin.Role -> Admin.SystemUserRole
         modelBuilder.Entity<AdminRolePermission>().HasOne(x => x.Role).WithMany(x => x.Permissions).HasForeignKey(x => x.IdRole); // Admin.RolePermission -> Admin.Role
         modelBuilder.Entity<AdminRolePermission>().HasOne(x => x.Permission).WithMany().HasForeignKey(x => x.IdPermission); // Admin.RolePermission -> Admin.Permission
@@ -684,10 +686,17 @@ public sealed partial class ShopDbContext
         modelBuilder.Entity<VariantName>().HasOne(x => x.Parent).WithMany().HasForeignKey(x => x.IdParent).OnDelete(DeleteBehavior.Restrict); // Warehouse.VariantName -> Warehouse.VariantName
         modelBuilder.Entity<ProductVariant>().HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.NoAction); // Warehouse.ProductVariant -> Warehouse.Product
         modelBuilder.Entity<ProductVariant>().HasOne(x => x.VariantName).WithMany().HasForeignKey(x => x.IdVariantName).OnDelete(DeleteBehavior.Restrict); // Warehouse.ProductVariant -> Warehouse.VariantName
+        modelBuilder.Entity<ProductVariant>().HasMany(x => x.AttributeValues).WithOne(x => x.ProductVariant)
+            .HasForeignKey(x => new { x.IdProductVariant, x.IdProduct }).HasPrincipalKey(x => new { x.Id, x.IdProduct })
+            .OnDelete(DeleteBehavior.Cascade); // Warehouse.ProductVariant -> Warehouse.ProductVariantAttributeValue
         modelBuilder.Entity<ProductAttribute>().HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct); // Warehouse.ProductAttribute -> Warehouse.Product
         modelBuilder.Entity<ProductAttributeValue>().HasOne(x => x.Attribute).WithMany(x => x.Values).HasForeignKey(x => new { x.IdProductAttribute, x.IdProduct }).HasPrincipalKey(x => new { x.Id, x.IdProduct }); // Warehouse.ProductAttributeValue -> Warehouse.ProductAttribute
+        modelBuilder.Entity<ProductAttributeValue>().HasMany(x => x.Variants).WithOne(x => x.AttributeValue)
+            .HasForeignKey(x => new { x.IdProductAttributeValue, x.IdProduct, x.IdProductAttribute })
+            .HasPrincipalKey(x => new { x.Id, x.IdProduct, x.IdProductAttribute }).OnDelete(DeleteBehavior.NoAction); // Warehouse.ProductAttributeValue -> Warehouse.ProductVariantAttributeValue
         modelBuilder.Entity<StoreCouponUsage>().HasOne<AccountCoupon>().WithMany().HasForeignKey(x => x.IdCoupon).OnDelete(DeleteBehavior.Restrict); // Store.CouponUsage -> Store.Coupon
         modelBuilder.Entity<StoreCouponUsage>().HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdCustomerOrder); // Store.CouponUsage -> Store.Order
+        modelBuilder.Entity<AccountCoupon>().HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile).OnDelete(DeleteBehavior.NoAction); // Store.Coupon -> Account.Profile
         modelBuilder.Entity<AccountProfile>().HasOne(x => x.Gender).WithMany().HasForeignKey(x => x.IdGender).OnDelete(DeleteBehavior.Restrict); // Account.Profile -> Account.Gender
         modelBuilder.Entity<AccountMessage>().HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile); // Account.Message -> Account.Profile
         modelBuilder.Entity<StoreCustomerOrderReference>().HasOne(x => x.StatusReference).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict); // Store.Order -> Store.OrderStatus

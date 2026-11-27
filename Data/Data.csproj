@@ -8,8 +8,10 @@
   </PropertyGroup>
   <ItemGroup>
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+	  <PackageReference Include="EPPlus" />
 	  <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="FluentFTP" />
+	  <PackageReference Include="System.Drawing.Common" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 </Project>

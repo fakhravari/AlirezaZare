@@ -9,8 +9,7 @@ namespace Shop.Data.Infrastructure.Admin;
 public sealed class AdminIdentityData(ShopDbContext db, PasswordHasher<AdminSystemUser> passwordHasher)
     : IAdminIdentityData
 {
-    public async Task<AdminIdentityState?> AuthenticateAsync(string normalizedUserName, string password,
-        CancellationToken cancellationToken)
+    public async Task<AdminIdentityState?> AuthenticateAsync(string normalizedUserName, string password, CancellationToken cancellationToken)
     {
         var user = await db.AdminSystemUsers.Include(x => x.Warehouses).Include(x => x.Roles)
             .ThenInclude(x => x.Role).ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
@@ -41,11 +40,9 @@ public sealed class AdminIdentityData(ShopDbContext db, PasswordHasher<AdminSyst
             user.Warehouses.Select(x => x.IdWarehouse).ToArray(), roles, permissions);
     }
 
-    private static AdminPermissionData Project(AdminPermission x) => new(x.Id, x.PermissionKey,
-        x.ParentPermissionKey, x.Area, x.Controller, x.Action, x.FeatureKey, x.Name, x.SortOrder, x.IsActive);
+    private static AdminPermissionData Project(AdminPermission x) => new(x.Id, x.PermissionKey, x.ParentPermissionKey, x.Area, x.Controller, x.Action, x.FeatureKey, x.Name, x.SortOrder, x.IsActive);
 
-    public async Task<AdminBootstrapResult> BootstrapAsync(string userName, string password, string? displayName,
-        CancellationToken cancellationToken)
+    public async Task<AdminBootstrapResult> BootstrapAsync(string userName, string password, string? displayName, CancellationToken cancellationToken)
     {
         if (await db.AdminSystemUsers.AnyAsync(cancellationToken)) return AdminBootstrapResult.AlreadyInitialized;
         var role = await db.AdminRoles.SingleOrDefaultAsync(x => x.RoleKey == "system.full-access", cancellationToken);
