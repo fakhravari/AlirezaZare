@@ -30,8 +30,11 @@ public sealed class SystemProblemsDataService(ShopDbContext db) : ISystemProblem
                 variant => variant.IdProduct,
                 (productPlan, variant) => new { productPlan.product, productPlan.plan, variant })
             .GroupJoin(db.StoreProductVariantSalesPlanOffers.AsNoTracking(),
-                productPlanVariant => new { Variant = productPlanVariant.variant.Id,
-                    Plan = productPlanVariant.plan.Id },
+                productPlanVariant => new
+                {
+                    Variant = productPlanVariant.variant.Id,
+                    Plan = productPlanVariant.plan.Id
+                },
                 offer => new { Variant = offer.IdVariant, Plan = offer.IdSalesPlan },
                 (productPlanVariant, offers) => new { productPlanVariant, offers })
             .SelectMany(productPlanOffers => productPlanOffers.offers.DefaultIfEmpty(),
@@ -163,8 +166,13 @@ public sealed class SystemProblemsDataService(ShopDbContext db) : ISystemProblem
                 db.StoreAccessories.AsNoTracking(),
                 productPlanRelation => productPlanRelation.relation.IdAccessory,
                 accessory => accessory.Id,
-                (productPlanRelation, accessory) => new { productPlanRelation.product, productPlanRelation.plan,
-                    productPlanRelation.relation, accessory })
+                (productPlanRelation, accessory) => new
+                {
+                    productPlanRelation.product,
+                    productPlanRelation.plan,
+                    productPlanRelation.relation,
+                    accessory
+                })
             .Where(productPlanAccessory =>
                 productPlanAccessory.relation.IsRequired && productPlanAccessory.accessory.IsActive &&
                 (!db.StorePriceVersions.Any(price =>
@@ -235,18 +243,18 @@ public sealed class SystemProblemsDataService(ShopDbContext db) : ISystemProblem
             });
 
         var configuration = new List<SystemProblemRowData>();
-        var identity = await db.StoreSiteIdentities.AsNoTracking().Where(i => i.Id == 1)
-            .Select(i => new { i.IdWarehouse }).SingleOrDefaultAsync(cancellationToken);
-        if (identity is null || !identity.IdWarehouse.HasValue || !await db.Warehouses.AsNoTracking()
-                .AnyAsync(w => w.Id == identity.IdWarehouse && w.IsActive && w.IsSalesWarehouse, cancellationToken))
+        var identity = await db.StoreSiteIdentities.AsNoTracking().Where(i => i.Id == 1).Select(i => new { i.IdWarehouse }).SingleOrDefaultAsync(cancellationToken);
+
+        if (identity is null || !identity.IdWarehouse.HasValue || !await db.Warehouses.AsNoTracking().AnyAsync(w => w.Id == identity.IdWarehouse && w.IsActive && w.IsSalesWarehouse, cancellationToken))
             configuration.Add(new() { Subject = "انبار سایت", Detail = "انبار فروش فعال برای سایت تنظیم نشده است" });
+
         int regularPlanCount = await db.SalesPlanReferences.AsNoTracking().CountAsync(p => p.IdStockOwnerType == 1 &&
                 p.IsRegular && p.IsActive &&
                 (p.StartsAtUtc == null || p.StartsAtUtc <= now) && (p.EndsAtUtc == null || p.EndsAtUtc > now),
             cancellationToken);
         if (regularPlanCount != 1)
             configuration.Add(new()
-                { Subject = "طرح عادی فروش", Detail = "تعداد طرح‌های عادی فعال و جاری فروشگاه برابر یک نیست" });
+            { Subject = "طرح عادی فروش", Detail = "تعداد طرح‌های عادی فعال و جاری فروشگاه برابر یک نیست" });
 
         var checks = new List<SystemProblemCheck>
         {
@@ -271,10 +279,11 @@ public sealed class SystemProblemsDataService(ShopDbContext db) : ISystemProblem
             new("order-subtotal", "جمع اقلام سفارش", "مقایسهٔ جمع اقلام قیمت‌گذاری‌شده با مبلغ اقلام ثبت‌شده",
                 orderAmounts)
         };
+
         foreach (var item in checks)
             item.Count = item.Query is null ? item.LocalRows!.Count : await item.Query.CountAsync(cancellationToken);
-        var selected = checks.FirstOrDefault(c => c.Key == check) ??
-                       checks.FirstOrDefault(c => c.Count > 0) ?? checks[0];
+
+        var selected = checks.FirstOrDefault(c => c.Key == check) ?? checks.FirstOrDefault(c => c.Count > 0) ?? checks[0];
         int lastPage = Math.Max(1, (int)(((long)selected.Count + PageSize - 1) / PageSize));
         page = Math.Clamp(page, 1, lastPage);
         var rows = selected.Query is null
@@ -284,8 +293,8 @@ public sealed class SystemProblemsDataService(ShopDbContext db) : ISystemProblem
                 .Skip((page - 1) * PageSize).Take(PageSize).ToListAsync(cancellationToken);
         return new SystemProblemsData(checks.Select(x => new SystemProblemCheckData(x.Key, x.Title, x.Description, x.Count)).ToArray(), new SystemProblemCheckData(selected.Key, selected.Title, selected.Description, selected.Count), rows, page, lastPage, DateTimeOffset.UtcNow);
     }
-    private sealed class SystemProblemCheck(string key, string title, string description,
-        IQueryable<SystemProblemRowData>? query, List<SystemProblemRowData>? localRows = null)
+
+    private sealed class SystemProblemCheck(string key, string title, string description, IQueryable<SystemProblemRowData>? query, List<SystemProblemRowData>? localRows = null)
     {
         public string Key { get; } = key;
         public string Title { get; } = title;
