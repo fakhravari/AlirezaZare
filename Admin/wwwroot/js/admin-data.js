@@ -226,7 +226,8 @@
                 const rootList = document.createElement("ul"); rootList.className = "admin-permission-list"; rootList.setAttribute("role", "tree"); section.append(rootList);
                 for (const feature of features.filter(item => item.kind === kind && item.isActive)) {
                     const id = String(feature.id);
-                    select.append(new Option(`${featurePathLabel(feature)} — ${title}`, id));
+                    const isColorFeature = kind === 2 && feature.name === "رنگ";
+                    if (!isColorFeature) select.append(new Option(`${featurePathLabel(feature)} — ${title}`, id));
                     const node = document.createElement("li"); node.className = "admin-permission-node"; node.setAttribute("role", "treeitem");
                     const row = document.createElement("div"); row.className = "admin-permission-row";
                     const childList = document.createElement("ul"); childList.className = "admin-permission-list"; childList.setAttribute("role", "group"); childList.hidden = true;
@@ -245,6 +246,7 @@
                     const nameText = document.createElement("span"); nameText.className = "admin-permission-name"; nameText.textContent = featurePathLabel(feature) + (inherited.has(id) ? " (ارث‌برده از دستهٔ والد)" : ""); name.append(input, nameText);
                     const rename = document.createElement("button"); rename.type = "button"; rename.className = "btn btn-xs btn-outline-secondary me-2";
                     rename.dataset.featureRename = id; rename.dataset.featureCurrentName = feature.name; rename.textContent = "ویرایش نام";
+                    if (isColorFeature) { rename.disabled = true; rename.title = "نام ریشهٔ رنگ برای اتصال رنگ‌ها ثابت است."; }
                     const activeValues = (feature.values || []).filter(value => value.isActive);
                     if (!activeValues.length) {
                         const emptyNode = document.createElement("li"); emptyNode.className = "admin-permission-node";

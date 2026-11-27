@@ -57,6 +57,7 @@ test('catalog feature manager creates and edits color metadata', { skip: !exists
   await createForm.locator('[name="valueKey"]').fill('sky-blue');
   await createForm.locator('[name="hexCode"]').fill('#38BDF8');
   await createForm.locator('button[type="submit"]').click();
+  await colorRoot.locator('.admin-permission-toggle').click();
   await colorList.getByText(/آبی آسمانی/).waitFor();
   const createCall = await page.evaluate(() => window.calls.find(call => call.method === 'POST' && call.url.endsWith('/2/values')));
   assert.deepEqual(JSON.parse(createCall.body), { name: 'آبی آسمانی', nameEn: 'Sky blue', valueKey: 'sky-blue', hexCode: '#38BDF8' });
@@ -68,5 +69,5 @@ test('catalog feature manager creates and edits color metadata', { skip: !exists
   await page.waitForFunction(() => window.calls.some(call => call.method === 'PUT' && call.url.endsWith('/2/values/20')));
   const updateCall = await page.evaluate(() => window.calls.find(call => call.method === 'PUT' && call.url.endsWith('/2/values/20')));
   assert.deepEqual(JSON.parse(updateCall.body), { name: 'آبی', nameEn: 'Azure', valueKey: 'blue', hexCode: '#1D4ED8' });
-  assert.equal(await page.locator('[data-reference-feature-list="1"] [role="treeitem"]').count(), 1);
+  assert.equal(await page.locator('[data-reference-feature-list="1"] > ul > li[role="treeitem"]').count(), 1);
 });
