@@ -102,7 +102,7 @@
                 credentials: "same-origin",
                 headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "text/html" }
             });
-            if (!response.ok) throw new Error("بارگذاری گزارش مصرف کد تخفیف انجام نشد.");
+            if (!response.ok) throw new Error(`بارگذاری گزارش مصرف کد تخفیف انجام نشد (خطای ${response.status}).`);
             const documentFragment = new DOMParser().parseFromString(await response.text(), "text/html");
             const report = documentFragment.querySelector("#coupon-report-content");
             if (!report) throw new Error("پاسخ گزارش معتبر نیست.");

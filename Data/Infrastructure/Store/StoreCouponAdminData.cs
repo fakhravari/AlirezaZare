@@ -44,26 +44,35 @@ public sealed class StoreCouponAdminData(ShopDbContext db) : IStoreCouponAdminDa
     {
         var coupon = await db.AccountCoupons.AsNoTracking().SingleOrDefaultAsync(item => item.Id == id, ct);
         if (coupon is null) return null;
-        var orders = db.StoreCouponUsages.AsNoTracking()
-            .Where(usage => usage.IdCoupon == id)
-            .Join(db.StoreCustomerOrders.AsNoTracking(), usage => usage.IdCustomerOrder, order => order.Id,
-                (usage, order) => order)
-            .Join(db.AccountProfiles.AsNoTracking(), order => order.IdProfile, profile => profile.Id,
-                (order, profile) => new CouponOrderRowData(order.Id, "",
-                    (profile.FirstName + " " + profile.LastName).Trim(), order.StatusReference.NameFa,
-                    order.CreatedAtUtc, order.SubtotalAmount, order.CouponDiscountAmount, order.TotalAmount));
+        var orders = db.StoreCustomerOrders.AsNoTracking()
+            .Where(order => db.StoreCouponUsages.Any(usage => usage.IdCoupon == id &&
+                usage.IdCustomerOrder == order.Id));
         int total = await orders.CountAsync(ct);
         page = Math.Min(page, Math.Max(1, (int)Math.Ceiling(total / 25d)));
-        decimal discount = await orders.SumAsync(order => (decimal?)order.Discount, ct) ?? 0;
-        decimal subtotal = await orders.SumAsync(order => (decimal?)order.Subtotal, ct) ?? 0;
-        decimal payable = await orders.SumAsync(order => (decimal?)order.Total, ct) ?? 0;
-        var rows = await orders.OrderByDescending(order => order.CreatedAtUtc).ThenByDescending(order => order.Id)
-            .Skip((page - 1) * 25).Take(25).ToListAsync(ct);
-        rows = rows.Select(row => row with
+        var totals = await orders.GroupBy(_ => 1).Select(group => new
         {
-            OrderNumber = row.Id.ToString(System.Globalization.CultureInfo.InvariantCulture)
-        }).ToList();
-        return new CouponReportData(coupon.Id, coupon.Code, coupon.UsageLimit, total, subtotal, discount, payable,
+            Subtotal = group.Sum(order => order.SubtotalAmount),
+            Discount = group.Sum(order => order.CouponDiscountAmount),
+            Total = group.Sum(order => order.TotalAmount)
+        }).SingleOrDefaultAsync(ct);
+        var rawRows = await orders.Join(db.AccountProfiles.AsNoTracking(), order => order.IdProfile,
+                profile => profile.Id, (order, profile) => new
+                {
+                    order.Id,
+                    Customer = (profile.FirstName + " " + profile.LastName).Trim(),
+                    Status = order.StatusReference.NameFa,
+                    order.CreatedAtUtc,
+                    order.SubtotalAmount,
+                    order.CouponDiscountAmount,
+                    order.TotalAmount
+                })
+            .OrderByDescending(order => order.CreatedAtUtc).ThenByDescending(order => order.Id)
+            .Skip((page - 1) * 25).Take(25).ToListAsync(ct);
+        var rows = rawRows.Select(row => new CouponOrderRowData(row.Id,
+            row.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), row.Customer, row.Status,
+            row.CreatedAtUtc, row.SubtotalAmount, row.CouponDiscountAmount, row.TotalAmount)).ToList();
+        return new CouponReportData(coupon.Id, coupon.Code, coupon.UsageLimit, total, totals?.Subtotal ?? 0,
+            totals?.Discount ?? 0, totals?.Total ?? 0,
             page, rows);
     }
 
