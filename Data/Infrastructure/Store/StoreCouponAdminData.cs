@@ -11,7 +11,8 @@ public sealed class StoreCouponAdminData(ShopDbContext db) : IStoreCouponAdminDa
     public async Task<CouponIndexData> ReadAsync(string search, string status, int page, DateOnly today,
         CancellationToken ct)
     {
-        var query = db.AccountCoupons.AsNoTracking().Where(item => search == "" || item.Code.Contains(search));
+        var query = db.AccountCoupons.AsNoTracking().Where(item => search == "" || item.Code.Contains(search) ||
+            db.AccountProfiles.Any(profile => profile.Id == item.IdProfile && profile.Email.Contains(search)));
         query = status switch
         {
             "disabled" => query.Where(item => !item.Enabled),

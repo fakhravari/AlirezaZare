@@ -141,6 +141,23 @@
             "Admin/Areas/Store/Controllers/Api/StoreMediaUploadApiController.cs"
           ]
         },
+        "coupon-management": {
+          "markup": [
+            "Admin/Areas/Store/Views/Coupons/Index.cshtml",
+            "Admin/Areas/Store/Views/Coupons/_CouponContent.cshtml",
+            "Admin/Areas/Store/Views/Coupons/_CouponEditor.cshtml"
+          ],
+          "server": [
+            "Admin/Areas/Store/Controllers/CouponsController.cs"
+          ],
+          "data": [
+            "Data/Application/Store/Contracts/IStoreCouponAdminData.cs",
+            "Data/Infrastructure/Store/StoreCouponAdminData.cs"
+          ],
+          "js": [
+            "Admin/wwwroot/js/admin-coupons.js"
+          ]
+        },
         "store-reports": {
           "markup": [
             "Admin/Areas/Store/Views/Features/Reports.cshtml"

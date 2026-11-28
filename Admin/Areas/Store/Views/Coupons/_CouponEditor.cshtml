@@ -6,7 +6,7 @@
 }
 <div class="modal fade" id="coupon-editor-@suffix" tabindex="-1" aria-labelledby="coupon-editor-title-@suffix" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
-        <form asp-action="Save" method="post" class="modal-content">
+        <form asp-action="Save" method="post" class="modal-content" data-admin-confirm="این کد با شرایط واردشده ذخیره شود و در صورت فعال‌بودن، برای استفاده عملیاتی شود؟" data-coupon-mutation>
             @if (!isNew)
             {
                 <input type="hidden" name="id" value="@Model.Id"/>
@@ -17,8 +17,9 @@
                 </div><button class="btn-close ms-0" type="button" data-bs-dismiss="modal" aria-label="بستن"></button>
             </div>
             <div class="modal-body admin-modal-grid-two">
+                <div class="alert alert-danger d-none mb-0" role="alert" aria-live="assertive" data-coupon-form-error></div>
                 <div class="admin-modal-field">
-                    <label for="coupon-code-@suffix" class="form-label">کد انگلیسی و عددی</label><input id="coupon-code-@suffix" name="code" value="@Model.Code" class="form-control" dir="ltr" maxlength="32" pattern="[A-Za-z0-9]+" readonly="@lockedCode" required/><small class="text-muted">@(lockedCode ? "کد دارای سابقه قابل تغییر نیست." : "فقط حروف انگلیسی و عدد، بدون فاصله.")</small>
+                    <label for="coupon-code-@suffix" class="form-label">کد تخفیف</label><input id="coupon-code-@suffix" name="code" value="@Model.Code" class="form-control" dir="auto" maxlength="32" readonly="@lockedCode" required/><small class="text-muted">@(lockedCode ? "کد دارای سابقه قابل تغییر نیست." : "هر کد غیرخالی تا ۳۲ نویسه پذیرفته می‌شود؛ کد تکراری ذخیره نمی‌شود.")</small>
                 </div>
                 <div class="admin-modal-field">
                     <label for="coupon-percent-@suffix" class="form-label">درصد تخفیف</label><input id="coupon-percent-@suffix" name="discountPercent" value="@(isNew ? "" : Model.DiscountPercent.ToString())" type="number" min="1" max="99" class="form-control" required/><small class="text-muted">از ۱ تا ۹۹ درصد</small>
@@ -27,7 +28,7 @@
                     <label for="coupon-limit-@suffix" class="form-label">سقف کل استفاده</label><input id="coupon-limit-@suffix" name="usageLimit" value="@Model.UsageLimit" type="number" min="@Math.Max(1, Model.Uses)" class="form-control" required/><small class="text-muted">تعداد مصرف ثبت‌شده: @Model.Uses</small>
                 </div>
                 <div class="admin-modal-field">
-                    <label for="coupon-expiry-@suffix" class="form-label">تاریخ انقضا (میلادی)</label><input id="coupon-expiry-@suffix" name="expiresOn" value="@(isNew ? "" : Model.ExpiresOn.ToString("yyyy-MM-dd"))" type="date" class="form-control" required/><small class="text-muted">تا پایان این روز بر اساس UTC معتبر است.</small>
+                    <label for="coupon-expiry-@suffix" class="form-label">تاریخ انقضا</label><input id="coupon-expiry-@suffix" name="expiresOn" value="@(isNew ? "" : Model.ExpiresOn.ToString("yyyy-MM-dd"))" type="date" class="form-control" required aria-describedby="coupon-expiry-help-@suffix"/><small id="coupon-expiry-help-@suffix" class="text-muted">انتخاب تاریخ الزامی است؛ تا پایان این روز بر اساس UTC معتبر است.</small>
                 </div>
                 <div class="admin-modal-field">
                     <label for="coupon-audience-@suffix" class="form-label">مخاطب کد</label>

@@ -1,0 +1,71 @@
+@model Shop.Admin.Areas.Store.Controllers.CouponIndexModel
+
+@{
+    int totalPages = Math.Max(1, (int)Math.Ceiling(Model.Total / 25d));
+    int currentPage = Math.Min(Model.Page, totalPages);
+    int[] visiblePages = new[] { 1, currentPage - 1, currentPage, currentPage + 1, totalPages }.Where(page => page >= 1 && page <= totalPages).Distinct().OrderBy(page => page).ToArray();
+}
+<div id="coupon-content">
+@await Html.PartialAsync("_AdminPageIntro", ("کدهای تخفیف", "کدها، ظرفیت مصرف و عملکرد آن‌ها را یکجا مدیریت کنید."))
+<div id="coupon-feedback" aria-live="polite">
+    @if (TempData["CouponMessage"] is string message) { <div class="alert alert-success" role="status">@message</div> }
+    @if (TempData["CouponError"] is string error) { <div class="alert alert-danger" role="alert">@error</div> }
+</div>
+<section class="panel panel-inverse">
+    <div class="panel-heading">
+        <h2 class="panel-title">فهرست کدهای تخفیف</h2>
+        <div class="panel-heading-btn"><button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#coupon-editor-new"><i class="fa fa-plus me-1" aria-hidden="true"></i>تعریف کد تخفیف</button></div>
+    </div>
+    <div class="panel-body">
+        <form method="get" asp-action="Index" class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-coupon-filter>
+            <label for="coupon-search" class="visually-hidden">جست‌وجوی کد یا ایمیل</label><input id="coupon-search" name="q" value="@Model.Query" maxlength="254" dir="auto" class="form-control" placeholder="جست‌وجوی کد یا ایمیل"/>
+            <label for="coupon-status" class="visually-hidden">وضعیت</label>
+            <select id="coupon-status" name="status" class="form-select"><option value="" selected="@(Model.Status == "")">همهٔ وضعیت‌ها</option><option value="active" selected="@(Model.Status == "active")">قابل استفاده</option><option value="disabled" selected="@(Model.Status == "disabled")">غیرفعال</option><option value="expired" selected="@(Model.Status == "expired")">منقضی</option><option value="exhausted" selected="@(Model.Status == "exhausted")">ظرفیت تکمیل</option></select>
+            <button class="btn btn-primary" type="submit"><i class="fa fa-magnifying-glass me-1" aria-hidden="true"></i>جست‌وجو</button><a asp-action="Index" class="btn btn-default" data-coupon-clear>پاک‌کردن فیلتر</a>
+        </form>
+        <p class="small text-muted">@Model.Total.ToString("N0") کد · @Model.Uses.ToString("N0") مصرف · @Model.Discount.ToString("N0") تومان تخفیف ثبت‌شده در همهٔ وضعیت‌های سفارش</p>
+        <div class="table-responsive admin-table-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 admin-styled-table">
+                <thead><tr><th scope="col">کد تخفیف</th><th scope="col">مخاطب</th><th scope="col">ایمیل</th><th scope="col">درصد</th><th scope="col">مصرف / سقف</th><th scope="col">تاریخ انقضا</th><th scope="col">وضعیت</th><th scope="col">تخفیف ثبت‌شده</th><th scope="col">عملیات</th></tr></thead>
+                <tbody>
+                @foreach (var coupon in Model.Coupons)
+                {
+                    string status = !coupon.Enabled ? "غیرفعال" : coupon.ExpiresOn < Model.Today ? "منقضی" : coupon.Uses >= coupon.UsageLimit ? "ظرفیت تکمیل" : "قابل استفاده";
+                    string statusClass = status == "قابل استفاده" ? "bg-success" : "bg-secondary";
+                    <tr>
+                        <td><strong><bdi dir="ltr">@coupon.Code</bdi></strong></td>
+                        <td>@(coupon.IdProfile is null ? "عمومی" : "اختصاصی")</td>
+                        <td>@if (coupon.CustomerEmail is not null) { <bdi dir="ltr">@coupon.CustomerEmail</bdi> } else { <span class="text-muted">—</span> }</td>
+                        <td>@coupon.DiscountPercent٪</td><td>@coupon.Uses.ToString("N0") / @coupon.UsageLimit.ToString("N0")</td>
+                        <td><time data-admin-date datetime="@coupon.ExpiresOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)" dir="ltr">@coupon.ExpiresOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)</time></td>
+                        <td><span class="badge @statusClass">@status</span></td><td>@coupon.Discount.ToString("N0") تومان</td>
+                        <td><div class="d-flex align-items-center flex-wrap gap-1">
+                            <button type="button" class="btn btn-default btn-sm" data-bs-toggle="modal" data-bs-target="#coupon-editor-@coupon.Id" aria-label="ویرایش @coupon.Code"><i class="fa fa-pen me-1" aria-hidden="true"></i>ویرایش</button>
+                            <a class="btn btn-default btn-sm" asp-action="Report" asp-route-id="@coupon.Id" aria-label="گزارش @coupon.Code"><i class="fa fa-chart-column me-1" aria-hidden="true"></i>گزارش</a>
+                            @if (coupon.Uses == 0 && !coupon.HasOrders) { <form asp-action="Delete" method="post" data-admin-confirm="این کد تخفیف بدون سابقه حذف شود؟" data-coupon-mutation><input type="hidden" name="id" value="@coupon.Id"/><button type="submit" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash-can me-1" aria-hidden="true"></i>حذف</button></form> }
+                            else { <span class="small text-muted">دارای سابقه</span> }
+                        </div></td>
+                    </tr>
+                }
+                @if (Model.Coupons.Count == 0) { <tr><td colspan="9" class="text-center text-muted p-4">کدی در این صفحه یافت نشد.</td></tr> }
+                </tbody>
+            </table>
+        </div>
+        <form method="get" asp-action="Index" class="admin-pagination mt-3" role="navigation" aria-label="صفحه‌بندی کدهای تخفیف" data-coupon-filter>
+            <input type="hidden" name="q" value="@Model.Query"/><input type="hidden" name="status" value="@Model.Status"/>
+            <span class="small text-muted">صفحهٔ @currentPage.ToString("N0") از @totalPages.ToString("N0")</span>
+            <button type="submit" name="page" value="@(currentPage - 1)" class="btn btn-sm btn-default" disabled="@(currentPage <= 1)" aria-label="صفحهٔ قبل">قبلی</button>
+            @{ int previous = 0; }
+            @foreach (int pageNumber in visiblePages)
+            {
+                @if (previous > 0 && pageNumber - previous > 1) { <span class="admin-pagination__gap" aria-hidden="true">…</span> }
+                <button type="submit" name="page" value="@pageNumber" class="btn btn-sm @(pageNumber == currentPage ? "btn-primary" : "btn-default")" aria-current="@(pageNumber == currentPage ? "page" : null)" aria-label="صفحهٔ @pageNumber">@pageNumber.ToString("N0")</button>
+                previous = pageNumber;
+            }
+            <button type="submit" name="page" value="@(currentPage + 1)" class="btn btn-sm btn-default" disabled="@(currentPage >= totalPages)" aria-label="صفحهٔ بعد">بعدی</button>
+        </form>
+    </div>
+</section>
+@await Html.PartialAsync("_CouponEditor", new Shop.Admin.Areas.Store.Controllers.CouponRow(0, "", 0, 1, true, default, 0, 0, false, null, null))
+@foreach (var coupon in Model.Coupons) { @await Html.PartialAsync("_CouponEditor", coupon) }
+</div>
