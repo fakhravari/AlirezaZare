@@ -20,7 +20,7 @@ public sealed class CouponsController(IStoreCouponAdminData data) : Controller
         if (q.Length > 254 || page is < 1 or > 100000 ||
             status is not ("" or "active" or "disabled" or "expired" or "exhausted")) return BadRequest();
         var model = await ReadIndexModel(q, status, page, cancellationToken);
-        return IsAjaxRequest() ? PartialView("_CouponContent", model) : View(model);
+        return IsAjaxRequest() && !IsAdminShellNavigation() ? PartialView("_CouponContent", model) : View(model);
     }
 
     private async Task<CouponIndexModel> ReadIndexModel(string q, string status, int page, CancellationToken ct)
@@ -32,6 +32,7 @@ public sealed class CouponsController(IStoreCouponAdminData data) : Controller
     }
 
     private bool IsAjaxRequest() => string.Equals(Request.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
+    private bool IsAdminShellNavigation() => string.Equals(Request.Headers["X-Admin-Navigation"], "true", StringComparison.OrdinalIgnoreCase);
 
     [HttpGet]
     public async Task<IActionResult> Report(decimal id, int page = 1, CancellationToken cancellationToken = default)

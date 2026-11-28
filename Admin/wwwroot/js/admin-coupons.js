@@ -1,13 +1,19 @@
 (() => {
     "use strict";
 
-    const root = document.getElementById("coupon-page");
-    if (!root) return;
+    let root = document.getElementById("coupon-page");
+
+    window.AdminCoupons = {
+        initialize(container) {
+            root = container?.querySelector("#coupon-page") || (container?.id === "coupon-page" ? container : null);
+        }
+    };
 
     let activeRequest;
     let requestNumber = 0;
 
     const showMessage = (message, isError = false) => {
+        if (!root) return;
         const feedback = root.querySelector("#coupon-feedback");
         if (!feedback) return;
         feedback.replaceChildren();
@@ -32,7 +38,7 @@
     document.addEventListener("invalid", event => {
         const control = event.target;
         const form = control instanceof HTMLElement ? control.closest("form[data-coupon-mutation]") : null;
-        if (!form || !root.contains(form)) return;
+        if (!root || !form || !root.contains(form)) return;
         event.preventDefault();
         showFormError(form, control.validationMessage || "اطلاعات واردشده را بررسی کنید.");
         control.focus();
@@ -41,12 +47,13 @@
     document.addEventListener("input", event => {
         const control = event.target;
         const form = control instanceof HTMLElement ? control.closest("form[data-coupon-mutation]") : null;
-        if (!form || !root.contains(form)) return;
+        if (!root || !form || !root.contains(form)) return;
         const errorBox = form.querySelector("[data-coupon-form-error]");
         if (errorBox && control.checkValidity()) errorBox.classList.add("d-none");
     });
 
     const loadContent = async (url, { updateHistory = false, message = "" } = {}) => {
+        if (!root) return;
         activeRequest?.abort();
         activeRequest = new AbortController();
         const currentRequest = ++requestNumber;
@@ -113,7 +120,7 @@
 
     document.addEventListener("submit", async event => {
         const form = event.target;
-        if (!(form instanceof HTMLFormElement) || !root.contains(form)) return;
+        if (!(form instanceof HTMLFormElement) || !root || !root.contains(form)) return;
 
         if (form.matches("[data-coupon-filter]")) {
             event.preventDefault();
@@ -159,17 +166,17 @@
 
     document.addEventListener("click", event => {
         const reportButton = event.target.closest("[data-coupon-report]");
-        if (reportButton && root.contains(reportButton)) {
+        if (reportButton && root?.contains(reportButton)) {
             void loadReport(reportButton.dataset.couponReport);
             return;
         }
         const reportPageButton = event.target.closest("[data-coupon-report-page]");
-        if (reportPageButton && root.contains(reportPageButton)) {
+        if (reportPageButton && root?.contains(reportPageButton)) {
             void loadReport(reportPageButton.dataset.couponReportPage);
             return;
         }
         const clearLink = event.target.closest("[data-coupon-clear]");
-        if (clearLink && root.contains(clearLink)) {
+        if (clearLink && root?.contains(clearLink)) {
             event.preventDefault();
             void loadContent(clearLink.href, { updateHistory: true });
             return;

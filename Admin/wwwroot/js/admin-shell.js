@@ -60,7 +60,7 @@
         try {
             const response = await fetch(target, {
                 method: "GET", cache: "no-store", signal: controller.signal,
-                headers: { Accept: "text/html", "X-Requested-With": "XMLHttpRequest" }
+                headers: { Accept: "text/html", "X-Requested-With": "XMLHttpRequest", "X-Admin-Navigation": "true" }
             });
             if (response.redirected && new URL(response.url).pathname.toLowerCase() === "/auth/login") {
                 window.location.assign(response.url);
@@ -94,6 +94,7 @@
             window.AdminAccountMessages?.initialize(content);
             window.AdminVariantPrices?.initialize(content);
             window.AdminGeography?.initialize(content);
+            window.AdminCoupons?.initialize(content);
             const heading = content.querySelector("h1");
             if (heading) {
                 heading.tabIndex = -1;
@@ -150,6 +151,7 @@
             window.AdminAccountMessages?.initialize(content);
             window.AdminVariantPrices?.initialize(content);
             window.AdminGeography?.initialize(content);
+            window.AdminCoupons?.initialize(content);
         }, { once: true });
     } else {
         window.AdminPages?.initialize(content);
@@ -167,5 +169,6 @@
         window.AdminAccountMessages?.initialize(content);
         window.AdminVariantPrices?.initialize(content);
         window.AdminGeography?.initialize(content);
+        window.AdminCoupons?.initialize(content);
     }
 })();
