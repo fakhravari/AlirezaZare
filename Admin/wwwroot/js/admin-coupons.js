@@ -84,6 +84,33 @@
         });
     };
 
+    const loadReport = async url => {
+        const modalElement = root.querySelector("#coupon-report-modal");
+        const body = modalElement?.querySelector("#coupon-report-body");
+        if (!modalElement || !body) return;
+        body.textContent = "در حال بارگذاری گزارش…";
+        window.bootstrap?.Modal.getOrCreateInstance(modalElement).show();
+        try {
+            const response = await fetch(url, {
+                credentials: "same-origin",
+                headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "text/html" }
+            });
+            if (!response.ok) throw new Error("بارگذاری گزارش مصرف کد تخفیف انجام نشد.");
+            const documentFragment = new DOMParser().parseFromString(await response.text(), "text/html");
+            const report = documentFragment.querySelector("#coupon-report-content");
+            if (!report) throw new Error("پاسخ گزارش معتبر نیست.");
+            body.replaceChildren(report);
+            const title = modalElement.querySelector("#coupon-report-title");
+            if (title) title.textContent = `گزارش مصرف کد تخفیف ${report.dataset.couponReportCode || ""}`;
+        } catch (error) {
+            const alert = document.createElement("div");
+            alert.className = "alert alert-danger mb-0";
+            alert.setAttribute("role", "alert");
+            alert.textContent = error.message || "ارتباط با سرور برقرار نشد.";
+            body.replaceChildren(alert);
+        }
+    };
+
     document.addEventListener("submit", async event => {
         const form = event.target;
         if (!(form instanceof HTMLFormElement) || !root.contains(form)) return;
@@ -131,6 +158,16 @@
     });
 
     document.addEventListener("click", event => {
+        const reportButton = event.target.closest("[data-coupon-report]");
+        if (reportButton && root.contains(reportButton)) {
+            void loadReport(reportButton.dataset.couponReport);
+            return;
+        }
+        const reportPageButton = event.target.closest("[data-coupon-report-page]");
+        if (reportPageButton && root.contains(reportPageButton)) {
+            void loadReport(reportPageButton.dataset.couponReportPage);
+            return;
+        }
         const clearLink = event.target.closest("[data-coupon-clear]");
         if (clearLink && root.contains(clearLink)) {
             event.preventDefault();

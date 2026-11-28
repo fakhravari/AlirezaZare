@@ -326,6 +326,10 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     box-shadow: 0 .5rem 1.25rem rgb(32 37 42 / 12%);
 }
 
+#header > .navbar-nav {
+    margin-left: .75rem;
+}
+
 .admin-page-widget > .panel-heading {
     gap: 1rem;
 }

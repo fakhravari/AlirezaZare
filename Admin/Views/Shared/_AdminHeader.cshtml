@@ -17,16 +17,6 @@
         </button>
     </div>
     <div class="navbar-nav">
-        <div class="navbar-item d-none d-md-flex flex-column justify-content-center admin-header-context">
-            <span class="admin-header-context__label small text-muted">@ViewData["AreaTitle"]</span>
-            <span class="admin-header-context__title fw-semibold">@ViewData["Title"]</span>
-        </div>
-        <div class="navbar-item">
-            <a class="navbar-link d-flex align-items-center gap-2" asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>
-                <i class="fa fa-house" aria-hidden="true"></i>
-                <span class="d-none d-sm-inline">نمای کلی</span>
-            </a>
-        </div>
         <div class="navbar-item navbar-user dropdown">
             <button type="button" class="navbar-link dropdown-toggle d-flex align-items-center admin-header-profile" data-bs-toggle="dropdown" aria-expanded="false" aria-label="منوی حساب @displayName">
                 <span class="admin-header-profile__avatar" aria-hidden="true">@avatarInitial</span>
@@ -37,6 +27,11 @@
                     <span class="d-block fw-semibold">@displayName</span>
                     <small class="text-muted">حساب مدیریت</small>
                 </div>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>
+                    <i class="fa fa-house ms-2" aria-hidden="true"></i>
+                    نمای کلی
+                </a>
                 <div class="dropdown-divider"></div>
                 <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post">
                     @Html.AntiForgeryToken()
