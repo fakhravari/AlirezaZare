@@ -45,17 +45,15 @@ public sealed class StoreCouponAdminData(ShopDbContext db) : IStoreCouponAdminDa
         var coupon = await db.AccountCoupons.AsNoTracking().SingleOrDefaultAsync(item => item.Id == id, ct);
         if (coupon is null) return null;
         var orders = db.StoreCouponUsages.AsNoTracking()
+            .Where(usage => usage.IdCoupon == id)
             .Join(db.StoreCustomerOrders.AsNoTracking(), usage => usage.IdCustomerOrder, order => order.Id,
-                (usage, order) => new { usage, order })
-            .Join(db.AccountProfiles.AsNoTracking(), row => row.order.IdProfile, profile => profile.Id,
-                (row, profile) => new { row.usage, row.order, profile })
-            .Join(db.OrderStatuses.AsNoTracking(), row => row.order.IdStatus, status => status.Id,
-                (row, status) => new { row.usage, row.order, row.profile, status })
-            .Where(row => row.usage.IdCoupon == id)
-            .Select(row => new CouponOrderRowData(row.order.Id, "",
-                row.profile.FirstName + " " + row.profile.LastName, row.status.NameFa, row.order.CreatedAtUtc,
-                row.order.SubtotalAmount, row.order.CouponDiscountAmount, row.order.TotalAmount));
+                (usage, order) => order)
+            .Join(db.AccountProfiles.AsNoTracking(), order => order.IdProfile, profile => profile.Id,
+                (order, profile) => new CouponOrderRowData(order.Id, "",
+                    (profile.FirstName + " " + profile.LastName).Trim(), order.StatusReference.NameFa,
+                    order.CreatedAtUtc, order.SubtotalAmount, order.CouponDiscountAmount, order.TotalAmount));
         int total = await orders.CountAsync(ct);
+        page = Math.Min(page, Math.Max(1, (int)Math.Ceiling(total / 25d)));
         decimal discount = await orders.SumAsync(order => (decimal?)order.Discount, ct) ?? 0;
         decimal subtotal = await orders.SumAsync(order => (decimal?)order.Subtotal, ct) ?? 0;
         decimal payable = await orders.SumAsync(order => (decimal?)order.Total, ct) ?? 0;

@@ -41,8 +41,8 @@
                         <td><span class="badge @statusClass">@status</span></td><td>@coupon.Discount.ToString("N0") تومان</td>
                         <td><div class="d-flex align-items-center flex-wrap gap-1">
                             <button type="button" class="btn btn-default btn-sm" data-bs-toggle="modal" data-bs-target="#coupon-editor-@coupon.Id" aria-label="ویرایش @coupon.Code"><i class="fa fa-pen me-1" aria-hidden="true"></i>ویرایش</button>
-                            <a class="btn btn-default btn-sm" asp-action="Report" asp-route-id="@coupon.Id" aria-label="گزارش @coupon.Code"><i class="fa fa-chart-column me-1" aria-hidden="true"></i>گزارش</a>
-                            @if (coupon.Uses == 0 && !coupon.HasOrders) { <form asp-action="Delete" method="post" data-admin-confirm="این کد تخفیف بدون سابقه حذف شود؟" data-coupon-mutation><input type="hidden" name="id" value="@coupon.Id"/><button type="submit" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash-can me-1" aria-hidden="true"></i>حذف</button></form> }
+                            <button type="button" class="btn btn-default btn-sm" data-coupon-report="@Url.Action("Report", new { id = coupon.Id })" aria-label="گزارش @coupon.Code"><i class="fa fa-chart-column me-1" aria-hidden="true"></i>گزارش</button>
+                            @if (coupon.Uses == 0 && !coupon.HasOrders) { <form asp-action="Delete" method="post" data-admin-confirm="این کد تخفیف بدون سابقه حذف شود؟" data-coupon-mutation><input type="hidden" name="id" value="@coupon.Id"/><button type="submit" class="btn btn-outline-danger btn-sm" data-admin-confirm="این کد تخفیف بدون سابقه حذف شود؟"><i class="fa fa-trash-can me-1" aria-hidden="true"></i>حذف</button></form> }
                             else { <span class="small text-muted">دارای سابقه</span> }
                         </div></td>
                     </tr>
@@ -68,4 +68,15 @@
 </section>
 @await Html.PartialAsync("_CouponEditor", new Shop.Admin.Areas.Store.Controllers.CouponRow(0, "", 0, 1, true, default, 0, 0, false, null, null))
 @foreach (var coupon in Model.Coupons) { @await Html.PartialAsync("_CouponEditor", coupon) }
+<div class="modal fade" id="coupon-report-modal" tabindex="-1" aria-labelledby="coupon-report-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="coupon-report-title">گزارش مصرف کد تخفیف</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body" id="coupon-report-body" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
 </div>
