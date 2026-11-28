@@ -42,10 +42,11 @@ public sealed class CouponsController(IStoreCouponAdminData data) : Controller
         ViewData["Title"] = "گزارش مصرف کد تخفیف";
         ViewData["AreaTitle"] = "مدیریت فروشگاه";
         ViewData["FeatureId"] = "coupons";
-        return View(new CouponReportModel(report.Id, report.Code, report.UsageLimit, report.Uses, report.Subtotal,
+        var model = new CouponReportModel(report.Id, report.Code, report.UsageLimit, report.Uses, report.Subtotal,
             report.Discount, report.Total, report.Page,
             report.Orders.Select(x => new CouponOrderRow(x.Id, x.OrderNumber, x.Customer, x.Status, x.CreatedAtUtc,
-                x.Subtotal, x.Discount, x.Total)).ToList()));
+                x.Subtotal, x.Discount, x.Total)).ToList());
+        return IsAjaxRequest() ? PartialView("_CouponReport", model) : View(model);
     }
 
     [HttpPost, ValidateAntiForgeryToken]
